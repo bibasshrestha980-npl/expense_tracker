@@ -16,6 +16,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _email = TextEditingController(), _password = TextEditingController();
   bool _register = false, _busy = false, _hidden = true;
   String? _message;
+
   Future<void> _submit({bool reset = false}) async {
     if (reset) {
       if (!_email.text.contains('@')) {
@@ -54,6 +55,54 @@ class _AuthScreenState extends State<AuthScreen> {
     } catch (_) {
       if (mounted) {
         setState(() => _message = 'Unable to connect. Please try again.');
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _busy = true;
+      _message = null;
+    });
+    try {
+      final auth = context.read<app.AuthProvider>();
+      await auth.signInWithGoogle();
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(
+          () => _message =
+              e.message ?? 'Google sign-in failed. Please try again.',
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _message = 'Unable to connect to Google sign-in.');
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _signInAnonymously() async {
+    setState(() {
+      _busy = true;
+      _message = null;
+    });
+    try {
+      final auth = context.read<app.AuthProvider>();
+      await auth.signInAnonymously();
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        setState(
+          () => _message =
+              e.message ?? 'Guest login failed. Please try again.',
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _message = 'Unable to start guest session.');
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -208,6 +257,35 @@ class _AuthScreenState extends State<AuthScreen> {
                         _register
                             ? 'Already registered? Sign in'
                             : 'New to Pocket? Create account',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: const [
+                        Expanded(child: Divider()),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('OR', style: TextStyle(color: muted, fontSize: 12)),
+                        ),
+                        Expanded(child: Divider()),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: _busy ? null : _signInWithGoogle,
+                      icon: const Icon(Icons.account_circle_outlined, size: 20),
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Text('Continue with Google'),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      onPressed: _busy ? null : _signInAnonymously,
+                      icon: const Icon(Icons.person_outline, size: 20),
+                      label: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10),
+                        child: Text('Continue as Guest'),
                       ),
                     ),
                   ],

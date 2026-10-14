@@ -17,17 +17,5 @@ service cloud.firestore {
       allow read, delete: if owner();
       allow create, update: if owner() && valid();
     }
-    match /users/{userId}/sips/{sipId} {
-      function owner() { return request.auth != null && request.auth.uid == userId; }
-      function validSip() {
-        let d = request.resource.data;
-        return d.name is string && d.name.size() > 0 && d.name.size() <= 80
-          && d.monthlyAmountCents is int && d.monthlyAmountCents > 0
-          && d.dayOfMonth is int && d.dayOfMonth >= 1 && d.dayOfMonth <= 32
-          && d.startDate is timestamp;
-      }
-      allow read, delete: if owner();
-      allow create, update: if owner() && validSip();
-    }
   }
 }

@@ -5,18 +5,15 @@ import 'package:intl/intl.dart';
 import '../models/calendar_period.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
-import '../providers/sip_provider.dart';
 import '../theme.dart';
 import 'dashboard.dart';
 
 class ReportDialog extends StatelessWidget {
   final ExpenseProvider expenseProvider;
-  final SipProvider? sipProvider;
 
   const ReportDialog({
     super.key,
     required this.expenseProvider,
-    this.sipProvider,
   });
 
   String _formatSummaryText() {
@@ -34,12 +31,6 @@ class ReportDialog extends StatelessWidget {
     buffer.writeln('💵 Total Income:   ${money(income)}');
     buffer.writeln('💳 Total Expenses: ${money(totalExpense)}');
     buffer.writeln('📈 Net Savings:    ${money(netSavings)} ($savingsRate% savings rate)');
-
-    if (sipProvider != null && sipProvider!.activeSips.isNotEmpty) {
-      buffer.writeln(
-        '🌱 Monthly SIP Commitment: ${money(sipProvider!.totalMonthlyCommitmentCents)}',
-      );
-    }
 
     buffer.writeln('\n🏷️ Category Breakdown:');
     for (final cat in categories) {
@@ -242,18 +233,7 @@ class ReportDialog extends StatelessWidget {
                 );
               }),
 
-              if (sipProvider != null && sipProvider!.activeSips.isNotEmpty) ...[
-                const SizedBox(height: 16),
-                const Text(
-                  'SIP Investments',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  '${sipProvider!.activeSips.length} active SIPs totaling ${money(sipProvider!.totalMonthlyCommitmentCents)} per month.',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                ),
-              ],
+
             ],
           ),
         ),

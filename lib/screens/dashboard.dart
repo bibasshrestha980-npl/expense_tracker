@@ -11,10 +11,8 @@ import '../providers/expense_provider.dart';
 import '../theme.dart';
 import 'expense_editor.dart';
 import 'report_dialog.dart';
-import 'sip_screen.dart';
 import 'spending_stories.dart';
 import '../models/calendar_period.dart';
-import '../providers/sip_provider.dart';
 
 String money(int cents) =>
     NumberFormat.currency(symbol: 'NPR ', decimalDigits: 2).format(cents / 100);
@@ -28,7 +26,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int page = 0;
   final search = TextEditingController();
-  static const titles = ['Overview', 'Transactions', 'SIPs', 'Insights'];
+  static const titles = ['Overview', 'Transactions', 'Insights'];
   @override
   void dispose() {
     search.dispose();
@@ -85,7 +83,6 @@ class _DashboardState extends State<Dashboard> {
       context: context,
       builder: (_) => ReportDialog(
         expenseProvider: p,
-        sipProvider: context.read<SipProvider?>(),
       ),
     );
   }
@@ -109,10 +106,6 @@ class _DashboardState extends State<Dashboard> {
                 NavigationDestination(
                   icon: Icon(Icons.receipt_long_outlined),
                   label: 'Transactions',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.trending_up_rounded),
-                  label: 'SIPs',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.bar_chart_rounded),
@@ -177,7 +170,6 @@ class _DashboardState extends State<Dashboard> {
                               [
                                 Icons.space_dashboard_outlined,
                                 Icons.receipt_long_outlined,
-                                Icons.trending_up_rounded,
                                 Icons.bar_chart_rounded,
                               ][i],
                             ),
@@ -248,7 +240,6 @@ class _DashboardState extends State<Dashboard> {
                               context: context,
                               builder: (_) => ReportDialog(
                                 expenseProvider: p,
-                                sipProvider: context.read<SipProvider?>(),
                               ),
                             ),
                             icon: const Icon(
@@ -266,7 +257,6 @@ class _DashboardState extends State<Dashboard> {
                               context: context,
                               builder: (_) => ReportDialog(
                                 expenseProvider: p,
-                                sipProvider: context.read<SipProvider?>(),
                               ),
                             ),
                           ),
@@ -340,7 +330,6 @@ class _DashboardState extends State<Dashboard> {
                                         [
                                           'A little clarity. A lot of control.',
                                           'Every expense, in one place.',
-                                          'Systematic wealth building.',
                                           'Understand your spending.',
                                         ][page],
                                         style: Theme.of(context)
@@ -352,7 +341,6 @@ class _DashboardState extends State<Dashboard> {
                                         [
                                           'Here is how your month is shaping up.',
                                           'Search, review and organize your daily spending.',
-                                          'Track mutual fund SIPs, portfolio growth, and log installments.',
                                           'Turn your everyday expenses into useful insights.',
                                         ][page],
                                         style: const TextStyle(color: muted),
@@ -459,9 +447,7 @@ class _DashboardState extends State<Dashboard> {
                                   Text(p.error!),
                                 )
                               else ...[
-                                if (page == 2)
-                                  const SipScreen()
-                                else if (page == 3) ...[
+                                if (page == 2) ...[
                                   SpendingStories(
                                     expenses: p.monthly,
                                     month: p.month,
@@ -469,7 +455,7 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                   const SizedBox(height: 24),
                                 ],
-                                if (page == 0 || page == 3) ...[
+                                if (page == 0 || page == 2) ...[
                                   summary(p),
                                   const SizedBox(height: 12),
                                   Text(
@@ -519,7 +505,7 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                   const SizedBox(height: 24),
                                 ],
-                                if (page == 3)
+                                if (page == 2)
                                   panel(
                                     'Your monthly perspective',
                                     Column(
@@ -543,7 +529,7 @@ class _DashboardState extends State<Dashboard> {
                                       ],
                                     ),
                                   )
-                                else if (page != 2)
+                                else
                                   transactions(p),
                               ],
                             ],

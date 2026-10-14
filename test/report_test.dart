@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/models/expense.dart';
-import 'package:expense_tracker/models/sip.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
-import 'package:expense_tracker/providers/sip_provider.dart';
 import 'package:expense_tracker/screens/report_dialog.dart';
 
 void main() {
@@ -33,25 +31,13 @@ void main() {
       ),
     ];
 
-    final sampleSips = [
-      Sip(
-        id: 'sip_1',
-        name: 'NIBL Sahabhagita',
-        monthlyAmountCents: 500000, // NPR 5,000
-        dayOfMonth: 15,
-        startDate: DateTime(2026, 1, 1),
-      ),
-    ];
-
     final expProvider = ExpenseProvider('', initialExpenses: sampleExpenses);
-    final sipProvider = SipProvider('', initialSips: sampleSips);
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: ReportDialog(
             expenseProvider: expProvider,
-            sipProvider: sipProvider,
           ),
         ),
       ),
@@ -64,8 +50,8 @@ void main() {
     expect(find.text('Spending by Category'), findsOneWidget);
     expect(find.text('Food'), findsOneWidget);
     expect(find.text('Bills'), findsOneWidget);
-    expect(find.text('SIP Investments'), findsOneWidget);
     expect(find.text('Share Summary'), findsOneWidget);
     expect(find.text('Export CSV'), findsOneWidget);
   });
 }
+

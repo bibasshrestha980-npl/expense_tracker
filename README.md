@@ -102,15 +102,15 @@ Transactions includes income and expenses, signed amounts, type/category filters
 
 Income tests cover form saving, exact paisa amounts, legacy records, balance calculations, excluding income from spending charts, filtering, income edits, and deletion using a fake Firestore database. Production authenticated CRUD was not exercised by those tests.
 
-## SIP (Systematic Investment Plan) tracking
+## Authentication & two-step login verification
 
-The app includes dedicated mutual fund & investment tracking accessible via the **SIPs** tab in the main navigation.
+The app supports multiple sign-in providers configured in Firebase Authentication:
 
-- **Portfolio overview**: Total monthly commitment, total invested to date, and estimated current corpus value.
-- **Scheme management**: Add, edit, pause, and delete SIP plans with custom scheme names, monthly installment amount, expected annual return rate (%), monthly debit day, and start date.
-- **One-click expense logging**: Log any recurring monthly SIP installment directly into your expense ledger under the `Investment` category with a single tap.
-- **Compound growth calculator**: Interactive wealth projection calculator estimating total invested capital, estimated returns, and total future value based on monthly contribution, expected CAGR, and investment horizon (years).
-- **Firestore security rules**: Stored under `/users/{userId}/sips/{sipId}` with strict field-level validation and owner-only access.
+- **Email & password**: Register, log in, or reset password with email validation.
+- **Google Sign-In**: One-tap sign in with Google account.
+- **Anonymous / Guest access**: Instantly try the expense ledger as a guest without creating an account.
+- **Two-step verification code**: Upon login or registration, a secure 6-digit verification code is generated and required before entering the dashboard.
+- **Email verification integration**: A Firebase verification email is dispatched; users can enter the 6-digit verification code or verify directly via the link in their inbox.
 
 ## Share & export monthly financial reports
 
@@ -126,6 +126,7 @@ Access the comprehensive financial summary modal directly from the app bar via t
 The app defaults to Nepali (BS) as its primary calendar system while maintaining full dual display of both BS and AD:
 
 - **BS-first defaults**: App launches into Nepali (BS) mode with BS positioned first on all calendar toggles.
-- **Dual date representations**: Transaction history, month selector, expense editor, Nepali date picker, SIP schemes, and financial reports display the Nepali BS date first, followed by the English AD date (e.g., `Asoj 28, 2083 BS (Oct 14, 2026 AD)`).
+- **Dual date representations**: Transaction history, month selector, expense editor, Nepali date picker, and financial reports display the Nepali BS date first, followed by the English AD date (e.g., `Asoj 28, 2083 BS (Oct 14, 2026 AD)`).
 - **Synchronized conversions**: Accurate bidirectional date conversion between Bikram Sambat and Gregorian calendars preserving leap years and official Nepali month day lengths.
+
 
