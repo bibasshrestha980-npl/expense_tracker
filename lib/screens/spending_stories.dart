@@ -5,6 +5,7 @@ import '../models/expense.dart';
 import '../models/calendar_period.dart';
 import '../models/spending_story.dart';
 import '../theme.dart';
+import 'calendar_details.dart';
 
 String _cash(int cents) =>
     NumberFormat.currency(symbol: 'NPR ', decimalDigits: 2).format(cents / 100);
@@ -407,6 +408,12 @@ class _SpendingStoriesState extends State<SpendingStories> {
             );
           },
         ),
+        if (widget.nepali)
+          CalendarDetails(
+            year: toBs(period.start).year,
+            month: toBs(period.start).month,
+            day: selectedDay,
+          ),
         if (selectedDay != null)
           Container(
             width: double.infinity,

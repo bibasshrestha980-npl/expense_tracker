@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Small habits. Smarter spending.</strong><br>
-  A modern, responsive, and privacy-focused cross-platform expense tracker built with Flutter, Provider, Firebase Authentication, and Cloud Firestore.
+  A modern, responsive, and privacy-focused cross-platform expense tracker built with Flutter, Provider, Firebase Authentication, Cloud Firestore, and Bikram Sambat (BS) Nepali Calendar integration.
 </p>
 
 <p align="center">
@@ -23,7 +23,8 @@
 ## ✨ Features
 
 - 🔐 **Secure Authentication**: Email & password authentication with input validation, session management, and password reset.
-- ⚡ **Real-Time Cloud Sync**: Powered by Cloud Firestore — changes synchronize instantaneously with reactive UI updates.
+- ⚡ **Real-Time Cloud Sync**: Powered by Cloud Firestore — per-user isolated subcollections with reactive UI updates.
+- 🇳🇵 **Dual Calendar (AD & BS)**: Full Bikram Sambat (Nepali calendar) support with real month boundaries, BS date picker, and lunar calendar integration (tithi, events & holidays).
 - 📊 **Spending Analytics**:
   - Monthly budget tracking with interactive month-by-month navigation.
   - Ranked category breakdowns with proportional progress indicators.
@@ -42,20 +43,26 @@
 
 ```
 lib/
-├── firebase_options.dart      # Platform Firebase configuration (FlutterFire CLI)
-├── main.dart                  # App bootstrap, Material 3 theme & AuthGate
-├── theme.dart                 # Color schemes, typography & component themes
+├── firebase_options.dart        # Platform Firebase configuration (FlutterFire CLI)
+├── main.dart                    # App bootstrap, Material 3 theme & AuthGate
+├── theme.dart                   # Color schemes, typography & component themes
 ├── models/
-│   ├── expense.dart           # Expense entity, category definitions & currency parser
-│   └── spending_story.dart    # Journal computation models (calendar, recurrence, scenarios)
+│   ├── calendar_period.dart     # AD & BS calendar period computations & boundaries
+│   ├── expense.dart             # Expense entity, category definitions & currency parser
+│   └── spending_story.dart      # Journal computation models (calendar, recurrence, scenarios)
 ├── providers/
-│   ├── auth_provider.dart     # Authentication state and user session management
-│   └── expense_provider.dart  # Firestore streams, CRUD actions, search & filters
-└── screens/
-    ├── auth_screen.dart       # Sign in, account registration & password recovery
-    ├── dashboard.dart         # Main view: Overview, Transactions & Insights navigation
-    ├── expense_editor.dart    # Add/Edit expense dialog with form validation
-    └── spending_stories.dart  # Pocket Journal & What-If Studio interface
+│   ├── auth_provider.dart       # Authentication state and user session management
+│   ├── calendar_provider.dart   # Nepali lunar calendar API state & memory caching
+│   └── expense_provider.dart    # Firestore streams, CRUD actions, search & filters
+├── screens/
+│   ├── auth_screen.dart         # Sign in, account registration & password recovery
+│   ├── calendar_details.dart    # Lunar calendar event details modal
+│   ├── dashboard.dart           # Main view: Overview, Transactions & Insights navigation
+│   ├── expense_editor.dart      # Add/Edit expense dialog with form validation
+│   ├── nepali_picker.dart       # Custom Bikram Sambat date picker dialog
+│   └── spending_stories.dart    # Pocket Journal & What-If Studio interface
+└── services/
+    └── nepali_calendar_api.dart # Multi-source resilient Nepali calendar REST client
 ```
 
 ### Core Technologies
@@ -73,7 +80,6 @@ lib/
 Ensure you have the following installed on your machine:
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.13.0` or higher)
 - [Git](https://git-scm.com/)
-- [Firebase CLI](https://firebase.google.com/docs/cli) (optional, for cloud reconfiguration)
 
 ### Installation
 
@@ -129,12 +135,28 @@ service cloud.firestore {
 
 ---
 
+## 📅 Nepali Calendar & Lunar API Integration
+
+Public calendar details are fetched with automatic fallback handling across multiple sources:
+- **Primary Source**: `https://raw.githubusercontent.com/sajanm/nepali-lunar-calendar-events/master/{YEAR}.json`
+- **Fallback Sources**: `https://the-value-crew.github.io/nepali-calendar-api/` and `https://bibhuticoder.github.io/nepali-calendar-api/`
+
+In BS mode, selecting a day under Insights or in the date picker surfaces published tithi, events, and holidays.
+Responses are cached in memory (up to 24 months), with automatic request deduplication and a 10-second timeout.
+
+To check representative live endpoints:
+```bash
+dart run tool/check_calendar_api.dart
+```
+
+---
+
 ## 🧪 Testing & Quality Assurance
 
-Pocket maintains a comprehensive suite of unit and widget tests covering business logic, financial calculations, and responsive layouts:
+Pocket maintains unit, widget, and integration tests covering business logic, financial arithmetic, responsive layouts, and calendar integrations:
 
 ```bash
-# Verify formatting
+# Verify code formatting
 dart format --output=none --set-exit-if-changed .
 
 # Run static analysis
@@ -155,9 +177,3 @@ Contributions, issues, and feature suggestions are welcome! Please check the [Co
 ## 📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
-## Nepali calendar
-
-Use English (AD) / Nepali (BS) above the month selector. BS mode uses real Bikram Sambat month boundaries for totals, transactions, category summaries, charts and the Pocket Journal. Nepali calendar weeks begin on Sunday. Expense forms provide both AD and BS date pickers and display both dates. The BS picker supports year/month selection and prevents future dates. Firestore timestamps remain unchanged; no migration is needed. CSV dates remain ISO Gregorian dates for spreadsheet compatibility.
-
-Calendar conversion uses nepali_utils month data with civil-date arithmetic to avoid historical Windows timezone differences. Package documentation: https://pub.dev/packages/nepali_utils

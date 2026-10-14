@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nepali_utils/nepali_utils.dart';
 
 import '../models/calendar_period.dart';
+import 'calendar_details.dart';
 
 Future<DateTime?> pickNepaliDate(BuildContext context, DateTime initial) =>
     showDialog<DateTime>(
@@ -161,6 +162,11 @@ class _NepaliPickerState extends State<_NepaliPicker> {
                     child: Text('$day'),
                   );
                 },
+              ),
+              CalendarDetails(
+                year: toBs(selected).year,
+                month: toBs(selected).month,
+                day: toBs(selected).day,
               ),
             ],
           ),
