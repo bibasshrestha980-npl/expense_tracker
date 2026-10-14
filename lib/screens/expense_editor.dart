@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'nepali_picker.dart';
+
+import '../models/calendar_period.dart';
+
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
 import '../theme.dart';
@@ -19,11 +23,13 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   late DateTime _date;
   late String _category;
   bool _busy = false;
+  bool _nepali = false;
   String? _error;
   @override
   void initState() {
     super.initState();
     final e = widget.expense;
+    _nepali = widget.provider.nepali;
     _title = TextEditingController(text: e?.title);
     _amount = TextEditingController(
       text: e == null ? '' : (e.amountCents / 100).toStringAsFixed(2),
@@ -123,6 +129,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                   ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
+                    isExpanded: true,
                     initialValue: _category,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: categories
@@ -146,14 +153,42 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                     onChanged: (v) => setState(() => _category = v!),
                   ),
                   const SizedBox(height: 12),
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(value: false, label: Text('AD')),
+                      ButtonSegment(value: true, label: Text('BS')),
+                    ],
+                    selected: {_nepali},
+                    onSelectionChanged: (value) =>
+                        setState(() => _nepali = value.first),
+                  ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.calendar_today_outlined),
-                    title: Text(DateFormat.yMMMd().format(_date)),
+                    title: Text(
+                      _nepali
+                          ? bsDate(_date)
+                          : DateFormat.yMMMd().format(_date),
+                    ),
+                    subtitle: Text(
+                      _nepali
+                          ? DateFormat.yMMMd().format(_date)
+                          : bsDate(_date),
+                    ),
                     trailing: const Icon(Icons.edit_outlined),
                     onTap: _busy
                         ? null
                         : () async {
+                            if (_nepali) {
+                              final selected = await pickNepaliDate(
+                                context,
+                                _date,
+                              );
+                              if (selected != null && mounted) {
+                                setState(() => _date = selected);
+                              }
+                              return;
+                            }
                             final d = await showDatePicker(
                               context: context,
                               initialDate: _date,

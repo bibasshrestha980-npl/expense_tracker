@@ -39,7 +39,7 @@ dependencies:
   cloud_firestore: ^6.10.0
   provider: ^6.1.5+1
   intl: ^0.20.3
-
+  nepali_utils: ^3.0.8
 dev_dependencies:
   flutter_test:
     sdk: flutter

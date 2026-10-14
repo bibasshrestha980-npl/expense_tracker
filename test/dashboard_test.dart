@@ -6,6 +6,7 @@ import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:expense_tracker/screens/dashboard.dart';
 import 'package:expense_tracker/theme.dart';
+import 'package:expense_tracker/models/calendar_period.dart';
 
 class TestAuth extends ChangeNotifier implements AuthProvider {
   @override
@@ -15,6 +16,16 @@ class TestAuth extends ChangeNotifier implements AuthProvider {
 }
 
 class TestExpenses extends ChangeNotifier implements ExpenseProvider {
+  @override
+  bool nepali = false;
+  @override
+  void setCalendar(bool value) {
+    nepali = value;
+    notifyListeners();
+  }
+
+  @override
+  CalendarPeriod get period => CalendarPeriod(month, nepali: nepali);
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
   @override
@@ -72,6 +83,9 @@ void main() {
         ),
       );
       expect(find.text('Total spending'), findsOneWidget);
+      await tester.tap(find.text('Nepali (BS)'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ashwin 2083 BS'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.tap(
         find.descendant(
@@ -90,6 +104,14 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('Daily spending'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.ensureVisible(find.text('Add expense'));
+      await tester.tap(find.text('Add expense'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byIcon(Icons.calendar_today_outlined));
+      await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('2083'), findsWidgets);
       expect(tester.takeException(), isNull);
     });
   }

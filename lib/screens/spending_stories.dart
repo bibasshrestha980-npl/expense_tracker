@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../models/expense.dart';
+import '../models/calendar_period.dart';
 import '../models/spending_story.dart';
 import '../theme.dart';
 
@@ -11,10 +12,12 @@ String _cash(int cents) =>
 class SpendingStories extends StatefulWidget {
   final List<Expense> expenses;
   final DateTime month;
+  final bool nepali;
   const SpendingStories({
     super.key,
     required this.expenses,
     required this.month,
+    this.nepali = false,
   });
   @override
   State<SpendingStories> createState() => _SpendingStoriesState();
@@ -27,7 +30,9 @@ class _SpendingStoriesState extends State<SpendingStories> {
   @override
   void didUpdateWidget(covariant SpendingStories oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.month != widget.month) selectedDay = null;
+    if (oldWidget.month != widget.month || oldWidget.nepali != widget.nepali) {
+      selectedDay = null;
+    }
   }
 
   Widget card(String number, String title, Widget child) => Card(
@@ -307,34 +312,40 @@ class _SpendingStoriesState extends State<SpendingStories> {
     ],
   );
   Widget calendar() {
-    final count = DateTime(widget.month.year, widget.month.month + 1, 0).day;
-    final offset = DateTime(widget.month.year, widget.month.month).weekday - 1;
+    final period = CalendarPeriod(widget.month, nepali: widget.nepali);
+    final count = period.days;
+    final offset = widget.nepali
+        ? period.start.weekday % 7
+        : period.start.weekday - 1;
     final totals = List.generate(
       count,
       (i) => widget.expenses
-          .where((e) => e.date.day == i + 1)
+          .where((e) => period.dayNumber(e.date) == i + 1)
           .fold<int>(0, (sum, e) => sum + e.amountCents),
     );
     final peak = totals.fold<int>(0, (a, b) => a > b ? a : b);
     final entries = widget.expenses
-        .where((e) => e.date.day == selectedDay)
+        .where((e) => period.dayNumber(e.date) == selectedDay)
         .toList();
     final now = DateTime.now();
     return Column(
       children: [
         Row(
-          children: ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-              .map(
-                (day) => Expanded(
-                  child: Center(
-                    child: Text(
-                      day,
-                      style: const TextStyle(color: muted, fontSize: 12),
+          children:
+              (widget.nepali
+                      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                      : ['M', 'T', 'W', 'T', 'F', 'S', 'S'])
+                  .map(
+                    (day) => Expanded(
+                      child: Center(
+                        child: Text(
+                          day,
+                          style: const TextStyle(color: muted, fontSize: 12),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              )
-              .toList(),
+                  )
+                  .toList(),
         ),
         const SizedBox(height: 10),
         GridView.builder(
@@ -351,14 +362,12 @@ class _SpendingStoriesState extends State<SpendingStories> {
             if (index < offset) return const SizedBox();
             final day = index - offset + 1;
             final amount = totals[day - 1];
-            final future = DateTime(
-              widget.month.year,
-              widget.month.month,
-              day,
-            ).isAfter(DateTime(now.year, now.month, now.day));
+            final future = period
+                .day(day)
+                .isAfter(DateTime(now.year, now.month, now.day));
             return Tooltip(
               message:
-                  '${DateFormat.MMMd().format(DateTime(widget.month.year, widget.month.month, day))}: ${_cash(amount)} recorded',
+                  '${DateFormat.MMMd().format(period.day(day))}: ${_cash(amount)} recorded',
               child: Semantics(
                 button: true,
                 selected: selectedDay == day,
@@ -411,13 +420,7 @@ class _SpendingStoriesState extends State<SpendingStories> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  DateFormat.yMMMMd().format(
-                    DateTime(
-                      widget.month.year,
-                      widget.month.month,
-                      selectedDay!,
-                    ),
-                  ),
+                  '${DateFormat.yMMMMd().format(period.day(selectedDay!))} / ${bsDate(period.day(selectedDay!))}',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),

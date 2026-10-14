@@ -11,6 +11,7 @@ import '../providers/expense_provider.dart';
 import '../theme.dart';
 import 'expense_editor.dart';
 import 'spending_stories.dart';
+import '../models/calendar_period.dart';
 
 String money(int cents) =>
     NumberFormat.currency(symbol: 'NPR ', decimalDigits: 2).format(cents / 100);
@@ -328,7 +329,23 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 26),
+                              const SizedBox(height: 18),
+                              SegmentedButton<bool>(
+                                segments: const [
+                                  ButtonSegment(
+                                    value: false,
+                                    label: Text('English (AD)'),
+                                  ),
+                                  ButtonSegment(
+                                    value: true,
+                                    label: Text('Nepali (BS)'),
+                                  ),
+                                ],
+                                selected: {p.nepali},
+                                onSelectionChanged: (value) =>
+                                    p.setCalendar(value.first),
+                              ),
+                              const SizedBox(height: 16),
                               Row(
                                 children: [
                                   Container(
@@ -344,7 +361,7 @@ class _DashboardState extends State<Dashboard> {
                                           icon: const Icon(Icons.chevron_left),
                                         ),
                                         Text(
-                                          DateFormat.yMMMM().format(p.month),
+                                          p.period.label,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -386,6 +403,7 @@ class _DashboardState extends State<Dashboard> {
                                   SpendingStories(
                                     expenses: p.monthly,
                                     month: p.month,
+                                    nepali: p.nepali,
                                   ),
                                   const SizedBox(height: 24),
                                 ],
@@ -633,7 +651,7 @@ class _DashboardState extends State<Dashboard> {
               (i) => Expanded(
                 child: Tooltip(
                   message:
-                      '${DateFormat.MMMd().format(DateTime(p.month.year, p.month.month, i + 1))}: ${money(days[i])}',
+                      '${DateFormat.MMMd().format(p.period.day(i + 1))}: ${money(days[i])}',
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: Container(
@@ -866,7 +884,7 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  '${e.category} · ${DateFormat.MMMd().format(e.date)}',
+                                  '${e.category} · ${p.nepali ? bsDate(e.date) : DateFormat.MMMd().format(e.date)}',
                                   style: const TextStyle(
                                     color: muted,
                                     fontSize: 12,

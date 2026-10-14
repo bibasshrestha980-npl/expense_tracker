@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/expense.dart';
+import '../models/calendar_period.dart';
 
 class ExpenseProvider extends ChangeNotifier {
   final String uid;
@@ -15,19 +16,28 @@ class ExpenseProvider extends ChangeNotifier {
   DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
   String category = 'All', search = '';
   String sort = 'Newest first';
+  bool nepali = false;
+  CalendarPeriod get period => CalendarPeriod(month, nepali: nepali);
+  void setCalendar(bool value) {
+    if (nepali == value) return;
+    final now = DateTime.now();
+    final anchor = period.contains(now) ? now : month;
+    nepali = value;
+    month = CalendarPeriod(anchor, nepali: value).start;
+    notifyListeners();
+  }
+
   int get previousTotal {
-    final previous = DateTime(month.year, month.month - 1);
+    final previous = CalendarPeriod(period.shifted(-1), nepali: nepali);
     return _items
-        .where(
-          (e) => e.date.year == previous.year && e.date.month == previous.month,
-        )
+        .where((e) => previous.contains(e.date))
         .fold(0, (value, e) => value + e.amountCents);
   }
 
   List<int> get dailyTotals => List.generate(
-    DateTime(month.year, month.month + 1, 0).day,
+    period.days,
     (index) => monthly
-        .where((e) => e.date.day == index + 1)
+        .where((e) => period.dayNumber(e.date) == index + 1)
         .fold(0, (value, e) => value + e.amountCents),
   );
   void setSort(String value) {
@@ -58,9 +68,8 @@ class ExpenseProvider extends ChangeNotifier {
       .collection('users')
       .doc(uid)
       .collection('expenses');
-  List<Expense> get monthly => _items
-      .where((e) => e.date.year == month.year && e.date.month == month.month)
-      .toList();
+  List<Expense> get monthly =>
+      _items.where((e) => period.contains(e.date)).toList();
   List<Expense> get visible {
     final result = monthly
         .where(
@@ -87,7 +96,9 @@ class ExpenseProvider extends ChangeNotifier {
       .where((e) => e.category == value)
       .fold(0, (total, e) => total + e.amountCents);
   void changeMonth(int delta) {
-    month = DateTime(month.year, month.month + delta);
+    final next = period.shifted(delta);
+    if (next.year < 2000 || next.year > 2100) return;
+    month = next;
     notifyListeners();
   }
 

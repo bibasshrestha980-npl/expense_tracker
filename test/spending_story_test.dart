@@ -67,7 +67,7 @@ void main() {
     await tester.ensureVisible(find.text('1').first);
     await tester.tap(find.text('1').first);
     await tester.pumpAndSettle();
-    expect(find.text('October 1, 2026'), findsOneWidget);
+    expect(find.textContaining('October 1, 2026'), findsOneWidget);
     await tester.ensureVisible(find.byType(Slider));
     await tester.tap(find.byType(Slider));
     await tester.pumpAndSettle();

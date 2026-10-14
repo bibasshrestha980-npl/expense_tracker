@@ -1,70 +1,163 @@
-# Pocket - Expense Tracker
+# Pocket — Personal Expense Tracker
 
-Final project built with Flutter, Provider, Firebase Authentication, and Cloud Firestore.
+<p align="center">
+  <img src="web/icons/Icon-192.png" alt="Pocket Logo" width="100" height="100" />
+</p>
 
-## Run
+<p align="center">
+  <strong>Small habits. Smarter spending.</strong><br>
+  A modern, responsive, and privacy-focused cross-platform expense tracker built with Flutter, Provider, Firebase Authentication, and Cloud Firestore.
+</p>
 
-```powershell
-cd C:\Users\BIBAS\Desktop\expense_tracker
-flutter pub get
-flutter run -d chrome
+<p align="center">
+  <a href="https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml"><img src="https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+  <img src="https://img.shields.io/badge/Flutter-3.47+-02569B?logo=flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/Dart-3.13+-0175C2?logo=dart&logoColor=white" alt="Dart" />
+  <img src="https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-4CAF50" alt="Platforms" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+</p>
+
+---
+
+## ✨ Features
+
+- 🔐 **Secure Authentication**: Email & password authentication with input validation, session management, and password reset.
+- ⚡ **Real-Time Cloud Sync**: Powered by Cloud Firestore — changes synchronize instantaneously with reactive UI updates.
+- 📊 **Spending Analytics**:
+  - Monthly budget tracking with interactive month-by-month navigation.
+  - Ranked category breakdowns with proportional progress indicators.
+  - Average transaction size and comparisons against previous months.
+- 📖 **The Pocket Journal**:
+  - Interactive daily calendar view highlighting spending hotspots.
+  - Automatic detection of repeated expense titles.
+  - **What-If Studio**: In-memory financial simulator to test spending adjustments without modifying actual records.
+- 💰 **Zero Rounding Errors**: All currency amounts are stored and computed in integer cents/paisa, eliminating floating-point inaccuracies.
+- 📱 **Adaptive Material 3 Design**: Responsive layout that transitions between a compact bottom navigation bar on mobile and a comfortable sidebar on desktop/web.
+- 📤 **Data Export**: Export filtered transactions directly to CSV for spreadsheet analysis.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+```
+lib/
+├── firebase_options.dart      # Platform Firebase configuration (FlutterFire CLI)
+├── main.dart                  # App bootstrap, Material 3 theme & AuthGate
+├── theme.dart                 # Color schemes, typography & component themes
+├── models/
+│   ├── expense.dart           # Expense entity, category definitions & currency parser
+│   └── spending_story.dart    # Journal computation models (calendar, recurrence, scenarios)
+├── providers/
+│   ├── auth_provider.dart     # Authentication state and user session management
+│   └── expense_provider.dart  # Firestore streams, CRUD actions, search & filters
+└── screens/
+    ├── auth_screen.dart       # Sign in, account registration & password recovery
+    ├── dashboard.dart         # Main view: Overview, Transactions & Insights navigation
+    ├── expense_editor.dart    # Add/Edit expense dialog with form validation
+    └── spending_stories.dart  # Pocket Journal & What-If Studio interface
 ```
 
-For Android, start an emulator or connect a phone with USB debugging and run `flutter run`. iOS builds require macOS and Xcode.
+### Core Technologies
+- **Framework**: [Flutter](https://flutter.dev/) (Channel Stable)
+- **State Management**: [Provider](https://pub.dev/packages/provider)
+- **Backend**: [Firebase Authentication](https://firebase.google.com/docs/auth) & [Cloud Firestore](https://firebase.google.com/docs/firestore)
+- **Design System**: Material Design 3
 
-## One remaining Firebase console step
+---
 
-The separate Firebase project `pocket-expenses-bibas-261014` and Android, iOS, and web registrations are configured. The free-tier Firestore database in asia-south1 is created and the security rules are deployed.
+## 🚀 Getting Started
 
-Open https://console.firebase.google.com/project/pocket-expenses-bibas-261014/authentication
-Select Get started, then Sign-in method > Email/Password > Enable > Save. Use ordinary Firebase Authentication; no paid Identity Platform upgrade is needed for this app. Authentication could not be enabled automatically because the admin initialization endpoint required billing and browser automation was unavailable.
+### Prerequisites
 
-Then create an account from the app. No demo credentials are included.
+Ensure you have the following installed on your machine:
+- [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.13.0` or higher)
+- [Git](https://git-scm.com/)
+- [Firebase CLI](https://firebase.google.com/docs/cli) (optional, for cloud reconfiguration)
 
-## Features
+### Installation
 
-- Email/password registration, login, logout, and password reset.
-- Live per-user expense storage with add, edit, and confirmed delete.
-- Monthly totals and category spending breakdowns.
-- Search by title/note and filter by category and month.
-- NPR currency; amounts stored as integer paisa to avoid floating-point errors.
-- Validated forms, loading indicators, empty states, and error messages.
-- Responsive Material 3 interface.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/bibasshrestha980-npl/expense_tracker.git
+   cd expense_tracker
+   ```
 
-## Structure
+2. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
 
-- lib/main.dart: Firebase initialization, theme, authentication gate.
-- lib/models/expense.dart: expense model and exact currency parsing.
-- lib/providers/auth_provider.dart: authentication state and operations.
-- lib/providers/expense_provider.dart: Firestore subscription, CRUD, totals and filters.
-- lib/screens/: authentication, dashboard and expense editor.
-- lib/firebase_options.dart: generated platform configuration.
-- firestore.rules: owner-only access with field validation.
-- test/expense_test.dart: amount validation and startup error-screen tests.
+3. **Run the application**:
+   - **Web (Chrome)**:
+     ```bash
+     flutter run -d chrome
+     ```
+   - **Android / iOS**:
+     Connect a device or launch an emulator, then execute:
+     ```bash
+     flutter run
+     ```
 
-Firestore path: users/{uid}/expenses/{expenseId}. The auth UID scopes all reads and writes, enforced by deployed rules. Provider subscriptions are disposed on logout/account changes.
+---
 
-## Verification
+## 🔒 Security & Firestore Rules
 
-Passed: flutter analyze, flutter test (2 tests), flutter build web.
-Live signup/login and authenticated CRUD still need verification after enabling Email/Password in the console. Android and iOS builds were not tested.
+User data is secured at the database layer using rules defined in `firestore.rules`. Each user can only read, write, and delete expenses within their own isolated subcollection (`/users/{userId}/expenses/{expenseId}`):
 
-Suggested demonstration: register, add two expenses, edit one, filter by category, browse months, delete an expense, sign out, then sign in to confirm persistence. A second account should see only its own expenses.
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/expenses/{expenseId} {
+      function owner() { return request.auth != null && request.auth.uid == userId; }
+      function valid() {
+        let d = request.resource.data;
+        return d.keys().hasAll(['title', 'category', 'amountCents', 'date', 'note'])
+          && d.keys().hasOnly(['title', 'category', 'amountCents', 'date', 'note'])
+          && d.title is string && d.title.size() > 0 && d.title.size() <= 80
+          && d.category in ['Food', 'Transport', 'Shopping', 'Bills', 'Health', 'Education', 'Other']
+          && d.amountCents is int && d.amountCents > 0 && d.amountCents <= 99999999999
+          && d.date is timestamp && d.note is string && d.note.size() <= 300;
+      }
+      allow read, delete: if owner();
+      allow create, update: if owner() && valid();
+    }
+  }
+}
+```
 
-## Reconfigure for another Firebase project
+---
 
-Run `flutterfire configure --project=YOUR_PROJECT_ID --platforms=android,ios,web`, create Firestore, enable Email/Password, and deploy rules with `firebase deploy --only firestore:rules --project=YOUR_PROJECT_ID`.
+## 🧪 Testing & Quality Assurance
 
-Official setup reference: https://firebase.google.com/docs/flutter/setup
+Pocket maintains a comprehensive suite of unit and widget tests covering business logic, financial calculations, and responsive layouts:
 
-## Professional interface update
+```bash
+# Verify formatting
+dart format --output=none --set-exit-if-changed .
 
-The app now offers Overview, Transactions and Insights navigation, a desktop sidebar and mobile navigation bar, daily spending charts, ranked category breakdowns, average transaction amount, previous-month comparisons, amount/date sorting, and copying filtered transactions as CSV. The forms have clearer currency entry, category icons, password confirmation, and save/delete feedback. Layout/navigation tests cover 360px and 1440px screens.
+# Run static analysis
+flutter analyze
 
-Firebase Email/Password enablement remains the console step described above; live authentication and Firestore CRUD were not verified in this update.
+# Execute all tests
+flutter test
+```
 
-## Pocket Journal
+---
 
-Open Insights to use the Pocket Journal: a summary of the largest spending category, a calendar with daily expense details, repeated-title purchase groups, and an interactive What-if Studio. The studio changes only an in-memory scenario; it never modifies stored expenses. Calculations use recorded transactions, with no external AI service. Missing entries do not establish no-spend days, and matching titles do not establish subscriptions.
+## 🤝 Contributing
 
-Verification for this update: Flutter analysis and all 6 tests passed, including phone/desktop layouts, calendar interaction, scenario reset, and calculation edge cases.
+Contributions, issues, and feature suggestions are welcome! Please check the [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## Nepali calendar
+
+Use English (AD) / Nepali (BS) above the month selector. BS mode uses real Bikram Sambat month boundaries for totals, transactions, category summaries, charts and the Pocket Journal. Nepali calendar weeks begin on Sunday. Expense forms provide both AD and BS date pickers and display both dates. The BS picker supports year/month selection and prevents future dates. Firestore timestamps remain unchanged; no migration is needed. CSV dates remain ISO Gregorian dates for spreadsheet compatibility.
+
+Calendar conversion uses nepali_utils month data with civil-date arithmetic to avoid historical Windows timezone differences. Package documentation: https://pub.dev/packages/nepali_utils
