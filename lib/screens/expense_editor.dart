@@ -1,0 +1,200 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../models/expense.dart';
+import '../providers/expense_provider.dart';
+import '../theme.dart';
+
+class ExpenseEditor extends StatefulWidget {
+  final ExpenseProvider provider;
+  final Expense? expense;
+  const ExpenseEditor({super.key, required this.provider, this.expense});
+  @override
+  State<ExpenseEditor> createState() => _ExpenseEditorState();
+}
+
+class _ExpenseEditorState extends State<ExpenseEditor> {
+  final _form = GlobalKey<FormState>();
+  late final TextEditingController _title, _amount, _note;
+  late DateTime _date;
+  late String _category;
+  bool _busy = false;
+  String? _error;
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.expense;
+    _title = TextEditingController(text: e?.title);
+    _amount = TextEditingController(
+      text: e == null ? '' : (e.amountCents / 100).toStringAsFixed(2),
+    );
+    _note = TextEditingController(text: e?.note);
+    _date = e?.date ?? DateTime.now();
+    _category = e?.category ?? categories.first;
+  }
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _amount.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    if (!_form.currentState!.validate()) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await widget.provider.save(
+        Expense(
+          id: widget.expense?.id ?? '',
+          title: _title.text.trim(),
+          category: _category,
+          amountCents: parseAmount(_amount.text)!,
+          date: _date,
+          note: _note.text.trim(),
+        ),
+      );
+      if (mounted) Navigator.pop(context, true);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error = 'Could not save. Check your connection and try again.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: !_busy,
+    child: AlertDialog(
+      title: Text(widget.expense == null ? 'Add expense' : 'Edit expense'),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: AbsorbPointer(
+            absorbing: _busy,
+            child: Form(
+              key: _form,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Keep the details clear. Your totals and insights update automatically.',
+                    style: TextStyle(color: muted),
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    controller: _title,
+                    maxLength: 80,
+                    decoration: const InputDecoration(
+                      labelText: 'What was it for?',
+                      hintText: 'e.g. Lunch at the cafe',
+                      prefixIcon: Icon(Icons.edit_note_rounded),
+                    ),
+                    validator: (v) =>
+                        (v?.trim().isEmpty ?? true) ? 'Enter a title' : null,
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _amount,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Amount',
+                      prefixText: 'NPR  ',
+                      hintText: '0.00',
+                      helperText: 'Enter the amount you paid',
+                    ),
+                    validator: (v) => parseAmount(v ?? '') == null
+                        ? 'Enter a positive amount with up to 2 decimals'
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: _category,
+                    decoration: const InputDecoration(labelText: 'Category'),
+                    items: categories
+                        .map(
+                          (c) => DropdownMenuItem(
+                            value: c,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  categoryIcon(c),
+                                  size: 18,
+                                  color: categoryColor(c),
+                                ),
+                                const SizedBox(width: 10),
+                                Text(c),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) => setState(() => _category = v!),
+                  ),
+                  const SizedBox(height: 12),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.calendar_today_outlined),
+                    title: Text(DateFormat.yMMMd().format(_date)),
+                    trailing: const Icon(Icons.edit_outlined),
+                    onTap: _busy
+                        ? null
+                        : () async {
+                            final d = await showDatePicker(
+                              context: context,
+                              initialDate: _date,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now(),
+                            );
+                            if (d != null && mounted) setState(() => _date = d);
+                          },
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _note,
+                    maxLength: 300,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      labelText: 'Note (optional)',
+                    ),
+                  ),
+                  if (_error != null)
+                    Text(
+                      _error!,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _busy ? null : _save,
+          child: Text(_busy ? 'Saving…' : 'Save expense'),
+        ),
+      ],
+    ),
+  );
+}

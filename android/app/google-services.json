@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "501443654737",
+    "project_id": "pocket-exp-2610142142",
+    "storage_bucket": "pocket-exp-2610142142.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:501443654737:android:437a13084400fd6d23f470",
+        "android_client_info": {
+          "package_name": "com.bibas.expense_tracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBFgZLat857d0Nm7ZaTc4PmhlnLMzffh8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
