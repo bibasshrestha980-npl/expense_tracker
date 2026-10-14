@@ -13,7 +13,7 @@ class ExpenseProvider extends ChangeNotifier {
   List<Expense> _items = [];
   bool loading = true;
   String? error;
-  DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
+  DateTime month = CalendarPeriod(DateTime.now(), nepali: true).start;
   String category = 'All', search = '';
   String sort = 'Newest first';
   String transactionType = 'All';
@@ -33,7 +33,7 @@ class ExpenseProvider extends ChangeNotifier {
     (value, e) => value + (e.isIncome ? e.amountCents : -e.amountCents),
   );
   int get monthlyNet => income - total;
-  bool nepali = false;
+  bool nepali = true;
   CalendarPeriod get period => CalendarPeriod(month, nepali: nepali);
   void setCalendar(bool value) {
     if (nepali == value) return;

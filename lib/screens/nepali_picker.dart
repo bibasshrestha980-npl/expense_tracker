@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:nepali_utils/nepali_utils.dart';
 
 import '../models/calendar_period.dart';
@@ -37,7 +38,14 @@ class _NepaliPickerState extends State<_NepaliPicker> {
             children: [
               Text(
                 bsDate(selected),
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${DateFormat.yMMMMd().format(selected)} AD',
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 16),
               Row(

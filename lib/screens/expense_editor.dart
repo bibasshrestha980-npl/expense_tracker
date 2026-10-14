@@ -174,8 +174,8 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                   const SizedBox(height: 12),
                   SegmentedButton<bool>(
                     segments: const [
-                      ButtonSegment(value: false, label: Text('AD')),
                       ButtonSegment(value: true, label: Text('BS')),
+                      ButtonSegment(value: false, label: Text('AD')),
                     ],
                     selected: {_nepali},
                     onSelectionChanged: (value) =>
@@ -187,11 +187,11 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                     title: Text(
                       _nepali
                           ? bsDate(_date)
-                          : DateFormat.yMMMd().format(_date),
+                          : '${DateFormat.yMMMd().format(_date)} AD',
                     ),
                     subtitle: Text(
                       _nepali
-                          ? DateFormat.yMMMd().format(_date)
+                          ? '${DateFormat.yMMMd().format(_date)} AD'
                           : bsDate(_date),
                     ),
                     trailing: const Icon(Icons.edit_outlined),

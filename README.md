@@ -121,3 +121,11 @@ Access the comprehensive financial summary modal directly from the app bar via t
 - **1-Click Share Summary**: Formats a clean, readable financial snapshot with emojis and amounts ready to copy to clipboard for WhatsApp, email, or messaging.
 - **CSV export**: Export your complete monthly ledger as a `.csv` spreadsheet for record keeping.
 
+## Dual BS (Bikram Sambat) and AD calendar display
+
+The app defaults to Nepali (BS) as its primary calendar system while maintaining full dual display of both BS and AD:
+
+- **BS-first defaults**: App launches into Nepali (BS) mode with BS positioned first on all calendar toggles.
+- **Dual date representations**: Transaction history, month selector, expense editor, Nepali date picker, SIP schemes, and financial reports display the Nepali BS date first, followed by the English AD date (e.g., `Asoj 28, 2083 BS (Oct 14, 2026 AD)`).
+- **Synchronized conversions**: Accurate bidirectional date conversion between Bikram Sambat and Gregorian calendars preserving leap years and official Nepali month day lengths.
+

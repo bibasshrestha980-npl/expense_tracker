@@ -4,6 +4,12 @@ import 'package:nepali_utils/nepali_utils.dart';
 String bsDate(DateTime date) =>
     '${NepaliDateFormat.yMMMMd().format(toBs(date))} BS';
 
+String formatBsAndAdDate(DateTime date) =>
+    '${bsDate(date)} (${DateFormat.yMMMd().format(date)})';
+
+String formatBsAndAdMonth(DateTime anchor) =>
+    '${NepaliDateFormat.yMMMM().format(toBs(anchor))} BS (${DateFormat.yMMMM().format(anchor)} AD)';
+
 class CalendarPeriod {
   final DateTime anchor;
   final bool nepali;

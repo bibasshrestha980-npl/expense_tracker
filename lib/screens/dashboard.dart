@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:nepali_utils/nepali_utils.dart';
 import 'package:provider/provider.dart';
 
 import '../models/expense.dart';
@@ -250,7 +251,10 @@ class _DashboardState extends State<Dashboard> {
                                 sipProvider: context.read<SipProvider?>(),
                               ),
                             ),
-                            icon: const Icon(Icons.summarize_outlined, size: 16),
+                            icon: const Icon(
+                              Icons.summarize_outlined,
+                              size: 16,
+                            ),
                             label: const Text('Share Report'),
                           ),
                           const SizedBox(width: 14),
@@ -268,7 +272,11 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                         if (wide) ...[
-                          const Icon(Icons.lock_outline, size: 15, color: muted),
+                          const Icon(
+                            Icons.lock_outline,
+                            size: 15,
+                            color: muted,
+                          ),
                           const SizedBox(width: 6),
                           const Text(
                             'Personal account',
@@ -368,14 +376,15 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               const SizedBox(height: 18),
                               SegmentedButton<bool>(
+                                showSelectedIcon: false,
                                 segments: const [
-                                  ButtonSegment(
-                                    value: false,
-                                    label: Text('English (AD)'),
-                                  ),
                                   ButtonSegment(
                                     value: true,
                                     label: Text('Nepali (BS)'),
+                                  ),
+                                  ButtonSegment(
+                                    value: false,
+                                    label: Text('English (AD)'),
                                   ),
                                 ],
                                 selected: {p.nepali},
@@ -397,11 +406,25 @@ class _DashboardState extends State<Dashboard> {
                                           onPressed: () => p.changeMonth(-1),
                                           icon: const Icon(Icons.chevron_left),
                                         ),
-                                        Text(
-                                          p.period.label,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                        Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              p.period.label,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            Text(
+                                              p.nepali
+                                                  ? '${DateFormat.yMMMM().format(p.period.anchor)} AD'
+                                                  : '${NepaliDateFormat.yMMMM().format(toBs(p.period.anchor))} BS',
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                color: muted,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                         IconButton(
                                           tooltip: 'Next month',
@@ -703,7 +726,7 @@ class _DashboardState extends State<Dashboard> {
               (i) => Expanded(
                 child: Tooltip(
                   message:
-                      '${DateFormat.MMMd().format(p.period.day(i + 1))}: ${money(days[i])}',
+                      '${bsDate(p.period.day(i + 1))} (${DateFormat.MMMd().format(p.period.day(i + 1))}): ${money(days[i])}',
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 2),
                     child: Container(
@@ -959,7 +982,7 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  '${e.category} · ${p.nepali ? bsDate(e.date) : DateFormat.MMMd().format(e.date)}',
+                                  '${e.category} · ${formatBsAndAdDate(e.date)}',
                                   style: const TextStyle(
                                     color: muted,
                                     fontSize: 12,

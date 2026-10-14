@@ -368,7 +368,7 @@ class _SpendingStoriesState extends State<SpendingStories> {
                 .isAfter(DateTime(now.year, now.month, now.day));
             return Tooltip(
               message:
-                  '${DateFormat.MMMd().format(period.day(day))}: ${_cash(amount)} recorded',
+                  '${bsDate(period.day(day))} (${DateFormat.MMMd().format(period.day(day))}): ${_cash(amount)} recorded',
               child: Semantics(
                 button: true,
                 selected: selectedDay == day,
@@ -427,7 +427,7 @@ class _SpendingStoriesState extends State<SpendingStories> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${DateFormat.yMMMMd().format(period.day(selectedDay!))} / ${bsDate(period.day(selectedDay!))}',
+                  '${bsDate(period.day(selectedDay!))} (${DateFormat.yMMMMd().format(period.day(selectedDay!))})',
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 8),

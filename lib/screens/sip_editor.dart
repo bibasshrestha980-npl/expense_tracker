@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import '../models/calendar_period.dart';
 import '../models/expense.dart';
 import '../models/sip.dart';
 import '../providers/sip_provider.dart';
@@ -204,7 +204,7 @@ class _SipEditorState extends State<SipEditor> {
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.event_outlined),
-                  title: Text('Start Date: ${DateFormat.yMMMd().format(_startDate)}'),
+                  title: Text('Start Date: ${formatBsAndAdDate(_startDate)}'),
                   trailing: const Icon(Icons.edit_outlined),
                   onTap: _busy
                       ? null

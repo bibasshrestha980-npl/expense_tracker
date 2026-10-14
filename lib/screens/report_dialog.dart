@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../models/calendar_period.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
 import '../providers/sip_provider.dart';
@@ -19,9 +20,7 @@ class ReportDialog extends StatelessWidget {
   });
 
   String _formatSummaryText() {
-    final periodName = expenseProvider.nepali
-        ? expenseProvider.period.label
-        : DateFormat.yMMMM().format(expenseProvider.month);
+    final periodName = formatBsAndAdMonth(expenseProvider.period.anchor);
 
     final income = expenseProvider.income;
     final totalExpense = expenseProvider.total;
@@ -100,9 +99,7 @@ class ReportDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final periodName = expenseProvider.nepali
-        ? expenseProvider.period.label
-        : DateFormat.yMMMM().format(expenseProvider.month);
+    final periodName = formatBsAndAdMonth(expenseProvider.period.anchor);
 
     final income = expenseProvider.income;
     final totalExpense = expenseProvider.total;
