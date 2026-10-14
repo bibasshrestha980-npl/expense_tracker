@@ -62,3 +62,9 @@ Official setup reference: https://firebase.google.com/docs/flutter/setup
 The app now offers Overview, Transactions and Insights navigation, a desktop sidebar and mobile navigation bar, daily spending charts, ranked category breakdowns, average transaction amount, previous-month comparisons, amount/date sorting, and copying filtered transactions as CSV. The forms have clearer currency entry, category icons, password confirmation, and save/delete feedback. Layout/navigation tests cover 360px and 1440px screens.
 
 Firebase Email/Password enablement remains the console step described above; live authentication and Firestore CRUD were not verified in this update.
+
+## Pocket Journal
+
+Open Insights to use the Pocket Journal: a summary of the largest spending category, a calendar with daily expense details, repeated-title purchase groups, and an interactive What-if Studio. The studio changes only an in-memory scenario; it never modifies stored expenses. Calculations use recorded transactions, with no external AI service. Missing entries do not establish no-spend days, and matching titles do not establish subscriptions.
+
+Verification for this update: Flutter analysis and all 6 tests passed, including phone/desktop layouts, calendar interaction, scenario reset, and calculation edge cases.

@@ -75,12 +75,14 @@ class _SpendingStoriesState extends State<SpendingStories> {
                 children: [
                   Icon(Icons.auto_stories_outlined, color: Color(0xffc9e6b4)),
                   SizedBox(width: 12),
-                  Text(
-                    'THE POCKET JOURNAL',
-                    style: TextStyle(
-                      color: Color(0xffc9e6b4),
-                      fontSize: 11,
-                      letterSpacing: 2,
+                  Flexible(
+                    child: Text(
+                      'THE POCKET JOURNAL',
+                      style: TextStyle(
+                        color: Color(0xffc9e6b4),
+                        fontSize: 11,
+                        letterSpacing: 2,
+                      ),
                     ),
                   ),
                 ],
