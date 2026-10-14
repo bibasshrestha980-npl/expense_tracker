@@ -12,7 +12,13 @@ import '../theme.dart';
 class ExpenseEditor extends StatefulWidget {
   final ExpenseProvider provider;
   final Expense? expense;
-  const ExpenseEditor({super.key, required this.provider, this.expense});
+  final bool income;
+  const ExpenseEditor({
+    super.key,
+    required this.provider,
+    this.expense,
+    this.income = false,
+  });
   @override
   State<ExpenseEditor> createState() => _ExpenseEditorState();
 }
@@ -24,6 +30,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   late String _category;
   bool _busy = false;
   bool _nepali = false;
+  bool get _income => widget.expense?.isIncome ?? widget.income;
   String? _error;
   @override
   void initState() {
@@ -36,7 +43,8 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     );
     _note = TextEditingController(text: e?.note);
     _date = e?.date ?? DateTime.now();
-    _category = e?.category ?? categories.first;
+    _category =
+        e?.category ?? (_income ? incomeCategories.first : categories.first);
   }
 
   @override
@@ -62,6 +70,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
           amountCents: parseAmount(_amount.text)!,
           date: _date,
           note: _note.text.trim(),
+          isIncome: _income,
         ),
       );
       if (mounted) Navigator.pop(context, true);
@@ -80,7 +89,11 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   Widget build(BuildContext context) => PopScope(
     canPop: !_busy,
     child: AlertDialog(
-      title: Text(widget.expense == null ? 'Add expense' : 'Edit expense'),
+      title: Text(
+        _income
+            ? (widget.expense == null ? 'Add money' : 'Edit income')
+            : (widget.expense == null ? 'Add expense' : 'Edit expense'),
+      ),
       content: SizedBox(
         width: 440,
         child: SingleChildScrollView(
@@ -99,10 +112,14 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                   TextFormField(
                     controller: _title,
                     maxLength: 80,
-                    decoration: const InputDecoration(
-                      labelText: 'What was it for?',
-                      hintText: 'e.g. Lunch at the cafe',
-                      prefixIcon: Icon(Icons.edit_note_rounded),
+                    decoration: InputDecoration(
+                      labelText: _income
+                          ? 'Where did the money come from?'
+                          : 'What was it for?',
+                      hintText: _income
+                          ? 'e.g. October salary'
+                          : 'e.g. Lunch at the cafe',
+                      prefixIcon: const Icon(Icons.edit_note_rounded),
                     ),
                     validator: (v) =>
                         (v?.trim().isEmpty ?? true) ? 'Enter a title' : null,
@@ -117,11 +134,13 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                     ),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Amount',
                       prefixText: 'NPR  ',
                       hintText: '0.00',
-                      helperText: 'Enter the amount you paid',
+                      helperText: _income
+                          ? 'Enter the amount you received'
+                          : 'Enter the amount you paid',
                     ),
                     validator: (v) => parseAmount(v ?? '') == null
                         ? 'Enter a positive amount with up to 2 decimals'
@@ -132,7 +151,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                     isExpanded: true,
                     initialValue: _category,
                     decoration: const InputDecoration(labelText: 'Category'),
-                    items: categories
+                    items: (_income ? incomeCategories : categories)
                         .map(
                           (c) => DropdownMenuItem(
                             value: c,
@@ -227,7 +246,9 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
         ),
         FilledButton(
           onPressed: _busy ? null : _save,
-          child: Text(_busy ? 'Saving…' : 'Save expense'),
+          child: Text(
+            _busy ? 'Saving…' : (_income ? 'Save income' : 'Save expense'),
+          ),
         ),
       ],
     ),

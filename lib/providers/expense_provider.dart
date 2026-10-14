@@ -8,14 +8,31 @@ import '../models/calendar_period.dart';
 
 class ExpenseProvider extends ChangeNotifier {
   final String uid;
-  late final StreamSubscription<QuerySnapshot<Map<String, dynamic>>>
-  _subscription;
+  final FirebaseFirestore? database;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _subscription;
   List<Expense> _items = [];
   bool loading = true;
   String? error;
   DateTime month = DateTime(DateTime.now().year, DateTime.now().month);
   String category = 'All', search = '';
   String sort = 'Newest first';
+  String transactionType = 'All';
+  void setType(String value) {
+    transactionType = value;
+    category = 'All';
+    notifyListeners();
+  }
+
+  List<Expense> get monthlyTransactions =>
+      _items.where((e) => period.contains(e.date)).toList();
+  int get income => monthlyTransactions
+      .where((e) => e.isIncome)
+      .fold(0, (value, e) => value + e.amountCents);
+  int get balance => _items.fold(
+    0,
+    (value, e) => value + (e.isIncome ? e.amountCents : -e.amountCents),
+  );
+  int get monthlyNet => income - total;
   bool nepali = false;
   CalendarPeriod get period => CalendarPeriod(month, nepali: nepali);
   void setCalendar(bool value) {
@@ -30,7 +47,7 @@ class ExpenseProvider extends ChangeNotifier {
   int get previousTotal {
     final previous = CalendarPeriod(period.shifted(-1), nepali: nepali);
     return _items
-        .where((e) => previous.contains(e.date))
+        .where((e) => !e.isIncome && previous.contains(e.date))
         .fold(0, (value, e) => value + e.amountCents);
   }
 
@@ -45,7 +62,16 @@ class ExpenseProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  ExpenseProvider(this.uid) {
+  ExpenseProvider(
+    this.uid, {
+    FirebaseFirestore? firestore,
+    List<Expense>? initialExpenses,
+  }) : database = firestore ?? (uid.isEmpty ? null : FirebaseFirestore.instance) {
+    if (initialExpenses != null) {
+      _items = initialExpenses;
+      loading = false;
+      return;
+    }
     _subscription = collection
         .orderBy('date', descending: true)
         .snapshots()
@@ -63,17 +89,16 @@ class ExpenseProvider extends ChangeNotifier {
           },
         );
   }
-  CollectionReference<Map<String, dynamic>> get collection => FirebaseFirestore
-      .instance
-      .collection('users')
-      .doc(uid)
-      .collection('expenses');
+  CollectionReference<Map<String, dynamic>> get collection =>
+      database!.collection('users').doc(uid).collection('expenses');
   List<Expense> get monthly =>
-      _items.where((e) => period.contains(e.date)).toList();
+      monthlyTransactions.where((e) => !e.isIncome).toList();
   List<Expense> get visible {
-    final result = monthly
+    final result = monthlyTransactions
         .where(
           (e) =>
+              (transactionType == 'All' ||
+                  (transactionType == 'Income' ? e.isIncome : !e.isIncome)) &&
               (category == 'All' || e.category == category) &&
               '${e.title} ${e.note}'.toLowerCase().contains(
                 search.toLowerCase(),
@@ -113,6 +138,11 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   Future<void> save(Expense e) async {
+    if (uid.isEmpty) {
+      _items.add(e);
+      notifyListeners();
+      return;
+    }
     if (e.id.isEmpty) {
       await collection.add(e.toMap());
     } else {
@@ -123,7 +153,7 @@ class ExpenseProvider extends ChangeNotifier {
   Future<void> delete(String id) => collection.doc(id).delete();
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 }

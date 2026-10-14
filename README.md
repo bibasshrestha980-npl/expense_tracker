@@ -1,179 +1,123 @@
-# Pocket — Personal Expense Tracker
+# Pocket - Expense Tracker
 
-<p align="center">
-  <img src="web/icons/Icon-192.png" alt="Pocket Logo" width="100" height="100" />
-</p>
+Final project built with Flutter, Provider, Firebase Authentication, and Cloud Firestore.
 
-<p align="center">
-  <strong>Small habits. Smarter spending.</strong><br>
-  A modern, responsive, and privacy-focused cross-platform expense tracker built with Flutter, Provider, Firebase Authentication, Cloud Firestore, and Bikram Sambat (BS) Nepali Calendar integration.
-</p>
+## Run
 
-<p align="center">
-  <a href="https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml"><img src="https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
-  <img src="https://img.shields.io/badge/Flutter-3.47+-02569B?logo=flutter&logoColor=white" alt="Flutter" />
-  <img src="https://img.shields.io/badge/Dart-3.13+-0175C2?logo=dart&logoColor=white" alt="Dart" />
-  <img src="https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase&logoColor=black" alt="Firebase" />
-  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-4CAF50" alt="Platforms" />
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
-</p>
-
----
-
-## ✨ Features
-
-- 🔐 **Secure Authentication**: Email & password authentication with input validation, session management, and password reset.
-- ⚡ **Real-Time Cloud Sync**: Powered by Cloud Firestore — per-user isolated subcollections with reactive UI updates.
-- 🇳🇵 **Dual Calendar (AD & BS)**: Full Bikram Sambat (Nepali calendar) support with real month boundaries, BS date picker, and lunar calendar integration (tithi, events & holidays).
-- 📊 **Spending Analytics**:
-  - Monthly budget tracking with interactive month-by-month navigation.
-  - Ranked category breakdowns with proportional progress indicators.
-  - Average transaction size and comparisons against previous months.
-- 📖 **The Pocket Journal**:
-  - Interactive daily calendar view highlighting spending hotspots.
-  - Automatic detection of repeated expense titles.
-  - **What-If Studio**: In-memory financial simulator to test spending adjustments without modifying actual records.
-- 💰 **Zero Rounding Errors**: All currency amounts are stored and computed in integer cents/paisa, eliminating floating-point inaccuracies.
-- 📱 **Adaptive Material 3 Design**: Responsive layout that transitions between a compact bottom navigation bar on mobile and a comfortable sidebar on desktop/web.
-- 📤 **Data Export**: Export filtered transactions directly to CSV for spreadsheet analysis.
-
----
-
-## 🛠️ Architecture & Tech Stack
-
-```
-lib/
-├── firebase_options.dart        # Platform Firebase configuration (FlutterFire CLI)
-├── main.dart                    # App bootstrap, Material 3 theme & AuthGate
-├── theme.dart                   # Color schemes, typography & component themes
-├── models/
-│   ├── calendar_period.dart     # AD & BS calendar period computations & boundaries
-│   ├── expense.dart             # Expense entity, category definitions & currency parser
-│   └── spending_story.dart      # Journal computation models (calendar, recurrence, scenarios)
-├── providers/
-│   ├── auth_provider.dart       # Authentication state and user session management
-│   ├── calendar_provider.dart   # Nepali lunar calendar API state & memory caching
-│   └── expense_provider.dart    # Firestore streams, CRUD actions, search & filters
-├── screens/
-│   ├── auth_screen.dart         # Sign in, account registration & password recovery
-│   ├── calendar_details.dart    # Lunar calendar event details modal
-│   ├── dashboard.dart           # Main view: Overview, Transactions & Insights navigation
-│   ├── expense_editor.dart      # Add/Edit expense dialog with form validation
-│   ├── nepali_picker.dart       # Custom Bikram Sambat date picker dialog
-│   └── spending_stories.dart    # Pocket Journal & What-If Studio interface
-└── services/
-    └── nepali_calendar_api.dart # Multi-source resilient Nepali calendar REST client
+```powershell
+cd C:\Users\BIBAS\Desktop\expense_tracker
+flutter pub get
+flutter run -d chrome
 ```
 
-### Core Technologies
-- **Framework**: [Flutter](https://flutter.dev/) (Channel Stable)
-- **State Management**: [Provider](https://pub.dev/packages/provider)
-- **Backend**: [Firebase Authentication](https://firebase.google.com/docs/auth) & [Cloud Firestore](https://firebase.google.com/docs/firestore)
-- **Design System**: Material Design 3
+For Android, start an emulator or connect a phone with USB debugging and run `flutter run`. iOS builds require macOS and Xcode.
 
----
+## One remaining Firebase console step
 
-## 🚀 Getting Started
+The separate Firebase project `pocket-exp-2610142142` (Pocket Expense Tracker) and Android, iOS, and web registrations are configured. The free-tier Firestore database in asia-south1 is created and the security rules are deployed.
 
-### Prerequisites
+Open https://console.firebase.google.com/project/pocket-exp-2610142142/authentication
+Select Get started, then Sign-in method > Email/Password > Enable > Save. Use ordinary Firebase Authentication; no paid Identity Platform upgrade is needed for this app. Authentication could not be enabled automatically because the admin initialization endpoint required billing and browser automation was unavailable.
 
-Ensure you have the following installed on your machine:
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.13.0` or higher)
-- [Git](https://git-scm.com/)
+Then create an account from the app. No demo credentials are included.
 
-### Installation
+## Features
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/bibasshrestha980-npl/expense_tracker.git
-   cd expense_tracker
-   ```
+- Email/password registration, login, logout, and password reset.
+- Live per-user expense storage with add, edit, and confirmed delete.
+- Monthly totals and category spending breakdowns.
+- Search by title/note and filter by category and month.
+- NPR currency; amounts stored as integer paisa to avoid floating-point errors.
+- Validated forms, loading indicators, empty states, and error messages.
+- Responsive Material 3 interface.
 
-2. **Install dependencies**:
-   ```bash
-   flutter pub get
-   ```
+## Structure
 
-3. **Run the application**:
-   - **Web (Chrome)**:
-     ```bash
-     flutter run -d chrome
-     ```
-   - **Android / iOS**:
-     Connect a device or launch an emulator, then execute:
-     ```bash
-     flutter run
-     ```
+- lib/main.dart: Firebase initialization, theme, authentication gate.
+- lib/models/expense.dart: expense model and exact currency parsing.
+- lib/providers/auth_provider.dart: authentication state and operations.
+- lib/providers/expense_provider.dart: Firestore subscription, CRUD, totals and filters.
+- lib/screens/: authentication, dashboard and expense editor.
+- lib/firebase_options.dart: generated platform configuration.
+- firestore.rules: owner-only access with field validation.
+- test/expense_test.dart: amount validation and startup error-screen tests.
 
----
+Firestore path: users/{uid}/expenses/{expenseId}. The auth UID scopes all reads and writes, enforced by deployed rules. Provider subscriptions are disposed on logout/account changes.
 
-## 🔒 Security & Firestore Rules
+## Verification
 
-User data is secured at the database layer using rules defined in `firestore.rules`. Each user can only read, write, and delete expenses within their own isolated subcollection (`/users/{userId}/expenses/{expenseId}`):
+Passed: flutter analyze, flutter test (2 tests), flutter build web.
+Live signup/login and authenticated CRUD still need verification after enabling Email/Password in the console. Android and iOS builds were not tested.
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/expenses/{expenseId} {
-      function owner() { return request.auth != null && request.auth.uid == userId; }
-      function valid() {
-        let d = request.resource.data;
-        return d.keys().hasAll(['title', 'category', 'amountCents', 'date', 'note'])
-          && d.keys().hasOnly(['title', 'category', 'amountCents', 'date', 'note'])
-          && d.title is string && d.title.size() > 0 && d.title.size() <= 80
-          && d.category in ['Food', 'Transport', 'Shopping', 'Bills', 'Health', 'Education', 'Other']
-          && d.amountCents is int && d.amountCents > 0 && d.amountCents <= 99999999999
-          && d.date is timestamp && d.note is string && d.note.size() <= 300;
-      }
-      allow read, delete: if owner();
-      allow create, update: if owner() && valid();
-    }
-  }
-}
-```
+Suggested demonstration: register, add two expenses, edit one, filter by category, browse months, delete an expense, sign out, then sign in to confirm persistence. A second account should see only its own expenses.
 
----
+## Reconfigure for another Firebase project
 
-## 📅 Nepali Calendar & Lunar API Integration
+Run `flutterfire configure --project=YOUR_PROJECT_ID --platforms=android,ios,web`, create Firestore, enable Email/Password, and deploy rules with `firebase deploy --only firestore:rules --project=YOUR_PROJECT_ID`.
 
-Public calendar details are fetched with automatic fallback handling across multiple sources:
-- **Primary Source**: `https://raw.githubusercontent.com/sajanm/nepali-lunar-calendar-events/master/{YEAR}.json`
-- **Fallback Sources**: `https://the-value-crew.github.io/nepali-calendar-api/` and `https://bibhuticoder.github.io/nepali-calendar-api/`
+Official setup reference: https://firebase.google.com/docs/flutter/setup
 
-In BS mode, selecting a day under Insights or in the date picker surfaces published tithi, events, and holidays.
-Responses are cached in memory (up to 24 months), with automatic request deduplication and a 10-second timeout.
+## Professional interface update
 
-To check representative live endpoints:
-```bash
-dart run tool/check_calendar_api.dart
-```
+The app now offers Overview, Transactions and Insights navigation, a desktop sidebar and mobile navigation bar, daily spending charts, ranked category breakdowns, average transaction amount, previous-month comparisons, amount/date sorting, and copying filtered transactions as CSV. The forms have clearer currency entry, category icons, password confirmation, and save/delete feedback. Layout/navigation tests cover 360px and 1440px screens.
 
----
+Firebase Email/Password enablement remains the console step described above; live authentication and Firestore CRUD were not verified in this update.
 
-## 🧪 Testing & Quality Assurance
+## Pocket Journal
 
-Pocket maintains unit, widget, and integration tests covering business logic, financial arithmetic, responsive layouts, and calendar integrations:
+Open Insights to use the Pocket Journal: a summary of the largest spending category, a calendar with daily expense details, repeated-title purchase groups, and an interactive What-if Studio. The studio changes only an in-memory scenario; it never modifies stored expenses. Calculations use recorded transactions, with no external AI service. Missing entries do not establish no-spend days, and matching titles do not establish subscriptions.
 
-```bash
-# Verify code formatting
-dart format --output=none --set-exit-if-changed .
+Verification for this update: Flutter analysis and all 6 tests passed, including phone/desktop layouts, calendar interaction, scenario reset, and calculation edge cases.
 
-# Run static analysis
-flutter analyze
+## Calendar API integration
 
-# Execute all tests
-flutter test
-```
+Public calendar details are fetched from the requested source:
+https://bibhuticoder.github.io/nepali-calendar-api/api/{BS_YEAR}.json
 
----
+The repository is deprecated. When its requested month is missing or the request fails, the app tries the successor linked by that repository:
+https://the-value-crew.github.io/nepali-calendar-api/data/{BS_YEAR}/{MONTH}.json
 
-## 🤝 Contributing
+In BS mode, select a day under Insights or in the expense date picker to see published tithi, events and holidays. Each result names its source. Missing records remain explicitly unavailable; they are not treated as confirmed non-holidays. The API augments date conversion and never changes expense timestamps or totals. No expense details or Firebase tokens are sent. Requests contain only public year/month paths.
 
-Contributions, issues, and feature suggestions are welcome! Please check the [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+Successful month responses are cached in memory (up to 24 months); concurrent matching requests are shared. Each request times out after 10 seconds. Missing-data and request-error states provide retry controls. Devanagari digits, blank calendar padding, original and successor JSON formats are supported.
 
----
+Live checks on 2026-10-14: the original 2073 endpoint and successor 2076/2 endpoint respond; both sources return 404 for 2083/6. Those two archive sources cannot supply current-month details; the current-data source below now covers this gap. The offline BS calendar remains usable.
 
-## 📄 License
+Run `dart run tool/check_calendar_api.dart` to check representative live endpoints. Mock HTTP tests cover parsing, fallback, caching, missing years and retry after malformed data.
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## Fix: current BS calendar data (2083/6)
+
+Recent years now try https://raw.githubusercontent.com/sajanm/nepali-lunar-calendar-events/master/{YEAR}.json first. Both nested month arrays and flat year arrays are supported. Records are selected by their explicit BS year/month; blank event markers are not displayed. Original APIs remain archival fallbacks. The source is shown on screen.
+
+Live verification: 2083/6 returns 31 days, including tithi and events, and the endpoint allows browser cross-origin access. All 13 tests pass. Restart the running Flutter app (or reload a newly deployed web build) to use the updated source. Public source data is displayed as provided, not official holiday certification.
+
+## Add money and income tracking
+
+The Add money button appears beside Add expense on every main screen. Record Salary, Freelance, Allowance, Gift, Refund, Opening balance or Other income. Use Opening balance once for funds already held when starting your ledger; do not add the same funds again as salary.
+
+Overview shows Recorded balance (all recorded income minus all recorded expenses), Money in and Money out for the selected AD/BS month, and monthly net. This is a manual personal ledger, not a bank-linked balance or payment/top-up service. Negative balances are shown when recorded spending exceeds recorded income.
+
+Transactions includes income and expenses, signed amounts, type/category filters, editing, deletion, and a Type column in CSV. Spending charts and Pocket Journal continue to use expenses only. Existing documents without a type field are treated as expenses. Firestore rules now validate transaction type and matching categories; these updated rules were deployed to pocket-expenses-bibas-261014.
+
+Income tests cover form saving, exact paisa amounts, legacy records, balance calculations, excluding income from spending charts, filtering, income edits, and deletion using a fake Firestore database. Production authenticated CRUD was not exercised by those tests.
+
+## SIP (Systematic Investment Plan) tracking
+
+The app includes dedicated mutual fund & investment tracking accessible via the **SIPs** tab in the main navigation.
+
+- **Portfolio overview**: Total monthly commitment, total invested to date, and estimated current corpus value.
+- **Scheme management**: Add, edit, pause, and delete SIP plans with custom scheme names, monthly installment amount, expected annual return rate (%), monthly debit day, and start date.
+- **One-click expense logging**: Log any recurring monthly SIP installment directly into your expense ledger under the `Investment` category with a single tap.
+- **Compound growth calculator**: Interactive wealth projection calculator estimating total invested capital, estimated returns, and total future value based on monthly contribution, expected CAGR, and investment horizon (years).
+- **Firestore security rules**: Stored under `/users/{userId}/sips/{sipId}` with strict field-level validation and owner-only access.
+
+## Share & export monthly financial reports
+
+Access the comprehensive financial summary modal directly from the app bar via the **Share Report** button (`Icons.summarize_outlined`).
+
+- **Executive breakdown**: Shows monthly income, expenses, net savings, and savings rate percentage for the selected month (AD or BS calendar).
+- **Category allocation**: Visual progress bars showing spend distribution across categories with percentage shares.
+- **1-Click Share Summary**: Formats a clean, readable financial snapshot with emojis and amounts ready to copy to clipboard for WhatsApp, email, or messaging.
+- **CSV export**: Export your complete monthly ledger as a `.csv` spreadsheet for record keeping.
+

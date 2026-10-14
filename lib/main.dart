@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'providers/expense_provider.dart';
+import 'providers/sip_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/dashboard.dart';
 import 'theme.dart';
@@ -70,9 +71,12 @@ class AuthGate extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (auth.user == null) return const AuthScreen();
-    return ChangeNotifierProvider(
+    return MultiProvider(
       key: ValueKey(auth.user!.uid),
-      create: (_) => ExpenseProvider(auth.user!.uid),
+      providers: [
+        ChangeNotifierProvider(create: (_) => ExpenseProvider(auth.user!.uid)),
+        ChangeNotifierProvider(create: (_) => SipProvider(auth.user!.uid)),
+      ],
       child: const Dashboard(),
     );
   }

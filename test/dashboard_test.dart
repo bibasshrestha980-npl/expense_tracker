@@ -19,6 +19,16 @@ class TestExpenses extends ChangeNotifier implements ExpenseProvider {
   @override
   bool nepali = false;
   @override
+  int get income => 200000;
+  @override
+  int get balance => income - total;
+  @override
+  int get monthlyNet => income - total;
+  @override
+  List<Expense> get monthlyTransactions => monthly;
+  @override
+  String get transactionType => 'All';
+  @override
   void setCalendar(bool value) {
     nepali = value;
     notifyListeners();
@@ -82,7 +92,7 @@ void main() {
           child: MaterialApp(theme: pocketTheme(), home: const Dashboard()),
         ),
       );
-      expect(find.text('Total spending'), findsOneWidget);
+      expect(find.text('Recorded balance'), findsOneWidget);
       await tester.tap(find.text('Nepali (BS)'));
       await tester.pumpAndSettle();
       expect(find.text('Ashwin 2083 BS'), findsOneWidget);

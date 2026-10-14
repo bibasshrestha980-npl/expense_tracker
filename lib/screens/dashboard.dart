@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -10,8 +9,11 @@ import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
 import '../theme.dart';
 import 'expense_editor.dart';
+import 'report_dialog.dart';
+import 'sip_screen.dart';
 import 'spending_stories.dart';
 import '../models/calendar_period.dart';
+import '../providers/sip_provider.dart';
 
 String money(int cents) =>
     NumberFormat.currency(symbol: 'NPR ', decimalDigits: 2).format(cents / 100);
@@ -25,20 +27,24 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int page = 0;
   final search = TextEditingController();
-  static const titles = ['Overview', 'Transactions', 'Insights'];
+  static const titles = ['Overview', 'Transactions', 'SIPs', 'Insights'];
   @override
   void dispose() {
     search.dispose();
     super.dispose();
   }
 
-  Future<void> edit(ExpenseProvider p, [Expense? e]) async {
+  Future<void> edit(
+    ExpenseProvider p, [
+    Expense? e,
+    bool income = false,
+  ]) async {
     final saved = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (_) => ExpenseEditor(provider: p, expense: e),
+      builder: (_) => ExpenseEditor(provider: p, expense: e, income: income),
     );
-    if (saved == true && mounted) message('Expense saved successfully.');
+    if (saved == true && mounted) message('Transaction saved successfully.');
   }
 
   void message(String text) => ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +54,7 @@ class _DashboardState extends State<Dashboard> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Delete this expense?'),
+        title: const Text('Delete this transaction?'),
         content: Text(
           '${e.title}\n${money(e.amountCents)}\n\nThis action cannot be undone.',
         ),
@@ -67,31 +73,20 @@ class _DashboardState extends State<Dashboard> {
     if (yes != true) return;
     try {
       await p.delete(e.id);
-      if (mounted) message('Expense deleted.');
+      if (mounted) message('Transaction deleted.');
     } catch (_) {
       if (mounted) message('Could not delete. Please try again.');
     }
   }
 
   Future<void> export(ExpenseProvider p) async {
-    String quote(String value) => '"${value.replaceAll('"', '""')}"';
-    final csv = [
-      'Date,Title,Category,Amount (NPR),Note',
-      ...p.visible.map(
-        (e) =>
-            '${DateFormat('yyyy-MM-dd').format(e.date)},${quote(e.title)},${quote(e.category)},${(e.amountCents / 100).toStringAsFixed(2)},${quote(e.note)}',
+    showDialog<void>(
+      context: context,
+      builder: (_) => ReportDialog(
+        expenseProvider: p,
+        sipProvider: context.read<SipProvider?>(),
       ),
-    ].join('\r\n');
-    try {
-      await Clipboard.setData(ClipboardData(text: csv));
-      if (mounted) {
-        message(
-          'Filtered transactions copied as CSV. Paste into a spreadsheet.',
-        );
-      }
-    } catch (_) {
-      if (mounted) message('Clipboard unavailable. Please try again.');
-    }
+    );
   }
 
   @override
@@ -113,6 +108,10 @@ class _DashboardState extends State<Dashboard> {
                 NavigationDestination(
                   icon: Icon(Icons.receipt_long_outlined),
                   label: 'Transactions',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.trending_up_rounded),
+                  label: 'SIPs',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.bar_chart_rounded),
@@ -161,7 +160,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     const SizedBox(height: 48),
                     ...List.generate(
-                      3,
+                      titles.length,
                       (i) => Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: Material(
@@ -177,6 +176,7 @@ class _DashboardState extends State<Dashboard> {
                               [
                                 Icons.space_dashboard_outlined,
                                 Icons.receipt_long_outlined,
+                                Icons.trending_up_rounded,
                                 Icons.bar_chart_rounded,
                               ][i],
                             ),
@@ -241,14 +241,41 @@ class _DashboardState extends State<Dashboard> {
                           style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         const Spacer(),
-                        const Icon(Icons.lock_outline, size: 15, color: muted),
-                        const SizedBox(width: 6),
-                        if (wide)
+                        if (wide) ...[
+                          FilledButton.tonalIcon(
+                            onPressed: () => showDialog<void>(
+                              context: context,
+                              builder: (_) => ReportDialog(
+                                expenseProvider: p,
+                                sipProvider: context.read<SipProvider?>(),
+                              ),
+                            ),
+                            icon: const Icon(Icons.summarize_outlined, size: 16),
+                            label: const Text('Share Report'),
+                          ),
+                          const SizedBox(width: 14),
+                        ] else ...[
+                          IconButton(
+                            tooltip: 'Share Report',
+                            icon: const Icon(Icons.summarize_outlined),
+                            onPressed: () => showDialog<void>(
+                              context: context,
+                              builder: (_) => ReportDialog(
+                                expenseProvider: p,
+                                sipProvider: context.read<SipProvider?>(),
+                              ),
+                            ),
+                          ),
+                        ],
+                        if (wide) ...[
+                          const Icon(Icons.lock_outline, size: 15, color: muted),
+                          const SizedBox(width: 6),
                           const Text(
                             'Personal account',
                             style: TextStyle(color: muted, fontSize: 12),
                           ),
-                        const SizedBox(width: 10),
+                          const SizedBox(width: 10),
+                        ],
                         PopupMenuButton<String>(
                           tooltip: 'Account',
                           icon: const CircleAvatar(
@@ -305,6 +332,7 @@ class _DashboardState extends State<Dashboard> {
                                         [
                                           'A little clarity. A lot of control.',
                                           'Every expense, in one place.',
+                                          'Systematic wealth building.',
                                           'Understand your spending.',
                                         ][page],
                                         style: Theme.of(context)
@@ -316,6 +344,7 @@ class _DashboardState extends State<Dashboard> {
                                         [
                                           'Here is how your month is shaping up.',
                                           'Search, review and organize your daily spending.',
+                                          'Track mutual fund SIPs, portfolio growth, and log installments.',
                                           'Turn your everyday expenses into useful insights.',
                                         ][page],
                                         style: const TextStyle(color: muted),
@@ -323,6 +352,14 @@ class _DashboardState extends State<Dashboard> {
                                     ],
                                   ),
                                   FilledButton.icon(
+                                    onPressed: () => edit(p, null, true),
+                                    icon: const Icon(
+                                      Icons.add_card_outlined,
+                                      size: 19,
+                                    ),
+                                    label: const Text('Add money'),
+                                  ),
+                                  OutlinedButton.icon(
                                     onPressed: () => edit(p),
                                     icon: const Icon(Icons.add, size: 19),
                                     label: const Text('Add expense'),
@@ -399,7 +436,9 @@ class _DashboardState extends State<Dashboard> {
                                   Text(p.error!),
                                 )
                               else ...[
-                                if (page == 2) ...[
+                                if (page == 2)
+                                  const SipScreen()
+                                else if (page == 3) ...[
                                   SpendingStories(
                                     expenses: p.monthly,
                                     month: p.month,
@@ -407,8 +446,21 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                   const SizedBox(height: 24),
                                 ],
-                                if (page != 1) ...[
+                                if (page == 0 || page == 3) ...[
                                   summary(p),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'Monthly net: ${money(p.monthlyNet)}  |  ${p.monthlyTransactions.length} transactions',
+                                    style: const TextStyle(color: muted),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
+                                    style: TextStyle(
+                                      color: muted,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                   const SizedBox(height: 24),
                                   LayoutBuilder(
                                     builder: (context, box) {
@@ -444,7 +496,7 @@ class _DashboardState extends State<Dashboard> {
                                   ),
                                   const SizedBox(height: 24),
                                 ],
-                                if (page == 2)
+                                if (page == 3)
                                   panel(
                                     'Your monthly perspective',
                                     Column(
@@ -468,7 +520,7 @@ class _DashboardState extends State<Dashboard> {
                                       ],
                                     ),
                                   )
-                                else
+                                else if (page != 2)
                                   transactions(p),
                               ],
                             ],
@@ -535,7 +587,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    'Total spending',
+                    'Recorded balance',
                     style: TextStyle(color: Colors.white70),
                   ),
                 ],
@@ -544,7 +596,7 @@ class _DashboardState extends State<Dashboard> {
               FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  money(p.total),
+                  money(p.balance),
                   style: const TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
@@ -554,23 +606,23 @@ class _DashboardState extends State<Dashboard> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'For the selected month',
+                'All recorded income minus expenses',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),
         ),
         metric(
-          'Transactions',
-          '${p.monthly.length}',
-          'Expenses recorded',
-          Icons.receipt_long_outlined,
+          'Money in',
+          money(p.income),
+          'Income for selected month',
+          Icons.south_west_rounded,
         ),
         metric(
-          'Average expense',
-          money(p.monthly.isEmpty ? 0 : (p.total / p.monthly.length).round()),
-          'Per transaction this month',
-          Icons.stacked_line_chart,
+          'Money out',
+          money(p.total),
+          'Expenses for selected month',
+          Icons.north_east_rounded,
         ),
       ];
       return box.maxWidth < 650
@@ -744,12 +796,27 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget transactions(ExpenseProvider p) {
-    final items = page == 0 ? p.monthly.take(5).toList() : p.visible;
+    final items = page == 0
+        ? p.monthlyTransactions.take(5).toList()
+        : p.visible;
     return panel(
       page == 0 ? 'Recent transactions' : 'Transaction history',
       Column(
         children: [
           if (page == 1) ...[
+            Wrap(
+              spacing: 8,
+              children: ['All', 'Income', 'Expenses']
+                  .map(
+                    (type) => ChoiceChip(
+                      label: Text(type == 'All' ? 'All transactions' : type),
+                      selected: p.transactionType == type,
+                      onSelected: (_) => p.setType(type),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 14),
             TextField(
               controller: search,
               onChanged: p.find,
@@ -770,15 +837,23 @@ class _DashboardState extends State<Dashboard> {
             Wrap(
               spacing: 8,
               runSpacing: 6,
-              children: ['All', ...categories]
-                  .map(
-                    (c) => ChoiceChip(
-                      label: Text(c),
-                      selected: p.category == c,
-                      onSelected: (_) => p.filter(c),
-                    ),
-                  )
-                  .toList(),
+              children:
+                  [
+                        'All',
+                        ...(p.transactionType == 'Income'
+                            ? incomeCategories
+                            : p.transactionType == 'Expenses'
+                            ? categories
+                            : [...categories, ...incomeCategories]),
+                      ]
+                      .map(
+                        (c) => ChoiceChip(
+                          label: Text(c),
+                          selected: p.category == c,
+                          onSelected: (_) => p.filter(c),
+                        ),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: 14),
             Row(
@@ -828,7 +903,7 @@ class _DashboardState extends State<Dashboard> {
                   const SizedBox(height: 14),
                   Text(
                     page == 1 && (p.search.isNotEmpty || p.category != 'All')
-                        ? 'No matching expenses'
+                        ? 'No matching transactions'
                         : 'A fresh start for this month',
                     style: const TextStyle(
                       fontSize: 18,
@@ -837,7 +912,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Add an expense or try another month or filter.',
+                    'Add money or an expense, or try another month or filter.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: muted),
                   ),
@@ -906,7 +981,7 @@ class _DashboardState extends State<Dashboard> {
                           const SizedBox(width: 8),
                           Flexible(
                             child: Text(
-                              money(e.amountCents),
+                              '${e.isIncome ? '+' : '-'}${money(e.amountCents)}',
                               textAlign: TextAlign.right,
                               style: const TextStyle(
                                 fontWeight: FontWeight.w700,
@@ -915,17 +990,17 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           PopupMenuButton<String>(
-                            tooltip: 'Expense actions',
+                            tooltip: 'Transaction actions',
                             onSelected: (v) =>
                                 v == 'edit' ? edit(p, e) : remove(p, e),
                             itemBuilder: (_) => const [
                               PopupMenuItem(
                                 value: 'edit',
-                                child: Text('Edit expense'),
+                                child: Text('Edit transaction'),
                               ),
                               PopupMenuItem(
                                 value: 'delete',
-                                child: Text('Delete expense'),
+                                child: Text('Delete transaction'),
                               ),
                             ],
                           ),

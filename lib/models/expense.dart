@@ -9,11 +9,21 @@ const categories = [
   'Education',
   'Other',
 ];
+const incomeCategories = [
+  'Salary',
+  'Freelance',
+  'Allowance',
+  'Gift',
+  'Refund',
+  'Opening balance',
+  'Other income',
+];
 
 class Expense {
   final String id, title, category, note;
   final int amountCents;
   final DateTime date;
+  final bool isIncome;
   const Expense({
     required this.id,
     required this.title,
@@ -21,6 +31,7 @@ class Expense {
     required this.amountCents,
     required this.date,
     this.note = '',
+    this.isIncome = false,
   });
   factory Expense.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data()!;
@@ -31,6 +42,7 @@ class Expense {
       amountCents: d['amountCents'] as int,
       date: (d['date'] as Timestamp).toDate(),
       note: d['note'] as String? ?? '',
+      isIncome: d['type'] == 'income',
     );
   }
   Map<String, dynamic> toMap() => {
@@ -39,6 +51,7 @@ class Expense {
     'amountCents': amountCents,
     'date': Timestamp.fromDate(date),
     'note': note,
+    'type': isIncome ? 'income' : 'expense',
   };
 }
 

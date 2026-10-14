@@ -6,14 +6,28 @@ service cloud.firestore {
       function valid() {
         let d = request.resource.data;
         return d.keys().hasAll(['title', 'category', 'amountCents', 'date', 'note'])
-          && d.keys().hasOnly(['title', 'category', 'amountCents', 'date', 'note'])
+          && d.keys().hasOnly(['title', 'category', 'amountCents', 'date', 'note', 'type'])
           && d.title is string && d.title.size() > 0 && d.title.size() <= 80
-          && d.category in ['Food', 'Transport', 'Shopping', 'Bills', 'Health', 'Education', 'Other']
+          && (d.get('type', 'expense') in ['expense', 'income'])
+          && ((d.get('type', 'expense') == 'expense' && d.category in ['Food', 'Transport', 'Shopping', 'Bills', 'Health', 'Education', 'Other'])
+            || (d.get('type', 'expense') == 'income' && d.category in ['Salary', 'Freelance', 'Allowance', 'Gift', 'Refund', 'Opening balance', 'Other income']))
           && d.amountCents is int && d.amountCents > 0 && d.amountCents <= 99999999999
           && d.date is timestamp && d.note is string && d.note.size() <= 300;
       }
       allow read, delete: if owner();
       allow create, update: if owner() && valid();
+    }
+    match /users/{userId}/sips/{sipId} {
+      function owner() { return request.auth != null && request.auth.uid == userId; }
+      function validSip() {
+        let d = request.resource.data;
+        return d.name is string && d.name.size() > 0 && d.name.size() <= 80
+          && d.monthlyAmountCents is int && d.monthlyAmountCents > 0
+          && d.dayOfMonth is int && d.dayOfMonth >= 1 && d.dayOfMonth <= 32
+          && d.startDate is timestamp;
+      }
+      allow read, delete: if owner();
+      allow create, update: if owner() && validSip();
     }
   }
 }
