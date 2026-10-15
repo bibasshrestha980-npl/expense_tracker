@@ -5,11 +5,12 @@ import 'package:flutter/foundation.dart';
 
 import '../models/expense.dart';
 import '../models/calendar_period.dart';
+import '../services/repositories/expense_repository.dart';
 
 class ExpenseProvider extends ChangeNotifier {
   final String uid;
-  final FirebaseFirestore? database;
-  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _subscription;
+  final ExpenseRepository repository;
+  StreamSubscription<List<Expense>>? _subscription;
   List<Expense> _items = [];
   bool loading = true;
   String? error;
@@ -64,21 +65,25 @@ class ExpenseProvider extends ChangeNotifier {
 
   ExpenseProvider(
     this.uid, {
+    ExpenseRepository? repository,
     FirebaseFirestore? firestore,
     List<Expense>? initialExpenses,
-  }) : database =
-           firestore ?? (uid.isEmpty ? null : FirebaseFirestore.instance) {
+  }) : repository =
+           repository ?? FirestoreExpenseRepository(firestore: firestore) {
     if (initialExpenses != null) {
       _items = initialExpenses;
       loading = false;
       return;
     }
-    _subscription = collection
-        .orderBy('date', descending: true)
-        .snapshots()
+    if (uid.isEmpty) {
+      loading = false;
+      return;
+    }
+    _subscription = this.repository
+        .watchExpenses(uid)
         .listen(
-          (s) {
-            _items = s.docs.map(Expense.fromDoc).toList();
+          (items) {
+            _items = items;
             loading = false;
             error = null;
             notifyListeners();
@@ -90,8 +95,20 @@ class ExpenseProvider extends ChangeNotifier {
           },
         );
   }
+
+  /// Backward-compatibility getter for tests and components accessing Firestore instance.
+  FirebaseFirestore? get database {
+    if (repository is FirestoreExpenseRepository) {
+      final repo = repository as FirestoreExpenseRepository;
+      return repo.firestore;
+    }
+    return null;
+  }
+
+  /// Backward-compatibility getter for tests asserting Firestore collection contents.
   CollectionReference<Map<String, dynamic>> get collection =>
-      database!.collection('users').doc(uid).collection('expenses');
+      repository.getCollection(uid)!;
+
   List<Expense> get monthly =>
       monthlyTransactions.where((e) => !e.isIncome).toList();
   List<Expense> get visible {
@@ -144,27 +161,25 @@ class ExpenseProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    if (e.id.isEmpty) {
-      await collection.add(e.toMap());
-    } else {
-      await collection.doc(e.id).update(e.toMap());
-    }
+    await repository.saveExpense(uid, e);
   }
 
-  Future<void> delete(String id) => collection.doc(id).delete();
+  Future<void> delete(String id) async {
+    if (uid.isEmpty) {
+      _items.removeWhere((item) => item.id == id);
+      notifyListeners();
+      return;
+    }
+    await repository.deleteExpense(uid, id);
+  }
 
   Future<void> deleteAllData() async {
-    if (uid.isEmpty || database == null) {
+    if (uid.isEmpty) {
       _items.clear();
       notifyListeners();
       return;
     }
-    final snapshot = await collection.get();
-    final batch = (database ?? FirebaseFirestore.instance).batch();
-    for (final doc in snapshot.docs) {
-      batch.delete(doc.reference);
-    }
-    await batch.commit();
+    await repository.deleteAllExpenses(uid);
     _items.clear();
     notifyListeners();
   }

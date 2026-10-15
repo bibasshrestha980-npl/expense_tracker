@@ -42,9 +42,9 @@ class AccountDeletionService {
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance,
-        _storage = storage ?? FirebaseStorage.instance;
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance;
 
   /// Deletes the authenticated user's:
   /// 1. Cloud Firestore documents (`users/{uid}/expenses/*` and `users/{uid}`)
@@ -80,8 +80,7 @@ class AccountDeletionService {
         if (credential == null) {
           throw FirebaseAuthException(
             code: 'requires-recent-login',
-            message:
-                'Account deletion requires recent sign-in. Re-authentication was cancelled.',
+            message: 'Account deletion requires recent sign-in. Re-authentication was cancelled.',
           );
         }
 

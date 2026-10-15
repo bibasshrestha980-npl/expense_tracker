@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,11 @@ Future<void> main() async {
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+    );
+    // Explicitly configure Firestore offline persistence and cache size
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
     );
   } catch (_) {
     setupError = 'Firebase could not start. Check your connection and follow README.md to configure Firebase, then restart.';
@@ -62,9 +68,7 @@ class ExpenseApp extends StatelessWidget {
             title: 'Pocket • Expense Tracker',
             debugShowCheckedModeBanner: false,
             theme: pocketTheme(),
-            routes: {
-              '/login': (_) => const AuthGate(),
-            },
+            routes: {'/login': (_) => const AuthGate()},
             home: const AuthGate(),
           ),
         );

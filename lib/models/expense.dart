@@ -33,18 +33,32 @@ class Expense {
     this.note = '',
     this.isIncome = false,
   });
-  factory Expense.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final d = doc.data()!;
+  factory Expense.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) =>
+      Expense.fromMap(doc.id, doc.data() ?? {});
+
+  factory Expense.fromMap(String id, Map<String, dynamic> d) {
+    final rawDate = d['date'];
+    final DateTime resolvedDate;
+    if (rawDate is Timestamp) {
+      resolvedDate = rawDate.toDate();
+    } else if (rawDate is String) {
+      resolvedDate = DateTime.tryParse(rawDate) ?? DateTime.now();
+    } else if (rawDate is int) {
+      resolvedDate = DateTime.fromMillisecondsSinceEpoch(rawDate);
+    } else {
+      resolvedDate = DateTime.now();
+    }
     return Expense(
-      id: doc.id,
-      title: d['title'] as String,
-      category: d['category'] as String,
-      amountCents: d['amountCents'] as int,
-      date: (d['date'] as Timestamp).toDate(),
+      id: id,
+      title: d['title'] as String? ?? '',
+      category: d['category'] as String? ?? 'Other',
+      amountCents: (d['amountCents'] as num?)?.toInt() ?? 0,
+      date: resolvedDate,
       note: d['note'] as String? ?? '',
       isIncome: d['type'] == 'income',
     );
   }
+
   Map<String, dynamic> toMap() => {
     'title': title,
     'category': category,

@@ -30,33 +30,36 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
 }
 
 void main() {
-  testWidgets('VerifyCodeScreen displays verification code and handles input validation', (tester) async {
-    final mockAuth = MockAuthProvider();
+  testWidgets(
+    'VerifyCodeScreen displays verification code and handles input validation',
+    (tester) async {
+      final mockAuth = MockAuthProvider();
 
-    await tester.pumpWidget(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider<AuthProvider>.value(value: mockAuth),
-        ],
-        child: MaterialApp(
-          theme: pocketTheme(),
-          home: const VerifyCodeScreen(),
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<AuthProvider>.value(value: mockAuth),
+          ],
+          child: MaterialApp(
+            theme: pocketTheme(),
+            home: const VerifyCodeScreen(),
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.text('Two-Step Verification'), findsOneWidget);
-    expect(find.text('Your Verification Code'), findsOneWidget);
-    expect(find.text('123456'), findsOneWidget);
+      expect(find.text('Two-Step Verification'), findsOneWidget);
+      expect(find.text('Your Verification Code'), findsOneWidget);
+      expect(find.text('123456'), findsOneWidget);
 
-    // Tap code banner to auto-fill
-    await tester.tap(find.text('123456'));
-    await tester.pumpAndSettle();
+      // Tap code banner to auto-fill
+      await tester.tap(find.text('123456'));
+      await tester.pumpAndSettle();
 
-    // Verify & Continue
-    await tester.tap(find.text('Verify & Continue'));
-    await tester.pumpAndSettle();
+      // Verify & Continue
+      await tester.tap(find.text('Verify & Continue'));
+      await tester.pumpAndSettle();
 
-    expect(mockAuth.isCodeVerified, isTrue);
-  });
+      expect(mockAuth.isCodeVerified, isTrue);
+    },
+  );
 }

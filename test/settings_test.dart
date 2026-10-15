@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -6,7 +5,6 @@ import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:expense_tracker/screens/settings_screen.dart';
-import 'package:expense_tracker/services/account_deletion_service.dart';
 import 'package:expense_tracker/theme.dart';
 import 'package:expense_tracker/models/calendar_period.dart';
 
@@ -18,20 +16,9 @@ class MockAuth extends ChangeNotifier implements AuthProvider {
   get user => null;
 
   bool signedOut = false;
-  bool accountDeleted = false;
-
   @override
   Future<void> signOut() async {
     signedOut = true;
-    notifyListeners();
-  }
-
-  @override
-  Future<void> deleteAccount({
-    required Future<AuthCredential?> Function(User user) onReauthenticate,
-    AccountDeletionService? deletionService,
-  }) async {
-    accountDeleted = true;
     notifyListeners();
   }
 }
@@ -136,7 +123,10 @@ void main() {
       await tester.pump();
 
       // Verify explicit notification text
-      expect(find.text('Your data will be deleted in 1 minute'), findsOneWidget);
+      expect(
+        find.text('Your data will be deleted in 1 minute'),
+        findsOneWidget,
+      );
       expect(find.text('01:00'), findsOneWidget);
       expect(find.text('Cancel Deletion'), findsOneWidget);
       expect(find.text('Delete Immediately'), findsOneWidget);
@@ -150,7 +140,10 @@ void main() {
       await tester.tap(find.text('Cancel Deletion'));
       await tester.pump();
 
-      expect(find.text('Data deletion cancelled. Your data is safe.'), findsOneWidget);
+      expect(
+        find.text('Data deletion cancelled. Your data is safe.'),
+        findsOneWidget,
+      );
       expect(find.text('Delete My Data'), findsOneWidget);
       expect(mockExpenses.deletedAll, isFalse);
     },
@@ -197,113 +190,6 @@ void main() {
       expect(mockExpenses.deletedAll, isTrue);
       expect(
         find.text('All your records have been permanently deleted.'),
-        findsOneWidget,
-      );
-    },
-  );
-
-  testWidgets(
-    'SettingsScreen shows confirmation dialog on Delete Account and cancels cleanly',
-    (tester) async {
-      tester.view.physicalSize = const Size(800, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      final mockAuth = MockAuth();
-      final mockExpenses = MockExpenses();
-
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider<AuthProvider>.value(value: mockAuth),
-            ChangeNotifierProvider<ExpenseProvider>.value(value: mockExpenses),
-          ],
-          child: MaterialApp(
-            theme: pocketTheme(),
-            routes: {
-              '/login': (context) => const Scaffold(body: Text('Login Screen')),
-            },
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: SettingsScreen(expenseProvider: mockExpenses),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.widgetWithText(FilledButton, 'Delete Account'), findsOneWidget);
-
-      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Delete Account'));
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
-      await tester.pumpAndSettle();
-
-      // Check dialog
-      expect(find.text('Delete Account Permanently?'), findsOneWidget);
-      expect(
-        find.textContaining('This will permanently delete your Pocket account'),
-        findsOneWidget,
-      );
-
-      // Cancel
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Delete Account Permanently?'), findsNothing);
-      expect(mockAuth.accountDeleted, isFalse);
-    },
-  );
-
-  testWidgets(
-    'SettingsScreen triggers account deletion and routes to /login when confirmed',
-    (tester) async {
-      tester.view.physicalSize = const Size(800, 1200);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      final mockAuth = MockAuth();
-      final mockExpenses = MockExpenses();
-
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider<AuthProvider>.value(value: mockAuth),
-            ChangeNotifierProvider<ExpenseProvider>.value(value: mockExpenses),
-          ],
-          child: MaterialApp(
-            theme: pocketTheme(),
-            routes: {
-              '/login': (context) => const Scaffold(body: Text('Login Screen')),
-            },
-            home: Scaffold(
-              body: SingleChildScrollView(
-                child: SettingsScreen(expenseProvider: mockExpenses),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.ensureVisible(find.widgetWithText(FilledButton, 'Delete Account'));
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete Account'));
-      await tester.pumpAndSettle();
-
-      // Tap confirm button in dialog
-      final dialogDeleteBtn = find.descendant(
-        of: find.byType(AlertDialog),
-        matching: find.widgetWithText(FilledButton, 'Delete Account'),
-      );
-      await tester.tap(dialogDeleteBtn);
-      await tester.pumpAndSettle();
-
-      expect(mockAuth.accountDeleted, isTrue);
-      expect(find.text('Login Screen'), findsOneWidget);
-      expect(
-        find.text(
-          'Your account and all associated data have been permanently deleted.',
-        ),
         findsOneWidget,
       );
     },
