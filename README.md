@@ -1,143 +1,138 @@
-# Pocket 👛
+﻿# Pocket
 
-A clean, fast, no-nonsense personal expense and income tracker built with Flutter and Firebase.
+### Personal finance, made clear.
 
-Designed for everyday personal finance tracking — log daily expenses, manage income streams, review monthly category breakdowns, and export clean financial summaries.
+[![Flutter CI](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml)
+![Flutter](https://img.shields.io/badge/Flutter-Material%203-02569B?logo=flutter)
+![Provider](https://img.shields.io/badge/State-Provider-155f53)
+![Firebase](https://img.shields.io/badge/Storage-Firestore-FFCA28?logo=firebase)
+[![MIT](https://img.shields.io/badge/License-MIT-155f53)](LICENSE)
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
-[![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-FFCA28?logo=firebase)](https://firebase.google.com)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web-4CAF50)](#)
+Pocket is a personal finance app for everyday tracking in Nepal. Record income and spending in NPR, switch between Bikram Sambat and Gregorian dates, and review your month through clear summaries.
 
----
+Built as a Flutter final project with **Firebase Authentication**, **Provider**, and **Cloud Firestore**.
 
-## Preview
-
-<!-- Replace with your app screenshots -->
-```
-┌────────────────────────────────────────────────────────┐
-│                                                        │
-│            [ App Screenshot / Demo GIF ]               │
-│                                                        │
-└────────────────────────────────────────────────────────┘
-```
-*(Add your screenshot to `assets/screenshots/` and update this section)*
-
----
+[Features](#features) · [Getting started](#getting-started) · [Architecture](#architecture) · [Contributing](CONTRIBUTING.md)
 
 ## Features
 
-- **Income & Expense Tracking**: Record money in (Salary, Freelance, Allowance, Opening balance) and daily spending across categorized tags with notes.
-- **Monthly Analytics & Insights**: Daily spending charts, ranked category breakdowns, savings rate percentages, and previous-month comparisons.
-- **Dual Calendar System (BS & AD)**: Native Bikram Sambat (Nepali calendar) support with bidirectional AD/BS date conversion and tithi/event data.
-- **Shareable Financial Reports**: 1-click executive snapshot formatted for messaging (WhatsApp, Telegram) plus full CSV spreadsheet export.
-- **Multi-Provider Auth & Two-Step Verification**: Sign in with Email/Password, Google, or Anonymous Guest access, protected by a 6-digit verification code gate.
-- **Paisa-Exact Accuracy**: Stored and calculated in integer cents (paisa) to eliminate floating-point rounding errors.
-- **Cross-Platform**: Single codebase runs responsively on Android, iOS, and Web (desktop & mobile).
+| Area | What you can do |
+| --- | --- |
+| Transactions | Record, edit, search, and delete income and expenses with categories and notes. |
+| Overview | Review income, spending, balance, and recent transactions. |
+| Insights | Explore monthly spending, category totals, and comparisons. |
+| Nepali calendar | Switch between BS and AD dates and browse daily activity. |
+| Calendar details | View available event and tithi data from external sources. |
+| Reports | Copy financial summaries and export transactions as CSV. |
+| Authentication | Email/password, Google, and guest sign-in when enabled in Firebase. |
+| Storage | Firestore synchronization with user-scoped access rules. |
 
----
+Amounts are stored as integer paisa to avoid floating-point rounding errors in transaction totals.
 
-## Architecture Overview
+### In development
 
-State management is handled with `provider`, and data persistence uses Cloud Firestore with owner-only security rules.
+Payment reminders and share/SIP tracking are being developed locally and are not yet committed to this repository. Reminders currently use in-app alerts; investment values are manually entered snapshots.
 
-```
-lib/
-├── main.dart                 # App entrypoint, theme, and authentication gate
-├── firebase_options.dart     # Auto-generated Firebase platform configs
-├── theme.dart                # Material 3 design tokens and color scheme
-├── models/
-│   ├── expense.dart          # Transaction data model & exact paisa parser
-│   └── calendar_period.dart  # Bikram Sambat (BS) / Gregorian (AD) period logic
-├── providers/
-│   ├── auth_provider.dart    # Firebase Auth, Google/Guest sign-in, and 2FA state
-│   └── expense_provider.dart # Real-time Firestore stream, filters, and totals
-└── screens/
-    ├── auth_screen.dart      # Login, registration, Google & Guest sign-in
-    ├── verify_code_screen.dart # 6-digit two-step verification screen
-    ├── dashboard.dart        # Main hub: Overview, Transactions, Insights
-    ├── expense_editor.dart   # Add/edit transaction modal form
-    ├── report_dialog.dart    # Monthly financial summary & CSV export
-    └── spending_stories.dart # Monthly journal, daily calendar, and scenario studio
-```
+## Getting started
 
----
+### Requirements
 
-## Getting Started
+- Flutter with **Dart 3.13 or later**, matching [pubspec.yaml](pubspec.yaml).
+- Firebase CLI and FlutterFire CLI.
+- Your own Firebase project.
+- Chrome or a configured Android/iOS development environment.
 
-### Prerequisites
+### 1. Clone and install
 
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) (`^3.13.0` or higher)
-- [Firebase CLI](https://firebase.google.com/docs/cli) & [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/)
-- Android Studio, Xcode (macOS), or Chrome for web preview
-
-### 1. Clone the repository
-
-```bash
+```sh
 git clone https://github.com/bibasshrestha980-npl/expense_tracker.git
 cd expense_tracker
-```
-
-### 2. Install dependencies
-
-```bash
 flutter pub get
 ```
 
-### 3. Set up Firebase
+### 2. Configure Firebase
 
-1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
-2. Link your Flutter app with FlutterFire CLI:
-   ```bash
-   flutterfire configure
-   ```
-3. In **Firebase Console > Authentication > Sign-in method**, enable:
-   - **Email/Password**
-   - **Google**
-   - **Anonymous**
-4. Deploy the Firestore security rules:
-   ```bash
-   firebase deploy --only firestore:rules
-   ```
+```sh
+firebase login
+flutterfire configure --project=YOUR_PROJECT_ID
+```
 
-### 4. Run the app
+In Firebase Console:
 
-```bash
-# Run in Chrome
+1. Create a Cloud Firestore database.
+2. Enable Email/Password authentication.
+3. Enable Google and Anonymous authentication if you want those options.
+4. Configure authorized web domains and the platform settings needed for Google sign-in.
+
+The checked-in Firebase configuration identifies the original project. Generate your own configuration for a separate deployment.
+
+```sh
+firebase deploy --only firestore:rules --project=YOUR_PROJECT_ID
+```
+
+### 3. Run
+
+```sh
 flutter run -d chrome
-
-# Run on Android device / emulator
-flutter run -d android
-
-# Run on iOS simulator (macOS only)
-flutter run -d ios
 ```
 
----
+For a device or emulator, use its actual ID:
 
-## Running Tests
-
-Run the full automated widget and unit test suite:
-
-```bash
-flutter test
+```sh
+flutter devices
+flutter run -d DEVICE_ID
 ```
 
-Run static analysis:
+The repository includes web, Android, and iOS targets. Each needs Firebase configuration; building iOS requires macOS and Xcode.
 
-```bash
+### 4. Validate and build
+
+```sh
 flutter analyze
+flutter test
+flutter build web
 ```
 
----
+Web output is written to `build/web`. Building does not automatically publish a hosted site.
 
-## Security Rules
+## Architecture
 
-Firestore data is isolated per authenticated user at path `users/{userId}/expenses/{expenseId}`. Deployed rules enforce:
-- Authenticated user ID must match the document path (`request.auth.uid == userId`).
-- Strict schema validation for transaction fields, string limits, and valid category types.
+```mermaid
+flowchart LR
+    UI[Flutter screens] --> State[Provider / ChangeNotifier]
+    State --> Auth[Firebase Authentication]
+    State --> DB[Cloud Firestore]
+    State --> Calendar[Nepali calendar service]
+```
 
----
+| Path | Responsibility |
+| --- | --- |
+| `lib/main.dart` | Startup and authentication routing |
+| `lib/models/` | Transactions, calendar periods, and summaries |
+| `lib/providers/` | Authentication, data streams, and state |
+| `lib/screens/` | Dashboard, forms, reports, calendar, and settings |
+| `lib/services/` | Calendar API integration |
+| `lib/theme.dart` | Shared visual styling |
+| `firestore.rules` | Ownership and document validation |
+| `test/` | Unit and widget tests |
+
+Transactions live at `users/{userId}/expenses/{expenseId}`. Firestore rules require the authenticated user to own the path and validate document fields.
+
+## Current limitations
+
+- Calendar event coverage depends on the external source. Missing event data does not mean a date or transaction is missing.
+- The on-screen six-digit verification flow is a **demonstration**, not production multi-factor authentication. Firebase email verification is a separate flow.
+- Guest access should not be treated as a durable account across devices.
+- Platform folders alone do not establish that every authentication flow has been tested on every platform.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for checks and pull request guidance. Use the issue templates for reproducible bugs or feature suggestions. Do not include real financial records, passwords, or tokens in reports.
+
+## Acknowledgments
+
+Built with Flutter, Firebase, Provider, and `nepali_utils`. Calendar integration uses [bibhuticoder/nepali-calendar-api](https://github.com/bibhuticoder/nepali-calendar-api).
 
 ## License
 
-This project is open-source under the [MIT License](LICENSE).
+[MIT](LICENSE).
