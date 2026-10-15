@@ -4,6 +4,8 @@ import 'dart:math' as math;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
+import '../services/account_deletion_service.dart';
+
 class AuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth;
   late final StreamSubscription<User?> _subscription;
@@ -109,6 +111,18 @@ class AuthProvider extends ChangeNotifier {
     _isCodeVerified = false;
     _verificationCode = null;
     await _auth.signOut();
+  }
+
+  Future<void> deleteAccount({
+    required Future<AuthCredential?> Function(User user) onReauthenticate,
+    AccountDeletionService? deletionService,
+  }) async {
+    final service = deletionService ?? AccountDeletionService(auth: _auth);
+    await service.deleteAccount(onReauthenticate: onReauthenticate);
+    _isCodeVerified = false;
+    _verificationCode = null;
+    user = null;
+    notifyListeners();
   }
 
   @override

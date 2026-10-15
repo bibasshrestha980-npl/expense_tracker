@@ -27,12 +27,12 @@ class ExpenseApp extends StatelessWidget {
   final String? setupError;
   const ExpenseApp({super.key, this.setupError});
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'Pocket • Expense Tracker',
-    debugShowCheckedModeBanner: false,
-    theme: pocketTheme(),
-    home: setupError != null
-        ? Scaffold(
+  Widget build(BuildContext context) => setupError != null
+      ? MaterialApp(
+          title: 'Pocket • Expense Tracker',
+          debugShowCheckedModeBanner: false,
+          theme: pocketTheme(),
+          home: Scaffold(
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -54,12 +54,20 @@ class ExpenseApp extends StatelessWidget {
                 ),
               ),
             ),
-          )
-        : ChangeNotifierProvider(
-            create: (_) => AuthProvider(),
-            child: const AuthGate(),
           ),
-  );
+        )
+      : ChangeNotifierProvider(
+          create: (_) => AuthProvider(),
+          child: MaterialApp(
+            title: 'Pocket • Expense Tracker',
+            debugShowCheckedModeBanner: false,
+            theme: pocketTheme(),
+            routes: {
+              '/login': (_) => const AuthGate(),
+            },
+            home: const AuthGate(),
+          ),
+        );
 }
 
 class AuthGate extends StatelessWidget {

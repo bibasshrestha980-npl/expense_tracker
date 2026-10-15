@@ -1,5 +1,13 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart'
+    show
+        AuthCredential,
+        EmailAuthProvider,
+        FirebaseAuthException,
+        GoogleAuthProvider,
+        User;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _remainingSeconds = 60;
   bool _countdownActive = false;
   bool _isDeleting = false;
+  bool _isDeletingAccount = false;
 
   @override
   void dispose() {
@@ -106,6 +115,236 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _confirmAndDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Color(0xffdc2626)),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text('Delete Account Permanently?'),
+            ),
+          ],
+        ),
+        content: const Text(
+          'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore, and any associated files from Firebase Storage.\n\nThis action cannot be undone. Are you sure you want to proceed?',
+          style: TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xffdc2626),
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: const Text('Delete Account'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _isDeletingAccount = true;
+    });
+
+    try {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      await auth.deleteAccount(onReauthenticate: _promptReauthentication);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Your account and all associated data have been permanently deleted.',
+          ),
+          backgroundColor: Color(0xffb91c1c),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Route user to /login while clearing the navigation stack
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Failed to delete account. (${e.code})'),
+          backgroundColor: const Color(0xffb91c1c),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete account: $e'),
+          backgroundColor: const Color(0xffb91c1c),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDeletingAccount = false;
+        });
+      }
+    }
+  }
+
+  Future<AuthCredential?> _promptReauthentication(User user) async {
+    final isGoogleUser = user.providerData.any(
+      (p) => p.providerId == 'google.com',
+    );
+
+    if (isGoogleUser) {
+      final googleProvider = GoogleAuthProvider();
+      if (kIsWeb) {
+        final result = await user.reauthenticateWithPopup(googleProvider);
+        return result.credential;
+      } else {
+        final result = await user.reauthenticateWithProvider(googleProvider);
+        return result.credential;
+      }
+    }
+
+    if (!mounted) {
+      throw FirebaseAuthException(
+        code: 'requires-recent-login',
+        message: 'Re-authentication was cancelled.',
+      );
+    }
+
+    final cred = await showDialog<AuthCredential>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final passwordController = TextEditingController();
+        bool obscure = true;
+        String? errorMessage;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Row(
+                children: [
+                  Icon(Icons.lock_clock_outlined, color: Color(0xffdc2626)),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text('Confirm Password'),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'For security, please enter your password to confirm account deletion.',
+                    style: TextStyle(fontSize: 13, color: muted),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: obscure,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      errorText: errorMessage,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscure ? Icons.visibility_off : Icons.visibility,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setDialogState(() => obscure = !obscure);
+                        },
+                      ),
+                    ),
+                    onSubmitted: (_) {
+                      final pass = passwordController.text.trim();
+                      if (pass.isEmpty) {
+                        setDialogState(() => errorMessage = 'Password is required');
+                        return;
+                      }
+                      if (user.email == null) {
+                        setDialogState(
+                          () => errorMessage = 'No email associated with account',
+                        );
+                        return;
+                      }
+                      Navigator.of(dialogContext).pop(
+                        EmailAuthProvider.credential(
+                          email: user.email!,
+                          password: pass,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(null),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xffdc2626),
+                  ),
+                  onPressed: () {
+                    final pass = passwordController.text.trim();
+                    if (pass.isEmpty) {
+                      setDialogState(() => errorMessage = 'Password is required');
+                      return;
+                    }
+                    if (user.email == null) {
+                      setDialogState(
+                        () => errorMessage = 'No email associated with account',
+                      );
+                      return;
+                    }
+                    Navigator.of(dialogContext).pop(
+                      EmailAuthProvider.credential(
+                        email: user.email!,
+                        password: pass,
+                      ),
+                    );
+                  },
+                  child: const Text('Confirm'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (cred == null) {
+      throw FirebaseAuthException(
+        code: 'requires-recent-login',
+        message: 'Re-authentication was cancelled.',
+      );
+    }
+    return cred;
+  }
+
   String get _timerFormatted {
     final mins = (_remainingSeconds ~/ 60).toString().padLeft(2, '0');
     final secs = (_remainingSeconds % 60).toString().padLeft(2, '0');
@@ -151,7 +390,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: const TextStyle(color: muted, fontSize: 13),
                     ),
                     trailing: OutlinedButton.icon(
-                      onPressed: () => auth.signOut(),
+                      onPressed: (_isDeleting ||
+                              _isDeletingAccount ||
+                              _countdownActive)
+                          ? null
+                          : () => auth.signOut(),
                       icon: const Icon(Icons.logout, size: 16),
                       label: const Text('Sign out'),
                     ),
@@ -345,7 +588,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         alignment: WrapAlignment.spaceBetween,
                         children: [
                           FilledButton.icon(
-                            onPressed: _cancelCountdown,
+                            onPressed: _isDeletingAccount ? null : _cancelCountdown,
                             icon: const Icon(Icons.close_rounded, size: 18),
                             label: const Text('Cancel Deletion'),
                             style: FilledButton.styleFrom(
@@ -358,7 +601,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           OutlinedButton.icon(
-                            onPressed: _performDelete,
+                            onPressed: _isDeletingAccount ? null : _performDelete,
                             icon: const Icon(Icons.delete_forever, size: 18),
                             label: const Text('Delete Immediately'),
                             style: OutlinedButton.styleFrom(
@@ -379,7 +622,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: 16),
                       FilledButton.tonalIcon(
-                        onPressed: _startCountdown,
+                        onPressed: _isDeletingAccount ? null : _startCountdown,
                         icon: const Icon(Icons.delete_outline, size: 18),
                         label: const Text('Delete My Data'),
                         style: FilledButton.styleFrom(
@@ -392,6 +635,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ],
+
+                    const Divider(height: 36, color: Color(0xfffecaca)),
+                    const Text(
+                      'Delete Account',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xffb91c1c),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Permanently delete your account credentials from Firebase Authentication, all documents in Cloud Firestore (users/{uid}), and any uploaded media in Firebase Storage. This action cannot be undone.',
+                      style: TextStyle(color: muted, fontSize: 13),
+                    ),
+                    const SizedBox(height: 14),
+                    if (_isDeletingAccount)
+                      const Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Color(0xffdc2626),
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Text(
+                            'Permanently deleting account and all data...',
+                            style: TextStyle(
+                              color: Color(0xffb91c1c),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      FilledButton.icon(
+                        onPressed: (_isDeleting || _countdownActive)
+                            ? null
+                            : _confirmAndDeleteAccount,
+                        icon: const Icon(
+                          Icons.person_remove_outlined,
+                          size: 18,
+                        ),
+                        label: const Text('Delete Account'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xffb91c1c),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
