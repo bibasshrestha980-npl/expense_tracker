@@ -96,8 +96,7 @@ class _AuthScreenState extends State<AuthScreen> {
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         setState(
-          () => _message =
-              e.message ?? 'Guest login failed. Please try again.',
+          () => _message = e.message ?? 'Guest login failed. Please try again.',
         );
       }
     } catch (_) {
@@ -265,7 +264,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         Expanded(child: Divider()),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('OR', style: TextStyle(color: muted, fontSize: 12)),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(color: muted, fontSize: 12),
+                          ),
                         ),
                         Expanded(child: Divider()),
                       ],

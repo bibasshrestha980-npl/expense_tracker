@@ -66,7 +66,8 @@ class ExpenseProvider extends ChangeNotifier {
     this.uid, {
     FirebaseFirestore? firestore,
     List<Expense>? initialExpenses,
-  }) : database = firestore ?? (uid.isEmpty ? null : FirebaseFirestore.instance) {
+  }) : database =
+           firestore ?? (uid.isEmpty ? null : FirebaseFirestore.instance) {
     if (initialExpenses != null) {
       _items = initialExpenses;
       loading = false;
@@ -151,6 +152,23 @@ class ExpenseProvider extends ChangeNotifier {
   }
 
   Future<void> delete(String id) => collection.doc(id).delete();
+
+  Future<void> deleteAllData() async {
+    if (uid.isEmpty || database == null) {
+      _items.clear();
+      notifyListeners();
+      return;
+    }
+    final snapshot = await collection.get();
+    final batch = (database ?? FirebaseFirestore.instance).batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+    _items.clear();
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _subscription?.cancel();

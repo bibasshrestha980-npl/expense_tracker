@@ -17,7 +17,8 @@ class AuthProvider extends ChangeNotifier {
       final prevUser = user;
       user = value;
       loading = false;
-      if (value != null && (prevUser?.uid != value.uid || _verificationCode == null)) {
+      if (value != null &&
+          (prevUser?.uid != value.uid || _verificationCode == null)) {
         _generateVerificationCode();
       }
       notifyListeners();

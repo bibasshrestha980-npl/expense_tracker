@@ -11,10 +11,7 @@ import 'dashboard.dart';
 class ReportDialog extends StatelessWidget {
   final ExpenseProvider expenseProvider;
 
-  const ReportDialog({
-    super.key,
-    required this.expenseProvider,
-  });
+  const ReportDialog({super.key, required this.expenseProvider});
 
   String _formatSummaryText() {
     final periodName = formatBsAndAdMonth(expenseProvider.period.anchor);
@@ -22,21 +19,26 @@ class ReportDialog extends StatelessWidget {
     final income = expenseProvider.income;
     final totalExpense = expenseProvider.total;
     final netSavings = expenseProvider.balance;
-    final savingsRate =
-        income > 0 ? ((netSavings / income) * 100).clamp(0, 100).toStringAsFixed(1) : '0.0';
+    final savingsRate = income > 0
+        ? ((netSavings / income) * 100).clamp(0, 100).toStringAsFixed(1)
+        : '0.0';
 
     final buffer = StringBuffer();
     buffer.writeln('📊 Pocket Financial Report — $periodName');
     buffer.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     buffer.writeln('💵 Total Income:   ${money(income)}');
     buffer.writeln('💳 Total Expenses: ${money(totalExpense)}');
-    buffer.writeln('📈 Net Savings:    ${money(netSavings)} ($savingsRate% savings rate)');
+    buffer.writeln(
+      '📈 Net Savings:    ${money(netSavings)} ($savingsRate% savings rate)',
+    );
 
     buffer.writeln('\n🏷️ Category Breakdown:');
     for (final cat in categories) {
       final spent = expenseProvider.categoryTotal(cat);
       if (spent > 0) {
-        final pct = totalExpense > 0 ? ((spent / totalExpense) * 100).toStringAsFixed(1) : '0';
+        final pct = totalExpense > 0
+            ? ((spent / totalExpense) * 100).toStringAsFixed(1)
+            : '0';
         buffer.writeln('• $cat: ${money(spent)} ($pct%)');
       }
     }
@@ -63,7 +65,9 @@ class ReportDialog extends StatelessWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Financial report summary copied! Ready to share or paste.'),
+          content: Text(
+            'Financial report summary copied! Ready to share or paste.',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -74,8 +78,10 @@ class ReportDialog extends StatelessWidget {
     String quote(String val) => '"${val.replaceAll('"', '""')}"';
     final lines = [
       'Date,Type,Title,Category,Amount (NPR),Note',
-      ...expenseProvider.monthlyTransactions.map((e) =>
-          '${DateFormat('yyyy-MM-dd').format(e.date)},${e.isIncome ? 'Income' : 'Expense'},${quote(e.title)},${quote(e.category)},${(e.amountCents / 100).toStringAsFixed(2)},${quote(e.note)}'),
+      ...expenseProvider.monthlyTransactions.map(
+        (e) =>
+            '${DateFormat('yyyy-MM-dd').format(e.date)},${e.isIncome ? 'Income' : 'Expense'},${quote(e.title)},${quote(e.category)},${(e.amountCents / 100).toStringAsFixed(2)},${quote(e.note)}',
+      ),
     ];
     await Clipboard.setData(ClipboardData(text: lines.join('\r\n')));
     if (context.mounted) {
@@ -95,8 +101,9 @@ class ReportDialog extends StatelessWidget {
     final income = expenseProvider.income;
     final totalExpense = expenseProvider.total;
     final netSavings = expenseProvider.balance;
-    final savingsRate =
-        income > 0 ? ((netSavings / income) * 100).clamp(0, 100).toStringAsFixed(1) : '0.0';
+    final savingsRate = income > 0
+        ? ((netSavings / income) * 100).clamp(0, 100).toStringAsFixed(1)
+        : '0.0';
 
     return AlertDialog(
       title: Row(
@@ -120,7 +127,10 @@ class ReportDialog extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xffe6f3ed),
                   borderRadius: BorderRadius.circular(8),
@@ -199,9 +209,9 @@ class ReportDialog extends StatelessWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               const SizedBox(height: 8),
-              ...categories
-                  .where((c) => expenseProvider.categoryTotal(c) > 0)
-                  .map((cat) {
+              ...categories.where((c) => expenseProvider.categoryTotal(c) > 0).map((
+                cat,
+              ) {
                 final spent = expenseProvider.categoryTotal(cat);
                 final pct = totalExpense > 0 ? (spent / totalExpense) : 0.0;
                 return Padding(
@@ -232,8 +242,6 @@ class ReportDialog extends StatelessWidget {
                   ),
                 );
               }),
-
-
             ],
           ),
         ),

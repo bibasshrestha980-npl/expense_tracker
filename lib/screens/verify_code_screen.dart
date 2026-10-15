@@ -26,14 +26,19 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   void _verify() {
     final code = _codeController.text.trim();
     if (code.length != 6 || int.tryParse(code) == null) {
-      setState(() => _errorMessage = 'Please enter a valid 6-digit verification code.');
+      setState(
+        () => _errorMessage = 'Please enter a valid 6-digit verification code.',
+      );
       return;
     }
 
     final auth = context.read<AuthProvider>();
     final ok = auth.verifyCode(code);
     if (!ok) {
-      setState(() => _errorMessage = 'Incorrect code. Please check the 6-digit code and try again.');
+      setState(
+        () => _errorMessage =
+            'Incorrect code. Please check the 6-digit code and try again.',
+      );
     }
   }
 
@@ -48,8 +53,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
       setState(() {
         _busy = false;
         if (!verified) {
-          _errorMessage =
-              'Email not yet verified via link. Please click the link in your email or enter the 6-digit code below.';
+          _errorMessage = 'Email not yet verified via link. Please click the link in your email or enter the 6-digit code below.';
         }
       });
     }
@@ -72,7 +76,8 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final generatedCode = auth.currentVerificationCode;
-    final email = auth.user?.email ??
+    final email =
+        auth.user?.email ??
         (auth.user?.isAnonymous == true ? 'Guest Session' : 'Your Account');
 
     return Scaffold(
@@ -167,10 +172,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                               const SizedBox(height: 4),
                               const Text(
                                 'Tap code to auto-fill & copy',
-                                style: TextStyle(
-                                  color: muted,
-                                  fontSize: 11,
-                                ),
+                                style: TextStyle(color: muted, fontSize: 11),
                               ),
                             ],
                           ),
@@ -227,14 +229,20 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                       ),
                       child: const Text(
                         'Verify & Continue',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
 
                     const SizedBox(height: 10),
                     OutlinedButton.icon(
                       onPressed: _busy ? null : _checkEmailLink,
-                      icon: const Icon(Icons.mark_email_read_outlined, size: 18),
+                      icon: const Icon(
+                        Icons.mark_email_read_outlined,
+                        size: 18,
+                      ),
                       label: const Text('I Clicked Verification Email Link'),
                     ),
 

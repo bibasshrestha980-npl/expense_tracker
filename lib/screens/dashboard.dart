@@ -11,6 +11,7 @@ import '../providers/expense_provider.dart';
 import '../theme.dart';
 import 'expense_editor.dart';
 import 'report_dialog.dart';
+import 'settings_screen.dart';
 import 'spending_stories.dart';
 import '../models/calendar_period.dart';
 
@@ -26,7 +27,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int page = 0;
   final search = TextEditingController();
-  static const titles = ['Overview', 'Transactions', 'Insights'];
+  static const titles = ['Overview', 'Transactions', 'Insights', 'Settings'];
   @override
   void dispose() {
     search.dispose();
@@ -81,9 +82,7 @@ class _DashboardState extends State<Dashboard> {
   Future<void> export(ExpenseProvider p) async {
     showDialog<void>(
       context: context,
-      builder: (_) => ReportDialog(
-        expenseProvider: p,
-      ),
+      builder: (_) => ReportDialog(expenseProvider: p),
     );
   }
 
@@ -110,6 +109,10 @@ class _DashboardState extends State<Dashboard> {
                 NavigationDestination(
                   icon: Icon(Icons.bar_chart_rounded),
                   label: 'Insights',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  label: 'Settings',
                 ),
               ],
             ),
@@ -171,6 +174,7 @@ class _DashboardState extends State<Dashboard> {
                                 Icons.space_dashboard_outlined,
                                 Icons.receipt_long_outlined,
                                 Icons.bar_chart_rounded,
+                                Icons.settings_outlined,
                               ][i],
                             ),
                             title: Text(titles[i]),
@@ -238,9 +242,7 @@ class _DashboardState extends State<Dashboard> {
                           FilledButton.tonalIcon(
                             onPressed: () => showDialog<void>(
                               context: context,
-                              builder: (_) => ReportDialog(
-                                expenseProvider: p,
-                              ),
+                              builder: (_) => ReportDialog(expenseProvider: p),
                             ),
                             icon: const Icon(
                               Icons.summarize_outlined,
@@ -255,9 +257,7 @@ class _DashboardState extends State<Dashboard> {
                             icon: const Icon(Icons.summarize_outlined),
                             onPressed: () => showDialog<void>(
                               context: context,
-                              builder: (_) => ReportDialog(
-                                expenseProvider: p,
-                              ),
+                              builder: (_) => ReportDialog(expenseProvider: p),
                             ),
                           ),
                         ],
@@ -291,11 +291,19 @@ class _DashboardState extends State<Dashboard> {
                               child: Text(auth.user?.email ?? 'Your account'),
                             ),
                             const PopupMenuItem(
+                              value: 'settings',
+                              child: Text('Settings'),
+                            ),
+                            const PopupMenuItem(
                               value: 'logout',
                               child: Text('Sign out'),
                             ),
                           ],
-                          onSelected: (_) async {
+                          onSelected: (val) async {
+                            if (val == 'settings') {
+                              setState(() => page = 3);
+                              return;
+                            }
                             try {
                               await auth.signOut();
                             } catch (_) {
@@ -331,6 +339,7 @@ class _DashboardState extends State<Dashboard> {
                                           'A little clarity. A lot of control.',
                                           'Every expense, in one place.',
                                           'Understand your spending.',
+                                          'Account & Preferences.',
                                         ][page],
                                         style: Theme.of(context)
                                             .textTheme
@@ -342,195 +351,210 @@ class _DashboardState extends State<Dashboard> {
                                           'Here is how your month is shaping up.',
                                           'Search, review and organize your daily spending.',
                                           'Turn your everyday expenses into useful insights.',
+                                          'Manage calendar, currency, and data privacy options.',
                                         ][page],
                                         style: const TextStyle(color: muted),
                                       ),
                                     ],
                                   ),
-                                  FilledButton.icon(
-                                    onPressed: () => edit(p, null, true),
-                                    icon: const Icon(
-                                      Icons.add_card_outlined,
-                                      size: 19,
+                                  if (page != 3) ...[
+                                    FilledButton.icon(
+                                      onPressed: () => edit(p, null, true),
+                                      icon: const Icon(
+                                        Icons.add_card_outlined,
+                                        size: 19,
+                                      ),
+                                      label: const Text('Add money'),
                                     ),
-                                    label: const Text('Add money'),
-                                  ),
-                                  OutlinedButton.icon(
-                                    onPressed: () => edit(p),
-                                    icon: const Icon(Icons.add, size: 19),
-                                    label: const Text('Add expense'),
-                                  ),
+                                    OutlinedButton.icon(
+                                      onPressed: () => edit(p),
+                                      icon: const Icon(Icons.add, size: 19),
+                                      label: const Text('Add expense'),
+                                    ),
+                                  ],
                                 ],
                               ),
-                              const SizedBox(height: 18),
-                              SegmentedButton<bool>(
-                                showSelectedIcon: false,
-                                segments: const [
-                                  ButtonSegment(
-                                    value: true,
-                                    label: Text('Nepali (BS)'),
-                                  ),
-                                  ButtonSegment(
-                                    value: false,
-                                    label: Text('English (AD)'),
-                                  ),
-                                ],
-                                selected: {p.nepali},
-                                onSelectionChanged: (value) =>
-                                    p.setCalendar(value.first),
-                              ),
-                              const SizedBox(height: 16),
-                              Row(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
+                              if (page == 3) ...[
+                                const SizedBox(height: 24),
+                                SettingsScreen(expenseProvider: p),
+                              ] else ...[
+                                const SizedBox(height: 18),
+                                SegmentedButton<bool>(
+                                  showSelectedIcon: false,
+                                  segments: const [
+                                    ButtonSegment(
+                                      value: true,
+                                      label: Text('Nepali (BS)'),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        IconButton(
-                                          tooltip: 'Previous month',
-                                          onPressed: () => p.changeMonth(-1),
-                                          icon: const Icon(Icons.chevron_left),
-                                        ),
-                                        Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              p.period.label,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            Text(
-                                              p.nepali
-                                                  ? '${DateFormat.yMMMM().format(p.period.anchor)} AD'
-                                                  : '${NepaliDateFormat.yMMMM().format(toBs(p.period.anchor))} BS',
-                                              style: const TextStyle(
-                                                fontSize: 10,
-                                                color: muted,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        IconButton(
-                                          tooltip: 'Next month',
-                                          onPressed: () => p.changeMonth(1),
-                                          icon: const Icon(Icons.chevron_right),
-                                        ),
-                                      ],
+                                    ButtonSegment(
+                                      value: false,
+                                      label: Text('English (AD)'),
                                     ),
-                                  ),
-                                  const Spacer(),
-                                  if (wide)
+                                  ],
+                                  selected: {p.nepali},
+                                  onSelectionChanged: (value) =>
+                                      p.setCalendar(value.first),
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                            tooltip: 'Previous month',
+                                            onPressed: () => p.changeMonth(-1),
+                                            icon: const Icon(
+                                              Icons.chevron_left,
+                                            ),
+                                          ),
+                                          Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                p.period.label,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              Text(
+                                                p.nepali
+                                                    ? '${DateFormat.yMMMM().format(p.period.anchor)} AD'
+                                                    : '${NepaliDateFormat.yMMMM().format(toBs(p.period.anchor))} BS',
+                                                style: const TextStyle(
+                                                  fontSize: 10,
+                                                  color: muted,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          IconButton(
+                                            tooltip: 'Next month',
+                                            onPressed: () => p.changeMonth(1),
+                                            icon: const Icon(
+                                              Icons.chevron_right,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    if (wide)
+                                      const Text(
+                                        'Currency: Nepalese Rupee (NPR)',
+                                        style: TextStyle(
+                                          color: muted,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                if (p.loading)
+                                  const Padding(
+                                    padding: EdgeInsets.all(70),
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  )
+                                else if (p.error != null)
+                                  panel(
+                                    'Unable to load your expenses',
+                                    Text(p.error!),
+                                  )
+                                else ...[
+                                  if (page == 2) ...[
+                                    SpendingStories(
+                                      expenses: p.monthly,
+                                      month: p.month,
+                                      nepali: p.nepali,
+                                    ),
+                                    const SizedBox(height: 24),
+                                  ],
+                                  if (page == 0 || page == 2) ...[
+                                    summary(p),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Monthly net: ${money(p.monthlyNet)}  |  ${p.monthlyTransactions.length} transactions',
+                                      style: const TextStyle(color: muted),
+                                    ),
+                                    const SizedBox(height: 8),
                                     const Text(
-                                      'Currency: Nepalese Rupee (NPR)',
+                                      'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
                                       style: TextStyle(
                                         color: muted,
                                         fontSize: 12,
                                       ),
                                     ),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              if (p.loading)
-                                const Padding(
-                                  padding: EdgeInsets.all(70),
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              else if (p.error != null)
-                                panel(
-                                  'Unable to load your expenses',
-                                  Text(p.error!),
-                                )
-                              else ...[
-                                if (page == 2) ...[
-                                  SpendingStories(
-                                    expenses: p.monthly,
-                                    month: p.month,
-                                    nepali: p.nepali,
-                                  ),
-                                  const SizedBox(height: 24),
-                                ],
-                                if (page == 0 || page == 2) ...[
-                                  summary(p),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Monthly net: ${money(p.monthlyNet)}  |  ${p.monthlyTransactions.length} transactions',
-                                    style: const TextStyle(color: muted),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text(
-                                    'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
-                                    style: TextStyle(
-                                      color: muted,
-                                      fontSize: 12,
+                                    const SizedBox(height: 24),
+                                    LayoutBuilder(
+                                      builder: (context, box) {
+                                        final chart = panel(
+                                          'Daily spending',
+                                          dailyChart(p),
+                                        );
+                                        final breakdown = panel(
+                                          'Spending by category',
+                                          categoryBreakdown(p),
+                                        );
+                                        return box.maxWidth > 750
+                                            ? Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Expanded(
+                                                    flex: 3,
+                                                    child: chart,
+                                                  ),
+                                                  const SizedBox(width: 20),
+                                                  Expanded(
+                                                    flex: 2,
+                                                    child: breakdown,
+                                                  ),
+                                                ],
+                                              )
+                                            : Column(
+                                                children: [
+                                                  chart,
+                                                  const SizedBox(height: 20),
+                                                  breakdown,
+                                                ],
+                                              );
+                                      },
                                     ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  LayoutBuilder(
-                                    builder: (context, box) {
-                                      final chart = panel(
-                                        'Daily spending',
-                                        dailyChart(p),
-                                      );
-                                      final breakdown = panel(
-                                        'Spending by category',
-                                        categoryBreakdown(p),
-                                      );
-                                      return box.maxWidth > 750
-                                          ? Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(flex: 3, child: chart),
-                                                const SizedBox(width: 20),
-                                                Expanded(
-                                                  flex: 2,
-                                                  child: breakdown,
-                                                ),
-                                              ],
-                                            )
-                                          : Column(
-                                              children: [
-                                                chart,
-                                                const SizedBox(height: 20),
-                                                breakdown,
-                                              ],
-                                            );
-                                    },
-                                  ),
-                                  const SizedBox(height: 24),
-                                ],
-                                if (page == 2)
-                                  panel(
-                                    'Your monthly perspective',
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          p.previousTotal == 0
-                                              ? 'No spending recorded last month to compare yet.'
-                                              : '${money((p.total - p.previousTotal).abs())} ${p.total > p.previousTotal ? 'more' : 'less'} than last month.',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w600,
+                                    const SizedBox(height: 24),
+                                  ],
+                                  if (page == 2)
+                                    panel(
+                                      'Your monthly perspective',
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            p.previousTotal == 0
+                                                ? 'No spending recorded last month to compare yet.'
+                                                : '${money((p.total - p.previousTotal).abs())} ${p.total > p.previousTotal ? 'more' : 'less'} than last month.',
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        const Text(
-                                          'Comparisons use whole calendar months. A month still in progress may have a lower total.',
-                                          style: TextStyle(color: muted),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                else
-                                  transactions(p),
+                                          const SizedBox(height: 10),
+                                          const Text(
+                                            'Comparisons use whole calendar months. A month still in progress may have a lower total.',
+                                            style: TextStyle(color: muted),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                  else
+                                    transactions(p),
+                                ],
                               ],
                             ],
                           ),

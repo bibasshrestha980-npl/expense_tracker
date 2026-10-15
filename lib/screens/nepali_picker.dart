@@ -38,9 +38,8 @@ class _NepaliPickerState extends State<_NepaliPicker> {
             children: [
               Text(
                 bsDate(selected),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 2),
               Text(

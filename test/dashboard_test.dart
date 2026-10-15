@@ -100,7 +100,9 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(width < 950 ? NavigationBar : ListTile),
-          matching: find.text('Transactions'),
+          matching: width < 950
+              ? find.byIcon(Icons.receipt_long_outlined)
+              : find.text('Transactions'),
         ),
       );
       await tester.pumpAndSettle();
@@ -109,7 +111,9 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(width < 950 ? NavigationBar : ListTile),
-          matching: find.text('Insights'),
+          matching: width < 950
+              ? find.byIcon(Icons.bar_chart_rounded)
+              : find.text('Insights'),
         ),
       );
       await tester.pumpAndSettle();
