@@ -1,8 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Explicitly permit authenticated users to manage and delete their own user document
+    match /users/{userId} {
+      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // User expense and income transactions
     match /users/{userId}/expenses/{expenseId} {
-      function owner() { return request.auth != null && request.auth.uid == userId; }
+      function owner() {
+        return request.auth != null && request.auth.uid == userId;
+      }
       function valid() {
         let d = request.resource.data;
         return d.keys().hasAll(['title', 'category', 'amountCents', 'date', 'note'])
@@ -14,6 +22,7 @@ service cloud.firestore {
           && d.amountCents is int && d.amountCents > 0 && d.amountCents <= 99999999999
           && d.date is timestamp && d.note is string && d.note.size() <= 300;
       }
+
       allow read, delete: if owner();
       allow create, update: if owner() && valid();
     }

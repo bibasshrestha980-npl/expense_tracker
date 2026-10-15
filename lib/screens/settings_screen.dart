@@ -1,6 +1,17 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart'
+    show
+        AuthCredential,
+        EmailAuthProvider,
+        FirebaseAuthException,
+        GoogleAuthProvider,
+        User;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+
+import '../l10n/generated/app_localizations.dart';
+
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -21,6 +32,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _remainingSeconds = 60;
   bool _countdownActive = false;
   bool _isDeleting = false;
+  bool _isDeletingAccount = false;
+
+  AppLocalizations? get _l10n => AppLocalizations.of(context);
 
   @override
   void dispose() {
@@ -59,8 +73,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Data deletion cancelled. Your data is safe.'),
+        SnackBar(
+          content: Text(
+            _l10n?.dataDeletionCancelled ??
+                'Data deletion cancelled. Your data is safe.',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -78,9 +95,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await widget.expenseProvider.deleteAllData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('All your records have been permanently deleted.'),
-            backgroundColor: Color(0xffb91c1c),
+          SnackBar(
+            content: Text(
+              _l10n?.allRecordsDeleted ??
+                  'All your records have been permanently deleted.',
+            ),
+            backgroundColor: const Color(0xffb91c1c),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -88,9 +108,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Failed to delete data. Please check your connection.',
+              _l10n?.failedToDeleteData ??
+                  'Failed to delete data. Please check your connection.',
             ),
             behavior: SnackBarBehavior.floating,
           ),
@@ -106,6 +127,253 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _confirmAndDeleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Color(0xffdc2626)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _l10n?.deleteAccountPermanentlyTitle ??
+                    'Delete Account Permanently?',
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          _l10n?.deleteAccountPermanentlyContent ?? 'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore, and any associated files from Firebase Storage.\n\nThis action cannot be undone. Are you sure you want to proceed?',
+          style: const TextStyle(fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: Text(_l10n?.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xffdc2626),
+            ),
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: Text(_l10n?.deleteAccount ?? 'Delete Account'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _isDeletingAccount = true;
+    });
+
+    try {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      await auth.deleteAccount(onReauthenticate: _promptReauthentication);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _l10n?.accountDeletedSuccess ?? 'Your account and all associated data have been permanently deleted.',
+          ),
+          backgroundColor: const Color(0xffb91c1c),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Route user to /login while clearing the navigation stack
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message ?? 'Failed to delete account. (${e.code})'),
+          backgroundColor: const Color(0xffb91c1c),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete account: $e'),
+          backgroundColor: const Color(0xffb91c1c),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDeletingAccount = false;
+        });
+      }
+    }
+  }
+
+  Future<AuthCredential?> _promptReauthentication(User user) async {
+    final isGoogleUser = user.providerData.any(
+      (p) => p.providerId == 'google.com',
+    );
+
+    if (isGoogleUser) {
+      final googleProvider = GoogleAuthProvider();
+      if (kIsWeb) {
+        final result = await user.reauthenticateWithPopup(googleProvider);
+        return result.credential;
+      } else {
+        final result = await user.reauthenticateWithProvider(googleProvider);
+        return result.credential;
+      }
+    }
+
+    if (!mounted) {
+      throw FirebaseAuthException(
+        code: 'requires-recent-login',
+        message: 'Re-authentication was cancelled.',
+      );
+    }
+
+    final cred = await showDialog<AuthCredential>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        final passwordController = TextEditingController();
+        bool obscure = true;
+        String? errorMessage;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: [
+                  const Icon(
+                    Icons.lock_clock_outlined,
+                    color: Color(0xffdc2626),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _l10n?.confirmPasswordTitle ?? 'Confirm Password',
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _l10n?.confirmPasswordSecurityPrompt ?? 'For security, please enter your password to confirm account deletion.',
+                    style: const TextStyle(fontSize: 13, color: muted),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: obscure,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: _l10n?.password ?? 'Password',
+                      errorText: errorMessage,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscure ? Icons.visibility_off : Icons.visibility,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setDialogState(() => obscure = !obscure);
+                        },
+                      ),
+                    ),
+                    onSubmitted: (_) {
+                      final pass = passwordController.text.trim();
+                      if (pass.isEmpty) {
+                        setDialogState(
+                          () => errorMessage =
+                              _l10n?.passwordIsRequired ??
+                              'Password is required',
+                        );
+                        return;
+                      }
+                      if (user.email == null) {
+                        setDialogState(
+                          () => errorMessage =
+                              _l10n?.noEmailAssociated ??
+                              'No email associated with account',
+                        );
+                        return;
+                      }
+                      Navigator.of(dialogContext).pop(
+                        EmailAuthProvider.credential(
+                          email: user.email!,
+                          password: pass,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(null),
+                  child: Text(_l10n?.cancel ?? 'Cancel'),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xffdc2626),
+                  ),
+                  onPressed: () {
+                    final pass = passwordController.text.trim();
+                    if (pass.isEmpty) {
+                      setDialogState(
+                        () => errorMessage =
+                            _l10n?.passwordIsRequired ?? 'Password is required',
+                      );
+                      return;
+                    }
+                    if (user.email == null) {
+                      setDialogState(
+                        () => errorMessage =
+                            _l10n?.noEmailAssociated ??
+                            'No email associated with account',
+                      );
+                      return;
+                    }
+                    Navigator.of(dialogContext).pop(
+                      EmailAuthProvider.credential(
+                        email: user.email!,
+                        password: pass,
+                      ),
+                    );
+                  },
+                  child: Text(_l10n?.confirm ?? 'Confirm'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (cred == null) {
+      throw FirebaseAuthException(
+        code: 'requires-recent-login',
+        message: 'Re-authentication was cancelled.',
+      );
+    }
+    return cred;
+  }
+
   String get _timerFormatted {
     final mins = (_remainingSeconds ~/ 60).toString().padLeft(2, '0');
     final secs = (_remainingSeconds % 60).toString().padLeft(2, '0');
@@ -116,11 +384,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final p = widget.expenseProvider;
+    final l10n = _l10n;
     final userEmail =
         auth.user?.email ??
         (auth.user?.isAnonymous == true
-            ? 'Guest Session'
-            : 'Offline / Personal');
+            ? (l10n?.guestSession ?? 'Guest Session')
+            : (l10n?.offlinePersonal ?? 'Offline / Personal'));
 
     return Center(
       child: ConstrainedBox(
@@ -130,7 +399,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             // Account Section
             _buildCard(
-              title: 'Account & Security',
+              title: l10n?.accountAndSecurity ?? 'Account & Security',
               icon: Icons.shield_outlined,
               child: Column(
                 children: [
@@ -146,14 +415,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     subtitle: Text(
                       auth.user?.isAnonymous == true
-                          ? 'Anonymous guest account'
-                          : 'Authenticated user • 2FA enabled',
+                          ? (l10n?.anonymousGuestAccount ??
+                                'Anonymous guest account')
+                          : (l10n?.authenticatedUser ??
+                                'Authenticated user • 2FA enabled'),
                       style: const TextStyle(color: muted, fontSize: 13),
                     ),
                     trailing: OutlinedButton.icon(
-                      onPressed: () => auth.signOut(),
+                      onPressed:
+                          (_isDeleting ||
+                              _isDeletingAccount ||
+                              _countdownActive)
+                          ? null
+                          : () => auth.signOut(),
                       icon: const Icon(Icons.logout, size: 16),
-                      label: const Text('Sign out'),
+                      label: Text(l10n?.signOut ?? 'Sign out'),
                     ),
                   ),
                 ],
@@ -163,31 +439,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Preferences Section
             _buildCard(
-              title: 'Preferences',
+              title: l10n?.preferences ?? 'Preferences',
               icon: Icons.tune_rounded,
               child: Column(
                 children: [
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Nepali Bikram Sambat (BS) Calendar'),
+                    title: Text(
+                      l10n?.nepaliCalendarTitle ??
+                          'Nepali Bikram Sambat (BS) Calendar',
+                    ),
                     subtitle: Text(
                       p.nepali
-                          ? 'Active: Showing Nepali dates and tithi'
-                          : 'Inactive: Showing Gregorian (AD) calendar',
+                          ? (l10n?.nepaliCalendarActive ??
+                                'Active: Showing Nepali dates and tithi')
+                          : (l10n?.nepaliCalendarInactive ??
+                                'Inactive: Showing Gregorian (AD) calendar'),
                       style: const TextStyle(color: muted, fontSize: 13),
                     ),
                     value: p.nepali,
                     onChanged: (val) => p.setCalendar(val),
                   ),
                   const Divider(height: 24),
-                  const ListTile(
+                  ListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: Text('Base Currency'),
+                    title: Text(l10n?.baseCurrency ?? 'Base Currency'),
                     subtitle: Text(
-                      'NPR — Nepalese Rupee (paisa-exact precision)',
-                      style: TextStyle(color: muted, fontSize: 13),
+                      l10n?.baseCurrencySubtitle ??
+                          'NPR — Nepalese Rupee (paisa-exact precision)',
+                      style: const TextStyle(color: muted, fontSize: 13),
                     ),
-                    trailing: Chip(
+                    trailing: const Chip(
                       label: Text(
                         'NPR',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -202,13 +484,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             // Data Overview Section
             _buildCard(
-              title: 'Data & Storage',
+              title: l10n?.dataAndStorage ?? 'Data & Storage',
               icon: Icons.folder_outlined,
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Recorded Transactions'),
+                title: Text(
+                  l10n?.recordedTransactions ?? 'Recorded Transactions',
+                ),
                 subtitle: Text(
-                  '${p.monthlyTransactions.length} in this period • ${p.income > 0 ? "Income & expenses recorded" : "Expenses recorded"}',
+                  l10n?.recordedTransactionsSubtitle(
+                        p.monthlyTransactions.length,
+                        p.income > 0
+                            ? (l10n.incomeAndExpensesRecorded)
+                            : (l10n.expensesRecorded),
+                      ) ??
+                      '${p.monthlyTransactions.length} in this period • ${p.income > 0 ? "Income & expenses recorded" : "Expenses recorded"}',
                   style: const TextStyle(color: muted, fontSize: 13),
                 ),
                 trailing: const Icon(Icons.cloud_done_outlined, color: accent),
@@ -246,10 +536,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           size: 24,
                         ),
                         const SizedBox(width: 10),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Danger Zone',
-                            style: TextStyle(
+                            l10n?.dangerZone ?? 'Danger Zone',
+                            style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
                               color: Color(0xffb91c1c),
@@ -261,18 +551,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 12),
 
                     if (_isDeleting) ...[
-                      const Center(
+                      Center(
                         child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24),
+                          padding: const EdgeInsets.symmetric(vertical: 24),
                           child: Column(
                             children: [
-                              CircularProgressIndicator(
+                              const CircularProgressIndicator(
                                 color: Color(0xffdc2626),
                               ),
-                              SizedBox(height: 14),
+                              const SizedBox(height: 14),
                               Text(
-                                'Deleting all data permanently...',
-                                style: TextStyle(fontWeight: FontWeight.w600),
+                                l10n?.deletingAllDataPermanently ??
+                                    'Deleting all data permanently...',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ],
                           ),
@@ -288,18 +581,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         child: Column(
                           children: [
-                            const Row(
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.timer_outlined,
                                   color: Color(0xffdc2626),
                                   size: 20,
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Your data will be deleted in 1 minute',
-                                  style: TextStyle(
+                                  l10n?.dataWillBeDeletedIn1Min ??
+                                      'Your data will be deleted in 1 minute',
+                                  style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xffb91c1c),
@@ -329,7 +623,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              '$_remainingSeconds seconds remaining before automatic permanent deletion.',
+                              l10n?.secondsRemaining(_remainingSeconds) ??
+                                  '$_remainingSeconds seconds remaining before automatic permanent deletion.',
                               style: const TextStyle(
                                 color: muted,
                                 fontSize: 12,
@@ -345,9 +640,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         alignment: WrapAlignment.spaceBetween,
                         children: [
                           FilledButton.icon(
-                            onPressed: _cancelCountdown,
+                            onPressed: _isDeletingAccount
+                                ? null
+                                : _cancelCountdown,
                             icon: const Icon(Icons.close_rounded, size: 18),
-                            label: const Text('Cancel Deletion'),
+                            label: Text(
+                              l10n?.cancelDeletion ?? 'Cancel Deletion',
+                            ),
                             style: FilledButton.styleFrom(
                               backgroundColor: accent,
                               foregroundColor: Colors.white,
@@ -358,9 +657,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           ),
                           OutlinedButton.icon(
-                            onPressed: _performDelete,
+                            onPressed: _isDeletingAccount
+                                ? null
+                                : _performDelete,
                             icon: const Icon(Icons.delete_forever, size: 18),
-                            label: const Text('Delete Immediately'),
+                            label: Text(
+                              l10n?.deleteImmediately ?? 'Delete Immediately',
+                            ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xffdc2626),
                               side: const BorderSide(color: Color(0xffdc2626)),
@@ -373,15 +676,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       ),
                     ] else ...[
-                      const Text(
-                        'Permanently erase all your expense and income records from Cloud Firestore. Once deleted, your financial history cannot be recovered.',
-                        style: TextStyle(color: muted, fontSize: 13),
+                      Text(
+                        l10n?.deleteMyDataDesc ?? 'Permanently erase all your expense and income records from Cloud Firestore. Once deleted, your financial history cannot be recovered.',
+                        style: const TextStyle(color: muted, fontSize: 13),
                       ),
                       const SizedBox(height: 16),
                       FilledButton.tonalIcon(
-                        onPressed: _startCountdown,
+                        onPressed: _isDeletingAccount ? null : _startCountdown,
                         icon: const Icon(Icons.delete_outline, size: 18),
-                        label: const Text('Delete My Data'),
+                        label: Text(l10n?.deleteMyData ?? 'Delete My Data'),
                         style: FilledButton.styleFrom(
                           foregroundColor: const Color(0xffb91c1c),
                           backgroundColor: const Color(0xfffee2e2),
@@ -392,6 +695,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ],
+
+                    const Divider(height: 36, color: Color(0xfffecaca)),
+                    Text(
+                      l10n?.deleteAccount ?? 'Delete Account',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xffb91c1c),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      l10n?.deleteAccountDesc ?? 'Permanently delete your account credentials from Firebase Authentication, all documents in Cloud Firestore (users/{uid}), and any uploaded media in Firebase Storage. This action cannot be undone.',
+                      style: const TextStyle(color: muted, fontSize: 13),
+                    ),
+                    const SizedBox(height: 14),
+                    if (_isDeletingAccount)
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Color(0xffdc2626),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            l10n?.deletingAccountAndDataProgress ??
+                                'Permanently deleting account and all data...',
+                            style: const TextStyle(
+                              color: Color(0xffb91c1c),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      )
+                    else
+                      FilledButton.icon(
+                        onPressed: (_isDeleting || _countdownActive)
+                            ? null
+                            : _confirmAndDeleteAccount,
+                        icon: const Icon(
+                          Icons.person_remove_outlined,
+                          size: 18,
+                        ),
+                        label: Text(l10n?.deleteAccount ?? 'Delete Account'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xffb91c1c),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

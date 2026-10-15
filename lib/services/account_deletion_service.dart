@@ -34,17 +34,22 @@ import 'package:flutter/foundation.dart';
 /// The Admin SDK bypasses security rules entirely and completes cleanup even if
 /// the user closes the app or loses network connection immediately after account deletion.
 class AccountDeletionService {
-  final FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
+  final FirebaseAuth? _customAuth;
+  final FirebaseFirestore? _customFirestore;
+  final FirebaseStorage? _customStorage;
 
   AccountDeletionService({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
-  }) : _auth = auth ?? FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance,
-       _storage = storage ?? FirebaseStorage.instance;
+  }) : _customAuth = auth,
+       _customFirestore = firestore,
+       _customStorage = storage;
+
+  FirebaseAuth get _auth => _customAuth ?? FirebaseAuth.instance;
+  FirebaseFirestore get _firestore =>
+      _customFirestore ?? FirebaseFirestore.instance;
+  FirebaseStorage get _storage => _customStorage ?? FirebaseStorage.instance;
 
   /// Deletes the authenticated user's:
   /// 1. Cloud Firestore documents (`users/{uid}/expenses/*` and `users/{uid}`)

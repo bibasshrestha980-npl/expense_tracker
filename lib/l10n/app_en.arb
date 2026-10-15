@@ -1,0 +1,56 @@
+{
+  "@@locale": "en",
+  "settings": "Settings",
+  "accountAndSecurity": "Account & Security",
+  "anonymousGuestAccount": "Anonymous guest account",
+  "authenticatedUser": "Authenticated user • 2FA enabled",
+  "guestSession": "Guest Session",
+  "offlinePersonal": "Offline / Personal",
+  "signOut": "Sign out",
+  "preferences": "Preferences",
+  "nepaliCalendarTitle": "Nepali Bikram Sambat (BS) Calendar",
+  "nepaliCalendarActive": "Active: Showing Nepali dates and tithi",
+  "nepaliCalendarInactive": "Inactive: Showing Gregorian (AD) calendar",
+  "baseCurrency": "Base Currency",
+  "baseCurrencySubtitle": "NPR — Nepalese Rupee (paisa-exact precision)",
+  "dataAndStorage": "Data & Storage",
+  "recordedTransactions": "Recorded Transactions",
+  "recordedTransactionsSubtitle": "{count} in this period • {type}",
+  "@recordedTransactionsSubtitle": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "type": { "type": "String" }
+    }
+  },
+  "incomeAndExpensesRecorded": "Income & expenses recorded",
+  "expensesRecorded": "Expenses recorded",
+  "dangerZone": "Danger Zone",
+  "deletingAllDataPermanently": "Deleting all data permanently...",
+  "dataWillBeDeletedIn1Min": "Your data will be deleted in 1 minute",
+  "secondsRemaining": "{count} seconds remaining before automatic permanent deletion.",
+  "@secondsRemaining": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "cancelDeletion": "Cancel Deletion",
+  "deleteImmediately": "Delete Immediately",
+  "deleteMyData": "Delete My Data",
+  "deleteMyDataDesc": "Permanently erase all your expense and income records from Cloud Firestore. Once deleted, your financial history cannot be recovered.",
+  "dataDeletionCancelled": "Data deletion cancelled. Your data is safe.",
+  "allRecordsDeleted": "All your records have been permanently deleted.",
+  "failedToDeleteData": "Failed to delete data. Please check your connection.",
+  "deleteAccount": "Delete Account",
+  "deleteAccountDesc": "Permanently delete your account credentials from Firebase Authentication, all documents in Cloud Firestore, and any uploaded media in Firebase Storage. This action cannot be undone.",
+  "deleteAccountPermanentlyTitle": "Delete Account Permanently?",
+  "deleteAccountPermanentlyContent": "This will permanently delete your Pocket account, all expense and income records from Cloud Firestore, and any associated files from Firebase Storage.\n\nThis action cannot be undone. Are you sure you want to proceed?",
+  "cancel": "Cancel",
+  "deletingAccountAndDataProgress": "Permanently deleting account and all data...",
+  "accountDeletedSuccess": "Your account and all associated data have been permanently deleted.",
+  "confirmPasswordTitle": "Confirm Password",
+  "confirmPasswordSecurityPrompt": "For security, please enter your password to confirm account deletion.",
+  "password": "Password",
+  "passwordIsRequired": "Password is required",
+  "noEmailAssociated": "No email associated with account",
+  "confirm": "Confirm"
+}
