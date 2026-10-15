@@ -122,8 +122,12 @@ class AccountDeletionService {
         }
       }
 
-      // Delete the parent user profile document
-      await userDocRef.delete();
+      // Delete the parent user profile document if present
+      try {
+        await userDocRef.delete();
+      } catch (e) {
+        debugPrint('Parent user profile document delete non-fatal notice: $e');
+      }
     } catch (e) {
       debugPrint('Firestore data cleanup warning: $e');
       rethrow;
