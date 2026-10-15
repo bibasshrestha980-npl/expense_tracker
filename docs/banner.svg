@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="340" viewBox="0 0 1280 340" role="img" aria-labelledby="title">
+<title id="title">Pocket — Personal finance, made clear</title>
+<rect width="1280" height="340" rx="24" fill="#103e36"/>
+<circle cx="1150" cy="40" r="240" fill="#17594d"/>
+<circle cx="1200" cy="340" r="180" fill="#1c6858"/>
+<g font-family="Arial,sans-serif">
+<text x="72" y="82" font-size="15" letter-spacing="4" fill="#a9d9c8">FLUTTER / PROVIDER / FIREBASE</text>
+<text x="68" y="172" font-size="76" font-weight="700" fill="#fff">Pocket</text>
+<text x="72" y="226" font-size="28" fill="#d7eee5">Personal finance, made clear.</text>
+<text x="72" y="282" font-size="18" fill="#a9d9c8">Income &amp; expenses · Nepali calendar · Monthly insights</text>
+</g>
+<rect x="946" y="112" width="204" height="145" rx="24" fill="#e8f5ee"/>
+<path d="M968 112v-15q0-12 14-15l130-20v50" fill="none" stroke="#a9d9c8" stroke-width="10"/>
+<rect x="1070" y="157" width="94" height="56" rx="14" fill="#a9d9c8"/>
+<circle cx="1097" cy="185" r="7" fill="#103e36"/>
+</svg>

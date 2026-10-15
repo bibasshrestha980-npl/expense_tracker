@@ -1,6 +1,4 @@
-﻿# Pocket
-
-### Personal finance, made clear.
+<p align="center"><img src="docs/banner.svg" alt="Pocket: Personal finance, made clear" width="100%"></p>
 
 [![Flutter CI](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-Material%203-02569B?logo=flutter)
