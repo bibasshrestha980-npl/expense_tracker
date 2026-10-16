@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
@@ -33,7 +34,10 @@ void main() {
         ),
       ];
 
-      final expProvider = ExpenseProvider('', initialExpenses: sampleExpenses);
+      final expProvider = ExpenseProvider('', initialExpenses: sampleExpenses)
+        ..nepali = false
+        ..month = DateTime(2026, 10, 1);
+      addTearDown(expProvider.dispose);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -52,4 +56,74 @@ void main() {
       expect(find.text('Export CSV'), findsOneWidget);
     },
   );
+
+  for (final scenario in [
+    (income: 100000, expense: 25000, rate: '75.0%'),
+    (income: 100000, expense: 150000, rate: '-50.0%'),
+    (income: 0, expense: 25000, rate: '0.0%'),
+  ]) {
+    testWidgets('Monthly report and copied summary show ${scenario.rate}', (
+      tester,
+    ) async {
+      final provider = ExpenseProvider(
+        '',
+        initialExpenses: [
+          Expense(
+            id: 'previous-income',
+            title: 'Previous salary',
+            category: 'Salary',
+            amountCents: 900000,
+            date: DateTime(2026, 9, 1),
+            isIncome: true,
+          ),
+          if (scenario.income > 0)
+            Expense(
+              id: 'income',
+              title: 'Salary',
+              category: 'Salary',
+              amountCents: scenario.income,
+              date: DateTime(2026, 10, 1),
+              isIncome: true,
+            ),
+          Expense(
+            id: 'expense',
+            title: 'Food',
+            category: 'Food',
+            amountCents: scenario.expense,
+            date: DateTime(2026, 10, 2),
+          ),
+        ],
+      )..nepali = false;
+      provider.month = DateTime(2026, 10, 1);
+      addTearDown(provider.dispose);
+
+      String? copiedText;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copiedText = (call.arguments as Map)['text'] as String;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: ReportDialog(expenseProvider: provider)),
+        ),
+      );
+      expect(find.text(scenario.rate), findsOneWidget);
+      await tester.tap(find.text('Share Summary'));
+      await tester.pump();
+      expect(copiedText, contains('${scenario.rate} savings rate'));
+      expect(copiedText, isNot(contains('Previous salary')));
+    });
+  }
 }

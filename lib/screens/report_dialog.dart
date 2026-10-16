@@ -18,9 +18,9 @@ class ReportDialog extends StatelessWidget {
 
     final income = expenseProvider.income;
     final totalExpense = expenseProvider.total;
-    final netSavings = expenseProvider.balance;
+    final netSavings = expenseProvider.monthlyNet;
     final savingsRate = income > 0
-        ? ((netSavings / income) * 100).clamp(0, 100).toStringAsFixed(1)
+        ? ((netSavings / income) * 100).toStringAsFixed(1)
         : '0.0';
 
     final buffer = StringBuffer();
@@ -100,9 +100,9 @@ class ReportDialog extends StatelessWidget {
 
     final income = expenseProvider.income;
     final totalExpense = expenseProvider.total;
-    final netSavings = expenseProvider.balance;
+    final netSavings = expenseProvider.monthlyNet;
     final savingsRate = income > 0
-        ? ((netSavings / income) * 100).clamp(0, 100).toStringAsFixed(1)
+        ? ((netSavings / income) * 100).toStringAsFixed(1)
         : '0.0';
 
     return AlertDialog(
