@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -89,7 +91,57 @@ class PasswordAuth extends MockAuth {
   }
 }
 
+class TimeoutAuth extends MockAuth {
+  @override
+  Future<void> deleteAccount({
+    required Future<AuthCredential?> Function(User user) onReauthenticate,
+    AccountDeletionService? deletionService,
+  }) async {
+    throw TimeoutException(
+      'Deletion timed out. Check your connection before retrying.',
+    );
+  }
+}
+
 void main() {
+  testWidgets('Deletion timeout stops the spinner and enables retry', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final auth = TimeoutAuth();
+    final expenses = MockExpenses();
+    addTearDown(auth.dispose);
+    addTearDown(expenses.dispose);
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AuthProvider>.value(
+        value: auth,
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: SettingsScreen(expenseProvider: expenses),
+            ),
+          ),
+        ),
+      ),
+    );
+    final button = find.widgetWithText(FilledButton, 'Delete Account');
+    await tester.ensureVisible(button);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(of: find.byType(AlertDialog), matching: button),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Deletion timed out. Check your connection before retrying.'),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.widget<FilledButton>(button).onPressed, isNotNull);
+  });
   for (final submitWithKeyboard in [false, true]) {
     testWidgets(
       'Password confirmation preserves spaces (keyboard: $submitWithKeyboard)',

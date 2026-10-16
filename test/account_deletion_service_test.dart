@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,6 +51,12 @@ class MockUser extends Fake implements User {
 
 class FakeUserCredential extends Fake implements UserCredential {}
 
+class HangingUser extends MockUser {
+  HangingUser() : super(uid: 'hanging-auth');
+  @override
+  Future<void> delete() => Completer<void>().future;
+}
+
 class MockFirebaseAuth extends Fake implements FirebaseAuth {
   User? mockCurrentUser;
 
@@ -59,13 +67,24 @@ class MockFirebaseAuth extends Fake implements FirebaseAuth {
 }
 
 class MockStorage extends Fake implements FirebaseStorage {
+  MockStorage({this.failure, this.hang = false});
+  final FirebaseException? failure;
+  final bool hang;
   @override
-  Reference ref([String? path]) => MockStorageReference();
+  Reference ref([String? path]) =>
+      MockStorageReference(failure: failure, hang: hang);
 }
 
 class MockStorageReference extends Fake implements Reference {
+  MockStorageReference({this.failure, this.hang = false});
+  final FirebaseException? failure;
+  final bool hang;
   @override
-  Future<ListResult> listAll() async => MockListResult();
+  Future<ListResult> listAll() async {
+    if (failure != null) throw failure!;
+    if (hang) return Completer<ListResult>().future;
+    return MockListResult();
+  }
 
   @override
   Future<void> delete() async {}
@@ -80,6 +99,69 @@ class MockListResult extends Fake implements ListResult {
 }
 
 void main() {
+  test('Stalled authentication deletion returns a timeout', () async {
+    final service = AccountDeletionService(
+      auth: MockFirebaseAuth(mockCurrentUser: HangingUser()),
+      firestore: FakeFirebaseFirestore(),
+      requestTimeout: const Duration(milliseconds: 20),
+    );
+    await expectLater(
+      service.deleteAccount(onReauthenticate: (_) async => null),
+      throwsA(isA<TimeoutException>()),
+    );
+  });
+  test(
+    'Default deletion does not initialize or contact unused Storage',
+    () async {
+      final user = MockUser(uid: 'no-storage');
+      final service = AccountDeletionService(
+        auth: MockFirebaseAuth(mockCurrentUser: user),
+        firestore: FakeFirebaseFirestore(),
+      );
+      await service.deleteAccount(onReauthenticate: (_) async => null);
+      expect(user.deleteCalled, isTrue);
+    },
+  );
+
+  test(
+    'Stalled optional Storage cleanup times out and retains auth account',
+    () async {
+      final user = MockUser(uid: 'storage-timeout');
+      final service = AccountDeletionService(
+        auth: MockFirebaseAuth(mockCurrentUser: user),
+        firestore: FakeFirebaseFirestore(),
+        storage: MockStorage(hang: true),
+        requestTimeout: const Duration(milliseconds: 20),
+      );
+      await expectLater(
+        service.deleteAccount(onReauthenticate: (_) async => null),
+        throwsA(isA<TimeoutException>()),
+      );
+      expect(user.deleteCalled, isFalse);
+    },
+  );
+
+  test(
+    'Storage permissions failure does not silently delete auth account',
+    () async {
+      final user = MockUser(uid: 'storage-denied');
+      final service = AccountDeletionService(
+        auth: MockFirebaseAuth(mockCurrentUser: user),
+        firestore: FakeFirebaseFirestore(),
+        storage: MockStorage(
+          failure: FirebaseException(
+            plugin: 'firebase_storage',
+            code: 'unauthorized',
+          ),
+        ),
+      );
+      await expectLater(
+        service.deleteAccount(onReauthenticate: (_) async => null),
+        throwsA(isA<FirebaseException>()),
+      );
+      expect(user.deleteCalled, isFalse);
+    },
+  );
   group('AccountDeletionService', () {
     late FakeFirebaseFirestore fakeFirestore;
     late MockStorage mockStorage;

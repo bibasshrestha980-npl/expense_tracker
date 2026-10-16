@@ -147,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
         content: Text(
-          _l10n?.deleteAccountPermanentlyContent ?? 'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore, and any associated files from Firebase Storage.\n\nThis action cannot be undone. Are you sure you want to proceed?',
+          _l10n?.deleteAccountPermanentlyContent ?? 'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?',
           style: const TextStyle(fontSize: 14),
         ),
         actions: [
@@ -190,6 +190,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       // Route user to /login while clearing the navigation stack
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    } on TimeoutException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            e.message ??
+                'Deletion timed out. Check your connection before retrying.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

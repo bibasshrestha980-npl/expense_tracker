@@ -5,43 +5,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
-/// Service responsible for completely purging user data from Cloud Firestore,
-/// Firebase Storage, and deleting the user account from Firebase Authentication.
-///
-/// ARCHITECTURAL NOTE:
-/// In client-side deletion flows, Firestore documents MUST be deleted BEFORE
-/// invoking `user.delete()`.
-///
-/// Why?
-/// Cloud Firestore security rules typically enforce owner checks:
-/// `request.auth != null && request.auth.uid == userId`.
-/// When `user.delete()` is executed, the client's auth credentials are
-/// immediately revoked. If Firestore deletion is attempted after `user.delete()`,
-/// `request.auth` will evaluate to null, causing Firestore to reject the request
-/// with a `permission-denied` error.
-///
-/// SERVER-SIDE ALTERNATIVE (Cloud Functions):
-/// For enterprise resilience, an auth blocking trigger or Cloud Function
-/// (`functions.auth.user().onDelete()`) using the Firebase Admin SDK can be deployed:
-/// ```typescript
-/// export const cleanupUser = functions.auth.user().onDelete(async (user) => {
-///   const firestore = admin.firestore();
-///   const storage = admin.storage();
-///   await firestore.recursiveDelete(firestore.doc(`users/${user.uid}`));
-///   await storage.bucket().deleteFiles({ prefix: `users/${user.uid}/` });
-/// });
-/// ```
-/// The Admin SDK bypasses security rules entirely and completes cleanup even if
-/// the user closes the app or loses network connection immediately after account deletion.
+/// Removes Firestore records before deleting the Firebase Authentication account.
+/// Storage cleanup is opt-in: Pocket currently has no uploaded user files.
+/// Pass a storage instance only in clients that actually support file uploads.
 class AccountDeletionService {
   final FirebaseAuth? _customAuth;
   final FirebaseFirestore? _customFirestore;
   final FirebaseStorage? _customStorage;
+  final Duration requestTimeout;
 
   AccountDeletionService({
     FirebaseAuth? auth,
     FirebaseFirestore? firestore,
     FirebaseStorage? storage,
+    this.requestTimeout = const Duration(seconds: 20),
   }) : _customAuth = auth,
        _customFirestore = firestore,
        _customStorage = storage;
@@ -49,7 +26,12 @@ class AccountDeletionService {
   FirebaseAuth get _auth => _customAuth ?? FirebaseAuth.instance;
   FirebaseFirestore get _firestore =>
       _customFirestore ?? FirebaseFirestore.instance;
-  FirebaseStorage get _storage => _customStorage ?? FirebaseStorage.instance;
+  Future<T> _request<T>(Future<T> request, String step) => request.timeout(
+    requestTimeout,
+    onTimeout: () => throw TimeoutException(
+      '$step timed out. Check your connection before retrying. Some records may already have been deleted.',
+    ),
+  );
 
   /// Deletes the authenticated user's:
   /// 1. Cloud Firestore documents (`users/{uid}/expenses/*` and `users/{uid}`)
@@ -74,11 +56,11 @@ class AccountDeletionService {
     await deleteFirestoreUserData(uid);
 
     // STEP 2: Delete Firebase Storage media/files while user auth token is active
-    await deleteStorageUserData(uid);
+    if (_customStorage != null) await deleteStorageUserData(uid);
 
     // STEP 3: Delete Firebase Authentication account
     try {
-      await user.delete();
+      await _request(user.delete(), 'Account deletion');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         final credential = await onReauthenticate(user);
@@ -89,9 +71,12 @@ class AccountDeletionService {
           );
         }
 
-        await user.reauthenticateWithCredential(credential);
+        await _request(
+          user.reauthenticateWithCredential(credential),
+          'Sign-in confirmation',
+        );
         // Retry deletion after successful re-authentication
-        await user.delete();
+        await _request(user.delete(), 'Account deletion');
       } else {
         rethrow;
       }
@@ -103,7 +88,10 @@ class AccountDeletionService {
     try {
       final userDocRef = _firestore.collection('users').doc(uid);
       final expensesRef = userDocRef.collection('expenses');
-      final snapshot = await expensesRef.get();
+      final snapshot = await _request(
+        expensesRef.get(const GetOptions(source: Source.server)),
+        'Loading account records',
+      );
 
       if (snapshot.docs.isNotEmpty) {
         WriteBatch batch = _firestore.batch();
@@ -112,22 +100,17 @@ class AccountDeletionService {
           batch.delete(doc.reference);
           batchCount++;
           if (batchCount >= 450) {
-            await batch.commit();
+            await _request(batch.commit(), 'Deleting account records');
             batch = _firestore.batch();
             batchCount = 0;
           }
         }
         if (batchCount > 0) {
-          await batch.commit();
+          await _request(batch.commit(), 'Deleting account records');
         }
       }
 
-      // Delete the parent user profile document if present
-      try {
-        await userDocRef.delete();
-      } catch (e) {
-        debugPrint('Parent user profile document delete non-fatal notice: $e');
-      }
+      await _request(userDocRef.delete(), 'Deleting account profile');
     } catch (e) {
       debugPrint('Firestore data cleanup warning: $e');
       rethrow;
@@ -137,24 +120,27 @@ class AccountDeletionService {
   /// Recursively deletes all files and folders under `users/{uid}/*` in Firebase Storage.
   Future<void> deleteStorageUserData(String uid) async {
     try {
-      final userFolderRef = _storage.ref('users/$uid');
+      final storage = _customStorage;
+      if (storage == null) return;
+      final userFolderRef = storage.ref('users/$uid');
       await _deleteStorageFolderRecursively(userFolderRef);
     } on FirebaseException catch (e) {
       // If the folder or bucket does not exist, ignore (no files to clean up)
       if (e.code == 'object-not-found' || e.code == 'bucket-not-found') {
         return;
       }
-      debugPrint('Storage cleanup non-fatal warning: ${e.message}');
-    } catch (e) {
-      debugPrint('Storage cleanup non-fatal error: $e');
+      rethrow;
     }
   }
 
   Future<void> _deleteStorageFolderRecursively(Reference ref) async {
     try {
-      final listResult = await ref.listAll();
+      final listResult = await _request(
+        ref.listAll(),
+        'Listing uploaded files',
+      );
       for (final item in listResult.items) {
-        await item.delete();
+        await _request(item.delete(), 'Deleting uploaded files');
       }
       for (final prefix in listResult.prefixes) {
         await _deleteStorageFolderRecursively(prefix);
