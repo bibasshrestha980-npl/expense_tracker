@@ -30,6 +30,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   late String _category;
   bool _busy = false;
   bool _nepali = false;
+  bool _titleEdited = false;
   bool get _income => widget.expense?.isIncome ?? widget.income;
   String? _error;
   @override
@@ -45,6 +46,20 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     _date = e?.date ?? DateTime.now();
     _category =
         e?.category ?? (_income ? incomeCategories.first : categories.first);
+    if (e == null && _income) _title.text = _category;
+  }
+
+  void _selectCategory(String? category) {
+    if (category == null) return;
+    setState(() {
+      _category = category;
+      if (_income &&
+          (_title.text.trim().isEmpty ||
+              (widget.expense == null && !_titleEdited))) {
+        _title.text = category;
+        _titleEdited = false;
+      }
+    });
   }
 
   @override
@@ -111,6 +126,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                   const SizedBox(height: 24),
                   TextFormField(
                     controller: _title,
+                    onChanged: (_) => _titleEdited = true,
                     maxLength: 80,
                     decoration: InputDecoration(
                       labelText: _income
@@ -169,7 +185,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                           ),
                         )
                         .toList(),
-                    onChanged: (v) => setState(() => _category = v!),
+                    onChanged: _selectCategory,
                   ),
                   const SizedBox(height: 12),
                   SegmentedButton<bool>(

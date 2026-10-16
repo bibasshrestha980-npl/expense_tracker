@@ -36,11 +36,79 @@ void main() {
     await tester.pumpAndSettle();
     final docs = await provider.collection.get();
     expect(docs.docs.single.data()['type'], 'income');
+    expect(docs.docs.single.data()['title'], 'October salary');
     expect(docs.docs.single.data()['category'], 'Salary');
     expect(docs.docs.single.data()['amountCents'], 2500000);
     expect(provider.balance, 2500000);
     expect(provider.total, 0);
   });
+  testWidgets('Income title follows category until customized', (tester) async {
+    final provider = ExpenseProvider('', initialExpenses: []);
+    addTearDown(provider.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pocketTheme(),
+        home: Scaffold(body: ExpenseEditor(provider: provider, income: true)),
+      ),
+    );
+    final title = find.byType(TextFormField).first;
+    String titleText() => tester.widget<TextFormField>(title).controller!.text;
+    Future<void> select(String category) async {
+      await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(category).last);
+      await tester.pumpAndSettle();
+    }
+
+    expect(titleText(), 'Salary');
+    await select('Opening balance');
+    expect(titleText(), 'Opening balance');
+    await select('Salary');
+    expect(titleText(), 'Salary');
+    await tester.enterText(title, 'October salary');
+    await select('Freelance');
+    expect(titleText(), 'October salary');
+    await tester.enterText(title, '');
+    await select('Gift');
+    expect(titleText(), 'Gift');
+  });
+
+  testWidgets(
+    'Editing income preserves its saved title when category changes',
+    (tester) async {
+      final provider = ExpenseProvider('', initialExpenses: []);
+      addTearDown(provider.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ExpenseEditor(
+              provider: provider,
+              expense: Expense(
+                id: 'saved',
+                title: 'Salary',
+                category: 'Salary',
+                amountCents: 10000,
+                date: DateTime(2026, 10, 1),
+                isIncome: true,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Freelance').last);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextFormField>(find.byType(TextFormField).first)
+            .controller!
+            .text,
+        'Salary',
+      );
+    },
+  );
   test('Income, legacy expenses, edits and deletes update the ledger independently of spending', () async {
     final db = FakeFirebaseFirestore();
     final collection = db
