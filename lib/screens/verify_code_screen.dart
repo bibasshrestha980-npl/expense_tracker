@@ -105,7 +105,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                     ),
                     const SizedBox(height: 20),
                     const Text(
-                      'Two-Step Verification',
+                      'Verification Demo',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 24,
@@ -114,7 +114,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'A verification code is required to access your Pocket account for $email.',
+                      'Enter the on-screen demo code to continue as $email. This is not two-factor authentication.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),

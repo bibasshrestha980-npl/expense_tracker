@@ -19,7 +19,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get anonymousGuestAccount => 'अज्ञात पाहुना खाता';
 
   @override
-  String get authenticatedUser => 'प्रमाणित प्रयोगकर्ता • २FA सक्रिय';
+  String get authenticatedUser => 'साइन इन गरिएको खाता';
 
   @override
   String get guestSession => 'पाहुना सत्र';

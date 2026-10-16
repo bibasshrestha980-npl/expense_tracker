@@ -47,7 +47,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Two-Step Verification'), findsOneWidget);
+      expect(find.text('Verification Demo'), findsOneWidget);
       expect(find.text('Your Verification Code'), findsOneWidget);
       expect(find.text('123456'), findsOneWidget);
 

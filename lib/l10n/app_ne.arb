@@ -3,7 +3,7 @@
   "settings": "सेटिङहरू",
   "accountAndSecurity": "खाता र सुरक्षा",
   "anonymousGuestAccount": "अज्ञात पाहुना खाता",
-  "authenticatedUser": "प्रमाणित प्रयोगकर्ता • २FA सक्रिय",
+  "authenticatedUser": "साइन इन गरिएको खाता",
   "guestSession": "पाहुना सत्र",
   "offlinePersonal": "अफलाइन / व्यक्तिगत",
   "signOut": "साइन आउट",

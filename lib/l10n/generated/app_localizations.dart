@@ -119,7 +119,7 @@ abstract class AppLocalizations {
   /// No description provided for @authenticatedUser.
   ///
   /// In en, this message translates to:
-  /// **'Authenticated user • 2FA enabled'**
+  /// **'Signed-in account'**
   String get authenticatedUser;
 
   /// No description provided for @guestSession.

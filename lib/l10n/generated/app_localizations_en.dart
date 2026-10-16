@@ -19,7 +19,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anonymousGuestAccount => 'Anonymous guest account';
 
   @override
-  String get authenticatedUser => 'Authenticated user • 2FA enabled';
+  String get authenticatedUser => 'Signed-in account';
 
   @override
   String get guestSession => 'Guest Session';

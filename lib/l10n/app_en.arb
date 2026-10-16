@@ -3,7 +3,7 @@
   "settings": "Settings",
   "accountAndSecurity": "Account & Security",
   "anonymousGuestAccount": "Anonymous guest account",
-  "authenticatedUser": "Authenticated user • 2FA enabled",
+  "authenticatedUser": "Signed-in account",
   "guestSession": "Guest Session",
   "offlinePersonal": "Offline / Personal",
   "signOut": "Sign out",

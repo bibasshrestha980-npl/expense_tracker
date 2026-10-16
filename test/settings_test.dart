@@ -65,7 +65,82 @@ class MockExpenses extends ChangeNotifier implements ExpenseProvider {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class PasswordUser extends Fake implements User {
+  @override
+  String get email => 'test@example.com';
+  @override
+  bool get isAnonymous => false;
+  @override
+  List<UserInfo> get providerData => [];
+}
+
+class PasswordAuth extends MockAuth {
+  final passwordUser = PasswordUser();
+  String? confirmedPassword;
+  @override
+  User get user => passwordUser;
+  @override
+  Future<void> deleteAccount({
+    required Future<AuthCredential?> Function(User user) onReauthenticate,
+    AccountDeletionService? deletionService,
+  }) async {
+    final credential = await onReauthenticate(passwordUser);
+    confirmedPassword = (credential as EmailAuthCredential).password;
+  }
+}
+
 void main() {
+  for (final submitWithKeyboard in [false, true]) {
+    testWidgets(
+      'Password confirmation preserves spaces (keyboard: $submitWithKeyboard)',
+      (tester) async {
+        tester.view.physicalSize = const Size(800, 1200);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final auth = PasswordAuth();
+        final expenses = MockExpenses();
+        addTearDown(auth.dispose);
+        addTearDown(expenses.dispose);
+        await tester.pumpWidget(
+          ChangeNotifierProvider<AuthProvider>.value(
+            value: auth,
+            child: MaterialApp(
+              routes: {'/login': (_) => const Scaffold(body: Text('Login'))},
+              home: Scaffold(
+                body: SingleChildScrollView(
+                  child: SettingsScreen(expenseProvider: expenses),
+                ),
+              ),
+            ),
+          ),
+        );
+        expect(find.text('Signed-in account'), findsOneWidget);
+        expect(find.textContaining('2FA enabled'), findsNothing);
+        final delete = find.widgetWithText(FilledButton, 'Delete Account');
+        await tester.ensureVisible(delete);
+        await tester.tap(delete);
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.descendant(of: find.byType(AlertDialog), matching: delete),
+        );
+        // The settings page shows a progress indicator while reauthentication is pending.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.enterText(
+          find.byType(TextField),
+          ' password with spaces ',
+        );
+        if (submitWithKeyboard) {
+          await tester.testTextInput.receiveAction(TextInputAction.done);
+        } else {
+          await tester.tap(find.text('Confirm'));
+        }
+        await tester.pumpAndSettle();
+        expect(auth.confirmedPassword, ' password with spaces ');
+      },
+    );
+  }
   testWidgets('SettingsScreen renders account, preferences and danger zone', (
     tester,
   ) async {

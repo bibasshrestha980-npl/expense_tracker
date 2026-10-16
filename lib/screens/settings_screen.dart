@@ -295,7 +295,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                     onSubmitted: (_) {
-                      final pass = passwordController.text.trim();
+                      final pass = passwordController.text;
                       if (pass.isEmpty) {
                         setDialogState(
                           () => errorMessage =
@@ -332,7 +332,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     backgroundColor: const Color(0xffdc2626),
                   ),
                   onPressed: () {
-                    final pass = passwordController.text.trim();
+                    final pass = passwordController.text;
                     if (pass.isEmpty) {
                       setDialogState(
                         () => errorMessage =
@@ -417,11 +417,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      auth.user?.isAnonymous == true
+                      auth.user == null
+                          ? (l10n?.offlinePersonal ?? 'Offline / Personal')
+                          : auth.user?.isAnonymous == true
                           ? (l10n?.anonymousGuestAccount ??
                                 'Anonymous guest account')
-                          : (l10n?.authenticatedUser ??
-                                'Authenticated user • 2FA enabled'),
+                          : (l10n?.authenticatedUser ?? 'Signed-in account'),
                       style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),
                     trailing: OutlinedButton.icon(
