@@ -6,9 +6,11 @@
 ![Firebase](https://img.shields.io/badge/Storage-Firestore-FFCA28?logo=firebase)
 [![MIT](https://img.shields.io/badge/License-MIT-155f53)](LICENSE)
 
-Pocket is a personal finance app for everyday tracking in Nepal. Record income and spending in NPR, switch between Bikram Sambat and Gregorian dates, and review your month through clear summaries.
+# Pocket — Expense Tracker
 
-Built as a Flutter final project with **Firebase Authentication**, **Provider**, and **Cloud Firestore**.
+Track everyday income and expenses in Nepali rupees, browse transactions with Bikram Sambat or Gregorian dates, and understand your spending through monthly summaries.
+
+Pocket is a Flutter personal finance project built with **Firebase Authentication**, **Cloud Firestore**, and **Provider**, with English and Nepali localization.
 
 [Features](#features) · [Getting started](#getting-started) · [Architecture](#architecture) · [Contributing](CONTRIBUTING.md)
 
@@ -21,15 +23,12 @@ Built as a Flutter final project with **Firebase Authentication**, **Provider**,
 | Insights | Explore monthly spending, category totals, and comparisons. |
 | Nepali calendar | Switch between BS and AD dates and browse daily activity. |
 | Calendar details | View available event and tithi data from external sources. |
-| Reports | Copy financial summaries and export transactions as CSV. |
+| Reports | Copy financial summaries and monthly transactions as CSV to the clipboard. |
+| Languages | English and Nepali localization resources. |
 | Authentication | Email/password, Google, and guest sign-in when enabled in Firebase. |
 | Storage | Firestore synchronization with user-scoped access rules. |
 
 Amounts are stored as integer paisa to avoid floating-point rounding errors in transaction totals.
-
-### In development
-
-Payment reminders and share/SIP tracking are being developed locally and are not yet committed to this repository. Reminders currently use in-app alerts; investment values are manually entered snapshots.
 
 ## Getting started
 
@@ -99,7 +98,8 @@ Web output is written to `build/web`. Building does not automatically publish a 
 flowchart LR
     UI[Flutter screens] --> State[Provider / ChangeNotifier]
     State --> Auth[Firebase Authentication]
-    State --> DB[Cloud Firestore]
+    State --> Repository[Expense repository]
+    Repository --> DB[Cloud Firestore]
     State --> Calendar[Nepali calendar service]
 ```
 
@@ -109,7 +109,8 @@ flowchart LR
 | `lib/models/` | Transactions, calendar periods, and summaries |
 | `lib/providers/` | Authentication, data streams, and state |
 | `lib/screens/` | Dashboard, forms, reports, calendar, and settings |
-| `lib/services/` | Calendar API integration |
+| `lib/services/` | Calendar integration, account deletion, and expense repository |
+| `lib/l10n/` | English and Nepali localization resources |
 | `lib/theme.dart` | Shared visual styling |
 | `firestore.rules` | Ownership and document validation |
 | `test/` | Unit and widget tests |
