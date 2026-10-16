@@ -161,7 +161,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       _register
                           ? 'Start tracking your expenses with a personal account.'
                           : 'Sign in to your personal spending dashboard.',
-                      style: const TextStyle(color: muted),
+                      style: TextStyle(color: context.appMuted),
                     ),
                     const SizedBox(height: 24),
                     TextFormField(
@@ -260,16 +260,19 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     const SizedBox(height: 16),
                     Row(
-                      children: const [
-                        Expanded(child: Divider()),
+                      children: [
+                        const Expanded(child: Divider()),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text(
                             'OR',
-                            style: TextStyle(color: muted, fontSize: 12),
+                            style: TextStyle(
+                              color: context.appMuted,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
-                        Expanded(child: Divider()),
+                        const Expanded(child: Divider()),
                       ],
                     ),
                     const SizedBox(height: 16),

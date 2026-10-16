@@ -92,14 +92,14 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Center(
+                    Center(
                       child: CircleAvatar(
                         radius: 36,
-                        backgroundColor: Color(0xffe6f3ed),
+                        backgroundColor: context.palette.primaryContainer,
                         child: Icon(
                           Icons.security_rounded,
                           size: 40,
-                          color: accent,
+                          color: context.appAccent,
                         ),
                       ),
                     ),
@@ -116,7 +116,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                     Text(
                       'A verification code is required to access your Pocket account for $email.',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: muted, fontSize: 13),
+                      style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),
                     const SizedBox(height: 24),
 
@@ -134,7 +134,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xfff0fdf4),
+                            color: context.palette.primaryContainer,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xff86efac)),
                           ),
@@ -142,19 +142,19 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                             children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
+                                children: [
                                   Icon(
                                     Icons.key_rounded,
                                     size: 16,
-                                    color: accent,
+                                    color: context.appAccent,
                                   ),
-                                  SizedBox(width: 6),
+                                  const SizedBox(width: 6),
                                   Text(
                                     'Your Verification Code',
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 13,
-                                      color: accent,
+                                      color: context.appAccent,
                                     ),
                                   ),
                                 ],
@@ -162,17 +162,20 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                               const SizedBox(height: 8),
                               Text(
                                 generatedCode,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 8,
-                                  color: Color(0xff14532d),
+                                  color: context.palette.onPrimaryContainer,
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              const Text(
+                              Text(
                                 'Tap code to auto-fill & copy',
-                                style: TextStyle(color: muted, fontSize: 11),
+                                style: TextStyle(
+                                  color: context.appMuted,
+                                  fontSize: 11,
+                                ),
                               ),
                             ],
                           ),
@@ -205,14 +208,14 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xfffef2f2),
+                          color: context.palette.errorContainer,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(color: const Color(0xfffca5a5)),
                         ),
                         child: Text(
                           _errorMessage!,
-                          style: const TextStyle(
-                            color: Color(0xffb91c1c),
+                          style: TextStyle(
+                            color: context.palette.onErrorContainer,
                             fontSize: 13,
                           ),
                           textAlign: TextAlign.center,

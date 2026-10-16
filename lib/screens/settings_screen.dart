@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/theme_provider.dart';
 import '../theme.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -33,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _countdownActive = false;
   bool _isDeleting = false;
   bool _isDeletingAccount = false;
+  int _appearanceRevision = 0;
 
   AppLocalizations? get _l10n => AppLocalizations.of(context);
 
@@ -134,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Color(0xffdc2626)),
+            Icon(Icons.warning_amber_rounded, color: context.palette.error),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -254,10 +256,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               title: Row(
                 children: [
-                  const Icon(
-                    Icons.lock_clock_outlined,
-                    color: Color(0xffdc2626),
-                  ),
+                  Icon(Icons.lock_clock_outlined, color: context.palette.error),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -272,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Text(
                     _l10n?.confirmPasswordSecurityPrompt ?? 'For security, please enter your password to confirm account deletion.',
-                    style: const TextStyle(fontSize: 13, color: muted),
+                    style: TextStyle(fontSize: 13, color: context.appMuted),
                   ),
                   const SizedBox(height: 16),
                   TextField(
@@ -385,6 +384,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final auth = context.watch<AuthProvider>();
     final p = widget.expenseProvider;
     final l10n = _l10n;
+    final appearance = context.watch<ThemeProvider?>();
     final userEmail =
         auth.user?.email ??
         (auth.user?.isAnonymous == true
@@ -405,9 +405,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   ListTile(
                     contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: Color(0xffe6f3ed),
-                      child: Icon(Icons.person_outline, color: accent),
+                    leading: CircleAvatar(
+                      backgroundColor: context.palette.primaryContainer,
+                      child: Icon(
+                        Icons.person_outline,
+                        color: context.appAccent,
+                      ),
                     ),
                     title: Text(
                       userEmail,
@@ -419,7 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 'Anonymous guest account')
                           : (l10n?.authenticatedUser ??
                                 'Authenticated user • 2FA enabled'),
-                      style: const TextStyle(color: muted, fontSize: 13),
+                      style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),
                     trailing: OutlinedButton.icon(
                       onPressed:
@@ -443,6 +446,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
               icon: Icons.tune_rounded,
               child: Column(
                 children: [
+                  if (appearance != null) ...[
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.brightness_6_outlined),
+                      title: Text(l10n?.appearance ?? 'Appearance'),
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: DropdownButtonFormField<ThemeMode>(
+                        key: ValueKey((appearance.mode, _appearanceRevision)),
+                        initialValue: appearance.mode,
+                        decoration: InputDecoration(
+                          labelText: l10n?.appearance ?? 'Appearance',
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                            value: ThemeMode.system,
+                            child: Text(l10n?.themeSystem ?? 'Follow system'),
+                          ),
+                          DropdownMenuItem(
+                            value: ThemeMode.light,
+                            child: Text(l10n?.themeLight ?? 'Light'),
+                          ),
+                          DropdownMenuItem(
+                            value: ThemeMode.dark,
+                            child: Text(l10n?.themeDark ?? 'Dark'),
+                          ),
+                        ],
+                        onChanged: (mode) async {
+                          if (mode == null) return;
+                          try {
+                            await appearance.setMode(mode);
+                          } catch (_) {
+                            if (!context.mounted) return;
+                            setState(() => _appearanceRevision++);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n?.themeSaveFailed ?? 'Could not save appearance. Please try again.',
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    const Divider(height: 24),
+                  ],
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
@@ -455,7 +506,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 'Active: Showing Nepali dates and tithi')
                           : (l10n?.nepaliCalendarInactive ??
                                 'Inactive: Showing Gregorian (AD) calendar'),
-                      style: const TextStyle(color: muted, fontSize: 13),
+                      style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),
                     value: p.nepali,
                     onChanged: (val) => p.setCalendar(val),
@@ -467,14 +518,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: Text(
                       l10n?.baseCurrencySubtitle ??
                           'NPR — Nepalese Rupee (paisa-exact precision)',
-                      style: const TextStyle(color: muted, fontSize: 13),
+                      style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),
-                    trailing: const Chip(
-                      label: Text(
+                    trailing: Chip(
+                      label: const Text(
                         'NPR',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      backgroundColor: Color(0xfff3f4f6),
+                      backgroundColor: context.appPanel,
                     ),
                   ),
                 ],
@@ -499,9 +550,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             : (l10n.expensesRecorded),
                       ) ??
                       '${p.monthlyTransactions.length} in this period • ${p.income > 0 ? "Income & expenses recorded" : "Expenses recorded"}',
-                  style: const TextStyle(color: muted, fontSize: 13),
+                  style: TextStyle(color: context.appMuted, fontSize: 13),
                 ),
-                trailing: const Icon(Icons.cloud_done_outlined, color: accent),
+                trailing: Icon(
+                  Icons.cloud_done_outlined,
+                  color: context.appAccent,
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -514,13 +568,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 side: BorderSide(
                   color: _countdownActive
                       ? const Color(0xffef4444)
-                      : const Color(0xfffee2e2),
+                      : context.palette.errorContainer,
                   width: _countdownActive ? 2 : 1,
                 ),
               ),
-              color: _countdownActive
-                  ? const Color(0xfffff1f2)
-                  : const Color(0xfffffbfb),
+              color: Color.alphaBlend(
+                context.palette.error.withValues(
+                  alpha: _countdownActive ? 0.12 : 0.06,
+                ),
+                context.appSurface,
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(22),
                 child: Column(
@@ -532,17 +589,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _countdownActive
                               ? Icons.warning_rounded
                               : Icons.delete_forever_outlined,
-                          color: const Color(0xffdc2626),
+                          color: context.palette.error,
                           size: 24,
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
                             l10n?.dangerZone ?? 'Danger Zone',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xffb91c1c),
+                              color: context.palette.onErrorContainer,
                             ),
                           ),
                         ),
@@ -556,8 +613,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 24),
                           child: Column(
                             children: [
-                              const CircularProgressIndicator(
-                                color: Color(0xffdc2626),
+                              CircularProgressIndicator(
+                                color: context.palette.error,
                               ),
                               const SizedBox(height: 14),
                               Text(
@@ -575,28 +632,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.appSurface,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xfffecaca)),
+                          border: Border.all(
+                            color: context.palette.outlineVariant,
+                          ),
                         ),
                         child: Column(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.timer_outlined,
-                                  color: Color(0xffdc2626),
+                                  color: context.palette.error,
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   l10n?.dataWillBeDeletedIn1Min ??
                                       'Your data will be deleted in 1 minute',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xffb91c1c),
+                                    color: context.palette.onErrorContainer,
                                   ),
                                 ),
                               ],
@@ -604,11 +663,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 12),
                             Text(
                               _timerFormatted,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 44,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 4,
-                                color: Color(0xffdc2626),
+                                color: context.palette.error,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -617,16 +676,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               child: LinearProgressIndicator(
                                 value: _remainingSeconds / 60.0,
                                 minHeight: 8,
-                                color: const Color(0xffdc2626),
-                                backgroundColor: const Color(0xfffee2e2),
+                                color: context.palette.error,
+                                backgroundColor: context.palette.errorContainer,
                               ),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               l10n?.secondsRemaining(_remainingSeconds) ??
                                   '$_remainingSeconds seconds remaining before automatic permanent deletion.',
-                              style: const TextStyle(
-                                color: muted,
+                              style: TextStyle(
+                                color: context.appMuted,
                                 fontSize: 12,
                               ),
                             ),
@@ -648,7 +707,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               l10n?.cancelDeletion ?? 'Cancel Deletion',
                             ),
                             style: FilledButton.styleFrom(
-                              backgroundColor: accent,
+                              backgroundColor: context.appAccent,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
@@ -666,7 +725,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xffdc2626),
-                              side: const BorderSide(color: Color(0xffdc2626)),
+                              side: BorderSide(color: context.palette.error),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 18,
                                 vertical: 12,
@@ -678,7 +737,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ] else ...[
                       Text(
                         l10n?.deleteMyDataDesc ?? 'Permanently erase all your expense and income records from Cloud Firestore. Once deleted, your financial history cannot be recovered.',
-                        style: const TextStyle(color: muted, fontSize: 13),
+                        style: TextStyle(color: context.appMuted, fontSize: 13),
                       ),
                       const SizedBox(height: 16),
                       FilledButton.tonalIcon(
@@ -687,7 +746,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         label: Text(l10n?.deleteMyData ?? 'Delete My Data'),
                         style: FilledButton.styleFrom(
                           foregroundColor: const Color(0xffb91c1c),
-                          backgroundColor: const Color(0xfffee2e2),
+                          backgroundColor: context.palette.errorContainer,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 18,
                             vertical: 12,
@@ -696,38 +755,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
 
-                    const Divider(height: 36, color: Color(0xfffecaca)),
+                    Divider(height: 36, color: context.palette.outlineVariant),
                     Text(
                       l10n?.deleteAccount ?? 'Delete Account',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xffb91c1c),
+                        color: context.palette.onErrorContainer,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       l10n?.deleteAccountDesc ?? 'Permanently delete your account credentials from Firebase Authentication, all documents in Cloud Firestore (users/{uid}), and any uploaded media in Firebase Storage. This action cannot be undone.',
-                      style: const TextStyle(color: muted, fontSize: 13),
+                      style: TextStyle(color: context.appMuted, fontSize: 13),
                     ),
                     const SizedBox(height: 14),
                     if (_isDeletingAccount)
                       Row(
                         children: [
-                          const SizedBox(
+                          SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: Color(0xffdc2626),
+                              color: context.palette.error,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             l10n?.deletingAccountAndDataProgress ??
                                 'Permanently deleting account and all data...',
-                            style: const TextStyle(
-                              color: Color(0xffb91c1c),
+                            style: TextStyle(
+                              color: context.palette.onErrorContainer,
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -772,7 +831,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(16),
-      side: const BorderSide(color: Color(0xffe5e7eb)),
+      side: BorderSide(color: context.palette.outlineVariant),
     ),
     child: Padding(
       padding: const EdgeInsets.all(22),
@@ -781,7 +840,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: accent, size: 20),
+              Icon(icon, color: context.appAccent, size: 20),
               const SizedBox(width: 8),
               Text(
                 title,

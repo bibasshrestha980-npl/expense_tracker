@@ -44,8 +44,8 @@ class _SpendingStoriesState extends State<SpendingStories> {
         children: [
           Text(
             number,
-            style: const TextStyle(
-              color: accent,
+            style: TextStyle(
+              color: context.appAccent,
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 2,
@@ -125,16 +125,16 @@ class _SpendingStoriesState extends State<SpendingStories> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Tap a day to see its expenses. Darker tiles mean more recorded spending.',
-                style: TextStyle(color: muted),
+                style: TextStyle(color: context.appMuted),
               ),
               const SizedBox(height: 20),
               calendar(),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'An empty tile means no entry, not necessarily no spending.',
-                style: TextStyle(color: muted, fontSize: 11),
+                style: TextStyle(color: context.appMuted, fontSize: 11),
               ),
             ],
           ),
@@ -144,16 +144,16 @@ class _SpendingStoriesState extends State<SpendingStories> {
           '02 / THE REPEAT EDIT',
           'Small things, seen together',
           repeated.isEmpty
-              ? const Text(
+              ? Text(
                   'When the same expense title appears more than once in this month, it will show here. These are repeated entries, not detected subscriptions.',
-                  style: TextStyle(color: muted),
+                  style: TextStyle(color: context.appMuted),
                 )
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Matching titles in this month. These may be separate purchases, not subscriptions.',
-                      style: TextStyle(color: muted, fontSize: 12),
+                      style: TextStyle(color: context.appMuted, fontSize: 12),
                     ),
                     const SizedBox(height: 14),
                     ...repeated
@@ -166,7 +166,7 @@ class _SpendingStoriesState extends State<SpendingStories> {
                                 Container(
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: const Color(0xfff2eee6),
+                                    color: context.appPanel,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: const Icon(
@@ -191,8 +191,8 @@ class _SpendingStoriesState extends State<SpendingStories> {
                                       ),
                                       Text(
                                         '${group.length} entries this month',
-                                        style: const TextStyle(
-                                          color: muted,
+                                        style: TextStyle(
+                                          color: context.appMuted,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -227,9 +227,9 @@ class _SpendingStoriesState extends State<SpendingStories> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Explore how a smaller category total would change your recorded spending. This is a calculation, not a prediction or a saved budget.',
-                style: TextStyle(color: muted),
+                style: TextStyle(color: context.appMuted),
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
@@ -274,11 +274,11 @@ class _SpendingStoriesState extends State<SpendingStories> {
                 ],
               ),
               if (story.categoryTotal(category) == 0)
-                const Padding(
-                  padding: EdgeInsets.only(top: 16),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
                   child: Text(
                     'No expenses in this category for this month. Choose another category to explore.',
-                    style: TextStyle(color: muted),
+                    style: TextStyle(color: context.appMuted),
                   ),
                 ),
               const SizedBox(height: 16),
@@ -300,14 +300,14 @@ class _SpendingStoriesState extends State<SpendingStories> {
   Widget result(String label, String value) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(label, style: const TextStyle(color: muted, fontSize: 12)),
+      Text(label, style: TextStyle(color: context.appMuted, fontSize: 12)),
       const SizedBox(height: 6),
       Text(
         value,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w700,
-          color: accent,
+          color: context.appAccent,
         ),
       ),
     ],
@@ -341,7 +341,10 @@ class _SpendingStoriesState extends State<SpendingStories> {
                       child: Center(
                         child: Text(
                           day,
-                          style: const TextStyle(color: muted, fontSize: 12),
+                          style: TextStyle(
+                            color: context.appMuted,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -366,6 +369,13 @@ class _SpendingStoriesState extends State<SpendingStories> {
             final future = period
                 .day(day)
                 .isAfter(DateTime(now.year, now.month, now.day));
+            final cellColor = amount == 0
+                ? context.appPanel
+                : Color.lerp(
+                    context.palette.primaryContainer,
+                    context.appAccent,
+                    peak == 0 ? 0 : amount / peak,
+                  )!;
             return Tooltip(
               message:
                   '${bsDate(period.day(day))} (${DateFormat.MMMd().format(period.day(day))}): ${_cash(amount)} recorded',
@@ -379,26 +389,21 @@ class _SpendingStoriesState extends State<SpendingStories> {
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: amount == 0
-                          ? const Color(0xfff2f5f4)
-                          : Color.lerp(
-                              const Color(0xffb6dfcc),
-                              accent,
-                              peak == 0 ? 0 : amount / peak,
-                            ),
+                      color: cellColor,
                       borderRadius: BorderRadius.circular(9),
                       border: selectedDay == day
-                          ? Border.all(color: ink, width: 2)
+                          ? Border.all(color: context.appInk, width: 2)
                           : null,
                     ),
                     child: Text(
                       '$day',
                       style: TextStyle(
                         fontSize: 12,
-                        color: amount > peak / 2 && amount > 0
+                        color: amount == 0
+                            ? (future ? context.appMuted : context.appInk)
+                            : ThemeData.estimateBrightnessForColor(cellColor) ==
+                                  Brightness.dark
                             ? Colors.white
-                            : future
-                            ? const Color(0xff9faeaa)
                             : ink,
                       ),
                     ),
@@ -420,7 +425,7 @@ class _SpendingStoriesState extends State<SpendingStories> {
             margin: const EdgeInsets.only(top: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xfff6f8f7),
+              color: context.appPanel,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -432,9 +437,9 @@ class _SpendingStoriesState extends State<SpendingStories> {
                 ),
                 const SizedBox(height: 8),
                 if (entries.isEmpty)
-                  const Text(
+                  Text(
                     'No expenses recorded for this day.',
-                    style: TextStyle(color: muted),
+                    style: TextStyle(color: context.appMuted),
                   )
                 else
                   ...entries.map(

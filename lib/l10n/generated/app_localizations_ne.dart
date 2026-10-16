@@ -148,4 +148,20 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get confirm => 'पुष्टि गर्नुहोस्';
+
+  @override
+  String get appearance => 'देखावट';
+
+  @override
+  String get themeSystem => 'प्रणाली अनुसार';
+
+  @override
+  String get themeLight => 'उज्यालो';
+
+  @override
+  String get themeDark => 'अँध्यारो';
+
+  @override
+  String get themeSaveFailed =>
+      'देखावट सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।';
 }

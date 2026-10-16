@@ -25,10 +25,21 @@ Pocket is a Flutter personal finance project built with **Firebase Authenticatio
 | Calendar details | View available event and tithi data from external sources. |
 | Reports | Copy financial summaries and monthly transactions as CSV to the clipboard. |
 | Languages | English and Nepali localization resources. |
+| Appearance | Light, dark, or system theme, with your preference saved on this device. |
 | Authentication | Email/password, Google, and guest sign-in when enabled in Firebase. |
 | Storage | Firestore synchronization with user-scoped access rules. |
 
 Amounts are stored as integer paisa to avoid floating-point rounding errors in transaction totals.
+
+### Light and dark mode
+
+Open **Settings → Preferences → Appearance** and choose **Light**, **Dark**, or **Follow system**. Pocket remembers the choice on your device; **Follow system** adapts to your device's appearance setting.
+
+| Light | Dark |
+| --- | --- |
+| ![Pocket dashboard in light mode](docs/light-mode.png) | ![Pocket dashboard in dark mode](docs/dark-mode.png) |
+
+Previews use sample transaction data.
 
 ## Getting started
 

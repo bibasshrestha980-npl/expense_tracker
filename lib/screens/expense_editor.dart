@@ -104,9 +104,9 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Keep the details clear. Your totals and insights update automatically.',
-                    style: TextStyle(color: muted),
+                    style: TextStyle(color: context.appMuted),
                   ),
                   const SizedBox(height: 24),
                   TextFormField(

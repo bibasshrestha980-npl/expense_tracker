@@ -3,63 +3,84 @@ import 'package:flutter/material.dart';
 const ink = Color(0xff172c35);
 const muted = Color(0xff6c7d84);
 const accent = Color(0xff167d68);
-ThemeData pocketTheme() => ThemeData(
-  useMaterial3: true,
-  colorScheme: ColorScheme.fromSeed(seedColor: accent, surface: Colors.white),
-  scaffoldBackgroundColor: const Color(0xfff3f6f7),
-  textTheme: const TextTheme(
-    headlineLarge: TextStyle(
-      fontSize: 32,
-      fontWeight: FontWeight.w800,
-      color: ink,
-      letterSpacing: -1,
+
+extension PocketColors on BuildContext {
+  ColorScheme get palette => Theme.of(this).colorScheme;
+  Color get appInk => palette.onSurface;
+  Color get appMuted => palette.onSurfaceVariant;
+  Color get appAccent => palette.primary;
+  Color get appSurface => palette.surface;
+  Color get appPanel => palette.surfaceContainerLow;
+}
+
+ThemeData pocketTheme({Brightness brightness = Brightness.light}) {
+  final dark = brightness == Brightness.dark;
+  final scheme = ColorScheme.fromSeed(
+    seedColor: accent,
+    brightness: brightness,
+    surface: dark ? const Color(0xff162328) : Colors.white,
+  );
+  return ThemeData(
+    useMaterial3: true,
+    brightness: brightness,
+    colorScheme: scheme,
+    scaffoldBackgroundColor: dark
+        ? const Color(0xff0e191e)
+        : const Color(0xfff3f6f7),
+    textTheme: TextTheme(
+      headlineLarge: TextStyle(
+        fontSize: 32,
+        fontWeight: FontWeight.w800,
+        color: scheme.onSurface,
+        letterSpacing: -1,
+      ),
+      headlineSmall: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurface,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: scheme.onSurface,
+      ),
+      bodyMedium: TextStyle(fontSize: 14, color: scheme.onSurface, height: 1.5),
     ),
-    headlineSmall: TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.w700,
-      color: ink,
+    cardTheme: CardThemeData(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      color: scheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
     ),
-    titleLarge: TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.w700,
-      color: ink,
+    dividerTheme: DividerThemeData(color: scheme.outlineVariant, thickness: 1),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     ),
-    bodyMedium: TextStyle(fontSize: 14, color: ink, height: 1.5),
-  ),
-  cardTheme: CardThemeData(
-    elevation: 0,
-    margin: EdgeInsets.zero,
-    color: Colors.white,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(22),
-      side: const BorderSide(color: Color(0xffe5ecee)),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: scheme.surfaceContainerLow,
+      contentPadding: const EdgeInsets.all(18),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.outlineVariant),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.outlineVariant),
+      ),
     ),
-  ),
-  dividerTheme: const DividerThemeData(color: Color(0xffedf1f2), thickness: 1),
-  filledButtonTheme: FilledButtonThemeData(
-    style: FilledButton.styleFrom(
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: scheme.surface,
+      indicatorColor: scheme.primaryContainer,
     ),
-  ),
-  inputDecorationTheme: InputDecorationTheme(
-    filled: true,
-    fillColor: const Color(0xfff8fafb),
-    contentPadding: const EdgeInsets.all(18),
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xffdce5e8)),
-    ),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xffdce5e8)),
-    ),
-  ),
-  navigationBarTheme: const NavigationBarThemeData(
-    backgroundColor: Colors.white,
-    indicatorColor: Color(0xffdcefe9),
-  ),
-);
+  );
+}
 
 IconData categoryIcon(String value) => switch (value) {
   'Food' => Icons.restaurant_rounded,

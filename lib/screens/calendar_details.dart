@@ -33,7 +33,7 @@ class _Details extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xfff3f6fa),
+        color: context.appPanel,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -47,12 +47,12 @@ class _Details extends StatelessWidget {
           if (state.loading)
             const LinearProgressIndicator()
           else if (state.error != null) ...[
-            Text(state.error!, style: const TextStyle(color: muted)),
+            Text(state.error!, style: TextStyle(color: context.appMuted)),
             TextButton(onPressed: state.reload, child: const Text('Retry')),
           ] else if (state.data == null) ...[
             Text(
               'The calendar sources have no published data for ${state.year}/${state.month}. Expense tracking and date selection still work.',
-              style: const TextStyle(color: muted, fontSize: 12),
+              style: TextStyle(color: context.appMuted, fontSize: 12),
             ),
             TextButton(
               onPressed: state.reload,
@@ -60,14 +60,14 @@ class _Details extends StatelessWidget {
             ),
           ] else ...[
             if (day == null)
-              const Text(
+              Text(
                 'Select a calendar day to see its tithi, events and holiday information.',
-                style: TextStyle(color: muted),
+                style: TextStyle(color: context.appMuted),
               )
             else if (info == null)
-              const Text(
+              Text(
                 'No details were published for this day.',
-                style: TextStyle(color: muted),
+                style: TextStyle(color: context.appMuted),
               )
             else ...[
               Text(
@@ -89,15 +89,15 @@ class _Details extends StatelessWidget {
                   ),
                 ),
               if (info.event.isEmpty && !info.holiday)
-                const Text(
+                Text(
                   'No event or holiday listed.',
-                  style: TextStyle(color: muted, fontSize: 12),
+                  style: TextStyle(color: context.appMuted, fontSize: 12),
                 ),
             ],
             const SizedBox(height: 10),
             Text(
               'Source: ${state.data!.source}',
-              style: const TextStyle(color: muted, fontSize: 10),
+              style: TextStyle(color: context.appMuted, fontSize: 10),
             ),
           ],
         ],

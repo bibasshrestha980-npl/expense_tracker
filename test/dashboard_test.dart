@@ -73,60 +73,68 @@ class TestExpenses extends ChangeNotifier implements ExpenseProvider {
 }
 
 void main() {
-  for (final width in [360.0, 1440.0]) {
-    testWidgets('Dashboard navigation and layout at width $width', (
-      tester,
-    ) async {
-      tester.view.physicalSize = Size(width, 1000);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider<AuthProvider>(create: (_) => TestAuth()),
-            ChangeNotifierProvider<ExpenseProvider>(
-              create: (_) => TestExpenses(),
+  for (final brightness in Brightness.values) {
+    for (final width in [360.0, 1440.0]) {
+      testWidgets(
+        'Dashboard navigation and layout at width $width in $brightness',
+        (tester) async {
+          tester.view.physicalSize = Size(width, 1000);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          await tester.pumpWidget(
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider<AuthProvider>(create: (_) => TestAuth()),
+                ChangeNotifierProvider<ExpenseProvider>(
+                  create: (_) => TestExpenses(),
+                ),
+              ],
+              child: MaterialApp(
+                theme: pocketTheme(brightness: brightness),
+                home: const Dashboard(),
+              ),
             ),
-          ],
-          child: MaterialApp(theme: pocketTheme(), home: const Dashboard()),
-        ),
+          );
+          expect(find.text('Recorded balance'), findsOneWidget);
+          await tester.tap(find.text('Nepali (BS)'));
+          await tester.pumpAndSettle();
+          expect(find.text('Ashwin 2083 BS'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+          await tester.tap(
+            find.descendant(
+              of: find.byType(width < 950 ? NavigationBar : ListTile),
+              matching: width < 950
+                  ? find.byIcon(Icons.receipt_long_outlined)
+                  : find.text('Transactions'),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('Transaction history'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+          await tester.tap(
+            find.descendant(
+              of: find.byType(width < 950 ? NavigationBar : ListTile),
+              matching: width < 950
+                  ? find.byIcon(Icons.bar_chart_rounded)
+                  : find.text('Insights'),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('Daily spending'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+          await tester.ensureVisible(find.text('Add expense'));
+          await tester.tap(find.text('Add expense'));
+          await tester.pumpAndSettle();
+          await tester.ensureVisible(
+            find.byIcon(Icons.calendar_today_outlined),
+          );
+          await tester.tap(find.byIcon(Icons.calendar_today_outlined));
+          await tester.pumpAndSettle();
+          expect(find.textContaining('2083'), findsWidgets);
+          expect(tester.takeException(), isNull);
+        },
       );
-      expect(find.text('Recorded balance'), findsOneWidget);
-      await tester.tap(find.text('Nepali (BS)'));
-      await tester.pumpAndSettle();
-      expect(find.text('Ashwin 2083 BS'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.tap(
-        find.descendant(
-          of: find.byType(width < 950 ? NavigationBar : ListTile),
-          matching: width < 950
-              ? find.byIcon(Icons.receipt_long_outlined)
-              : find.text('Transactions'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Transaction history'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.tap(
-        find.descendant(
-          of: find.byType(width < 950 ? NavigationBar : ListTile),
-          matching: width < 950
-              ? find.byIcon(Icons.bar_chart_rounded)
-              : find.text('Insights'),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.text('Daily spending'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.ensureVisible(find.text('Add expense'));
-      await tester.tap(find.text('Add expense'));
-      await tester.pumpAndSettle();
-      await tester.ensureVisible(find.byIcon(Icons.calendar_today_outlined));
-      await tester.tap(find.byIcon(Icons.calendar_today_outlined));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('2083'), findsWidgets);
-      expect(tester.takeException(), isNull);
-    });
+    }
   }
 }

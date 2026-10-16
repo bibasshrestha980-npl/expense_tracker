@@ -122,21 +122,21 @@ class _DashboardState extends State<Dashboard> {
             if (wide)
               Container(
                 width: 260,
-                color: Colors.white,
+                color: context.appSurface,
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 14),
-                    const Row(
+                    Row(
                       children: [
                         Icon(
                           Icons.account_balance_wallet_rounded,
-                          color: accent,
+                          color: context.appAccent,
                           size: 30,
                         ),
-                        SizedBox(width: 10),
-                        Text(
+                        const SizedBox(width: 10),
+                        const Text(
                           'pocket',
                           style: TextStyle(
                             fontSize: 29,
@@ -147,12 +147,12 @@ class _DashboardState extends State<Dashboard> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'YOUR MONEY, MADE CLEAR',
                       style: TextStyle(
                         fontSize: 10,
                         letterSpacing: 1.5,
-                        color: muted,
+                        color: context.appMuted,
                       ),
                     ),
                     const SizedBox(height: 48),
@@ -167,8 +167,8 @@ class _DashboardState extends State<Dashboard> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             selected: page == i,
-                            selectedTileColor: const Color(0xffe6f3ed),
-                            selectedColor: accent,
+                            selectedTileColor: context.palette.primaryContainer,
+                            selectedColor: context.appAccent,
                             leading: Icon(
                               [
                                 Icons.space_dashboard_outlined,
@@ -187,30 +187,36 @@ class _DashboardState extends State<Dashboard> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xfff3f7f5),
+                        color: context.palette.primaryContainer,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Column(
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.lightbulb_outline, color: accent),
-                          SizedBox(height: 10),
-                          Text(
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: context.appAccent,
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
                             'Make every rupee count',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(height: 6),
+                          const SizedBox(height: 6),
                           Text(
                             'Log the small things. Understand the bigger picture.',
-                            style: TextStyle(color: muted, fontSize: 12),
+                            style: TextStyle(
+                              color: context.appMuted,
+                              fontSize: 12,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Personal expense tracker',
-                      style: TextStyle(fontSize: 11, color: muted),
+                      style: TextStyle(fontSize: 11, color: context.appMuted),
                     ),
                   ],
                 ),
@@ -219,7 +225,7 @@ class _DashboardState extends State<Dashboard> {
               child: Column(
                 children: [
                   Container(
-                    color: Colors.white,
+                    color: context.appSurface,
                     padding: EdgeInsets.symmetric(
                       horizontal: wide ? 36 : 18,
                       vertical: 14,
@@ -227,9 +233,9 @@ class _DashboardState extends State<Dashboard> {
                     child: Row(
                       children: [
                         if (!wide) ...[
-                          const Icon(
+                          Icon(
                             Icons.account_balance_wallet_rounded,
-                            color: accent,
+                            color: context.appAccent,
                           ),
                           const SizedBox(width: 10),
                         ],
@@ -262,27 +268,30 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ],
                         if (wide) ...[
-                          const Icon(
+                          Icon(
                             Icons.lock_outline,
                             size: 15,
-                            color: muted,
+                            color: context.appMuted,
                           ),
                           const SizedBox(width: 6),
-                          const Text(
+                          Text(
                             'Personal account',
-                            style: TextStyle(color: muted, fontSize: 12),
+                            style: TextStyle(
+                              color: context.appMuted,
+                              fontSize: 12,
+                            ),
                           ),
                           const SizedBox(width: 10),
                         ],
                         PopupMenuButton<String>(
                           tooltip: 'Account',
-                          icon: const CircleAvatar(
+                          icon: CircleAvatar(
                             radius: 18,
-                            backgroundColor: Color(0xffe6f3ed),
+                            backgroundColor: context.palette.primaryContainer,
                             child: Icon(
                               Icons.person_outline,
                               size: 21,
-                              color: accent,
+                              color: context.appAccent,
                             ),
                           ),
                           itemBuilder: (_) => [
@@ -353,7 +362,9 @@ class _DashboardState extends State<Dashboard> {
                                           'Turn your everyday expenses into useful insights.',
                                           'Manage calendar, currency, and data privacy options.',
                                         ][page],
-                                        style: const TextStyle(color: muted),
+                                        style: TextStyle(
+                                          color: context.appMuted,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -400,7 +411,7 @@ class _DashboardState extends State<Dashboard> {
                                   children: [
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: context.appSurface,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Row(
@@ -425,9 +436,9 @@ class _DashboardState extends State<Dashboard> {
                                                 p.nepali
                                                     ? '${DateFormat.yMMMM().format(p.period.anchor)} AD'
                                                     : '${NepaliDateFormat.yMMMM().format(toBs(p.period.anchor))} BS',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 10,
-                                                  color: muted,
+                                                  color: context.appMuted,
                                                 ),
                                               ),
                                             ],
@@ -444,10 +455,10 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                     const Spacer(),
                                     if (wide)
-                                      const Text(
+                                      Text(
                                         'Currency: Nepalese Rupee (NPR)',
                                         style: TextStyle(
-                                          color: muted,
+                                          color: context.appMuted,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -480,13 +491,13 @@ class _DashboardState extends State<Dashboard> {
                                     const SizedBox(height: 12),
                                     Text(
                                       'Monthly net: ${money(p.monthlyNet)}  |  ${p.monthlyTransactions.length} transactions',
-                                      style: const TextStyle(color: muted),
+                                      style: TextStyle(color: context.appMuted),
                                     ),
                                     const SizedBox(height: 8),
-                                    const Text(
+                                    Text(
                                       'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
                                       style: TextStyle(
-                                        color: muted,
+                                        color: context.appMuted,
                                         fontSize: 12,
                                       ),
                                     ),
@@ -545,9 +556,11 @@ class _DashboardState extends State<Dashboard> {
                                             ),
                                           ),
                                           const SizedBox(height: 10),
-                                          const Text(
+                                          Text(
                                             'Comparisons use whole calendar months. A month still in progress may have a lower total.',
-                                            style: TextStyle(color: muted),
+                                            style: TextStyle(
+                                              color: context.appMuted,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -693,10 +706,10 @@ class _DashboardState extends State<Dashboard> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: accent),
+              Icon(icon, size: 20, color: context.appAccent),
               const SizedBox(width: 10),
               Flexible(
-                child: Text(title, style: const TextStyle(color: muted)),
+                child: Text(title, style: TextStyle(color: context.appMuted)),
               ),
             ],
           ),
@@ -709,7 +722,10 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           const SizedBox(height: 12),
-          Text(subtitle, style: const TextStyle(fontSize: 12, color: muted)),
+          Text(
+            subtitle,
+            style: TextStyle(fontSize: 12, color: context.appMuted),
+          ),
         ],
       ),
     ),
@@ -724,7 +740,7 @@ class _DashboardState extends State<Dashboard> {
           maxValue == 0
               ? 'Add an expense to start your spending timeline.'
               : 'Highest day: ${money(maxValue)}',
-          style: const TextStyle(color: muted, fontSize: 12),
+          style: TextStyle(color: context.appMuted, fontSize: 12),
         ),
         const SizedBox(height: 24),
         SizedBox(
@@ -744,7 +760,9 @@ class _DashboardState extends State<Dashboard> {
                           ? 4
                           : math.max(4, days[i] / maxValue * 155),
                       decoration: BoxDecoration(
-                        color: days[i] == 0 ? const Color(0xffedf3f0) : accent,
+                        color: days[i] == 0
+                            ? context.appPanel
+                            : context.appAccent,
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(5),
                         ),
@@ -760,14 +778,14 @@ class _DashboardState extends State<Dashboard> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('01', style: TextStyle(color: muted, fontSize: 11)),
-            const Text(
+            Text('01', style: TextStyle(color: context.appMuted, fontSize: 11)),
+            Text(
               'Day of month',
-              style: TextStyle(color: muted, fontSize: 11),
+              style: TextStyle(color: context.appMuted, fontSize: 11),
             ),
             Text(
               '${days.length}',
-              style: const TextStyle(color: muted, fontSize: 11),
+              style: TextStyle(color: context.appMuted, fontSize: 11),
             ),
           ],
         ),
@@ -779,12 +797,12 @@ class _DashboardState extends State<Dashboard> {
     final ranked = categories.where((c) => p.categoryTotal(c) > 0).toList()
       ..sort((a, b) => p.categoryTotal(b).compareTo(p.categoryTotal(a)));
     if (ranked.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
         height: 230,
         child: Center(
           child: Text(
             'Your categories will appear here.',
-            style: TextStyle(color: muted),
+            style: TextStyle(color: context.appMuted),
           ),
         ),
       );
@@ -808,7 +826,7 @@ class _DashboardState extends State<Dashboard> {
                       const SizedBox(width: 12),
                       Text(
                         money(p.categoryTotal(c)),
-                        style: const TextStyle(fontSize: 12, color: muted),
+                        style: TextStyle(fontSize: 12, color: context.appMuted),
                       ),
                     ],
                   ),
@@ -818,7 +836,7 @@ class _DashboardState extends State<Dashboard> {
                     minHeight: 6,
                     borderRadius: BorderRadius.circular(6),
                     color: categoryColor(c),
-                    backgroundColor: const Color(0xfff0f3f4),
+                    backgroundColor: context.appPanel,
                   ),
                 ],
               ),
@@ -894,7 +912,7 @@ class _DashboardState extends State<Dashboard> {
                 Expanded(
                   child: Text(
                     '${items.length} results',
-                    style: const TextStyle(color: muted),
+                    style: TextStyle(color: context.appMuted),
                   ),
                 ),
                 DropdownButton<String>(
@@ -928,10 +946,10 @@ class _DashboardState extends State<Dashboard> {
               padding: const EdgeInsets.symmetric(vertical: 36),
               child: Column(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.receipt_long_outlined,
                     size: 42,
-                    color: muted,
+                    color: context.appMuted,
                   ),
                   const SizedBox(height: 14),
                   Text(
@@ -944,10 +962,10 @@ class _DashboardState extends State<Dashboard> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Add money or an expense, or try another month or filter.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: muted),
+                    style: TextStyle(color: context.appMuted),
                   ),
                 ],
               ),
@@ -993,8 +1011,8 @@ class _DashboardState extends State<Dashboard> {
                                 const SizedBox(height: 3),
                                 Text(
                                   '${e.category} · ${formatBsAndAdDate(e.date)}',
-                                  style: const TextStyle(
-                                    color: muted,
+                                  style: TextStyle(
+                                    color: context.appMuted,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -1003,8 +1021,8 @@ class _DashboardState extends State<Dashboard> {
                                     e.note,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: muted,
+                                    style: TextStyle(
+                                      color: context.appMuted,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -1026,12 +1044,12 @@ class _DashboardState extends State<Dashboard> {
                             tooltip: 'Transaction actions',
                             onSelected: (v) =>
                                 v == 'edit' ? edit(p, e) : remove(p, e),
-                            itemBuilder: (_) => const [
-                              PopupMenuItem(
+                            itemBuilder: (_) => [
+                              const PopupMenuItem(
                                 value: 'edit',
                                 child: Text('Edit transaction'),
                               ),
-                              PopupMenuItem(
+                              const PopupMenuItem(
                                 value: 'delete',
                                 child: Text('Delete transaction'),
                               ),

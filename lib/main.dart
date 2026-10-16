@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
+import 'providers/theme_provider.dart';
 import 'providers/expense_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/dashboard.dart';
@@ -29,7 +30,14 @@ Future<void> main() async {
   } catch (_) {
     setupError = 'Firebase could not start. Check your connection and follow README.md to configure Firebase, then restart.';
   }
-  runApp(ExpenseApp(setupError: setupError));
+  final themeProvider = ThemeProvider();
+  await themeProvider.load();
+  runApp(
+    ChangeNotifierProvider.value(
+      value: themeProvider,
+      child: ExpenseApp(setupError: setupError),
+    ),
+  );
 }
 
 class ExpenseApp extends StatelessWidget {
@@ -42,6 +50,8 @@ class ExpenseApp extends StatelessWidget {
           title: 'Pocket • Expense Tracker',
           debugShowCheckedModeBanner: false,
           theme: pocketTheme(),
+          darkTheme: pocketTheme(brightness: Brightness.dark),
+          themeMode: context.watch<ThemeProvider?>()?.mode ?? ThemeMode.system,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
@@ -74,6 +84,9 @@ class ExpenseApp extends StatelessWidget {
             title: 'Pocket • Expense Tracker',
             debugShowCheckedModeBanner: false,
             theme: pocketTheme(),
+            darkTheme: pocketTheme(brightness: Brightness.dark),
+            themeMode:
+                context.watch<ThemeProvider?>()?.mode ?? ThemeMode.system,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             routes: {'/login': (_) => const AuthGate()},

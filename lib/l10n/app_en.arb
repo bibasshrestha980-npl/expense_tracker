@@ -52,5 +52,10 @@
   "password": "Password",
   "passwordIsRequired": "Password is required",
   "noEmailAssociated": "No email associated with account",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "appearance": "Appearance",
+  "themeSystem": "Follow system",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSaveFailed": "Could not save appearance. Please try again."
 }

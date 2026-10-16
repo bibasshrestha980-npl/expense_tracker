@@ -108,12 +108,12 @@ class ReportDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.summarize_outlined, color: accent),
+          Icon(Icons.summarize_outlined, color: context.appAccent),
           const SizedBox(width: 10),
-          Expanded(
+          const Expanded(
             child: Text(
               'Monthly Financial Report',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -132,13 +132,13 @@ class ReportDialog extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: const Color(0xffe6f3ed),
+                  color: context.palette.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   periodName,
-                  style: const TextStyle(
-                    color: accent,
+                  style: TextStyle(
+                    color: context.appAccent,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
@@ -151,27 +151,30 @@ class ReportDialog extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _metricBox(
+                      context,
                       'Income',
                       money(income),
-                      Colors.green.shade700,
+                      context.appAccent,
                       Icons.arrow_downward_rounded,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _metricBox(
+                      context,
                       'Expenses',
                       money(totalExpense),
-                      Colors.red.shade700,
+                      context.palette.error,
                       Icons.arrow_upward_rounded,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _metricBox(
+                      context,
                       'Net Savings',
                       money(netSavings),
-                      accent,
+                      context.appAccent,
                       Icons.savings_rounded,
                     ),
                   ),
@@ -181,7 +184,7 @@ class ReportDialog extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xfff5f7f8),
+                  color: context.appPanel,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -193,9 +196,9 @@ class ReportDialog extends StatelessWidget {
                     ),
                     Text(
                       '$savingsRate%',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: accent,
+                        color: context.appAccent,
                       ),
                     ),
                   ],
@@ -234,8 +237,9 @@ class ReportDialog extends StatelessWidget {
                       const SizedBox(height: 4),
                       LinearProgressIndicator(
                         value: pct.clamp(0.0, 1.0),
-                        backgroundColor: Colors.grey.shade200,
-                        color: accent,
+                        backgroundColor:
+                            context.palette.surfaceContainerHighest,
+                        color: context.appAccent,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ],
@@ -265,7 +269,13 @@ class ReportDialog extends StatelessWidget {
     );
   }
 
-  Widget _metricBox(String label, String value, Color color, IconData icon) {
+  Widget _metricBox(
+    BuildContext context,
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(

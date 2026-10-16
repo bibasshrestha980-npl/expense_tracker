@@ -41,5 +41,10 @@
   "password": "पासवर्ड",
   "passwordIsRequired": "पासवर्ड आवश्यक छ",
   "noEmailAssociated": "खातामा कुनै इमेल जोडिएको छैन",
-  "confirm": "पुष्टि गर्नुहोस्"
+  "confirm": "पुष्टि गर्नुहोस्",
+  "appearance": "देखावट",
+  "themeSystem": "प्रणाली अनुसार",
+  "themeLight": "उज्यालो",
+  "themeDark": "अँध्यारो",
+  "themeSaveFailed": "देखावट सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"
 }
