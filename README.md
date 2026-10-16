@@ -27,6 +27,7 @@ Pocket is a Flutter personal finance project built with **Firebase Authenticatio
 | Languages | English and Nepali localization resources. |
 | Appearance | Light, dark, or system theme, with your preference saved on this device. |
 | Authentication | Email/password, Google, and guest sign-in when enabled in Firebase. |
+| Email verification | Firebase emails a verification link; unverified accounts confirm their email before entering the dashboard. |
 | Storage | Firestore synchronization with user-scoped access rules. |
 
 Amounts are stored as integer paisa to avoid floating-point rounding errors in transaction totals.
@@ -71,6 +72,7 @@ In Firebase Console:
 2. Enable Email/Password authentication.
 3. Enable Google and Anonymous authentication if you want those options.
 4. Configure authorized web domains and the platform settings needed for Google sign-in.
+5. Review the verification email template under **Authentication → Templates**. Email/password users receive a link at their registered address (including Gmail). They open the link, return to Pocket, and choose **I've verified my email**. The app offers resend with a 60-second cooldown and displays delivery-request errors.
 
 The checked-in Firebase configuration identifies the original project. Generate your own configuration for a separate deployment.
 
@@ -131,7 +133,7 @@ Transactions live at `users/{userId}/expenses/{expenseId}`. Firestore rules requ
 ## Current limitations
 
 - Calendar event coverage depends on the external source. Missing event data does not mean a date or transaction is missing.
-- The on-screen six-digit verification flow is a **demonstration**, not production multi-factor authentication. Firebase email verification is a separate flow.
+- Email verification confirms ownership of the registered address; it is not multi-factor authentication. Delivery depends on Firebase email quotas and the recipient's spam filters.
 - Guest access should not be treated as a durable account across devices.
 - Platform folders alone do not establish that every authentication flow has been tested on every platform.
 

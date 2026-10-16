@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -14,8 +13,6 @@ class AuthProvider extends ChangeNotifier {
   StreamSubscription<User?>? _subscription;
   User? user;
   bool loading = true;
-  bool _isCodeVerified = false;
-  String? _verificationCode;
 
   FirebaseAuth get _auth => _customAuth ?? FirebaseAuth.instance;
 
@@ -24,13 +21,8 @@ class AuthProvider extends ChangeNotifier {
       _expenseRepository = expenseRepository ?? FirestoreExpenseRepository() {
     try {
       _subscription = _auth.authStateChanges().listen((value) {
-        final prevUser = user;
         user = value;
         loading = false;
-        if (value != null &&
-            (prevUser?.uid != value.uid || _verificationCode == null)) {
-          _generateVerificationCode();
-        }
         notifyListeners();
       });
     } catch (_) {
@@ -39,42 +31,25 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  bool get isCodeVerified => _isCodeVerified;
-  String? get currentVerificationCode => _verificationCode;
+  bool get requiresEmailVerification =>
+      user != null && !user!.isAnonymous && !user!.emailVerified;
 
-  void _generateVerificationCode() {
-    _verificationCode = (100000 + math.Random().nextInt(900000)).toString();
-    _isCodeVerified = false;
-    try {
-      user?.sendEmailVerification().catchError((_) {});
-    } catch (_) {}
-  }
-
-  Future<void> sendVerificationCode() async {
-    _generateVerificationCode();
-    notifyListeners();
-  }
-
-  bool verifyCode(String inputCode) {
-    if (_verificationCode != null && inputCode.trim() == _verificationCode) {
-      _isCodeVerified = true;
-      notifyListeners();
-      return true;
-    }
-    return false;
+  Future<void> sendVerificationEmail() async {
+    final current = _auth.currentUser;
+    if (current == null || current.isAnonymous || current.emailVerified) return;
+    await current.sendEmailVerification();
   }
 
   Future<bool> checkEmailLinkVerified() async {
-    try {
-      await user?.reload();
-      user = _auth.currentUser;
-      if (user?.emailVerified == true) {
-        _isCodeVerified = true;
-        notifyListeners();
-        return true;
-      }
-    } catch (_) {}
-    return false;
+    final current = _auth.currentUser;
+    if (current == null) return false;
+    await current.reload();
+    final refreshed = _auth.currentUser;
+    if (refreshed == null || refreshed.uid != current.uid) return false;
+    if (refreshed.emailVerified) await refreshed.getIdToken(true);
+    user = refreshed;
+    notifyListeners();
+    return refreshed.emailVerified;
   }
 
   /// Preloads guest expenses while the anonymous auth session is still valid.
@@ -105,7 +80,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signIn(String email, String password) async {
-    _isCodeVerified = false;
     final guest = user;
     final guestExpenses = await _fetchGuestExpenses(guest);
 
@@ -126,12 +100,11 @@ class AuthProvider extends ChangeNotifier {
       );
     }
 
-    _generateVerificationCode();
+    user = _auth.currentUser;
     notifyListeners();
   }
 
   Future<void> register(String email, String password) async {
-    _isCodeVerified = false;
     final guest = user;
 
     // First attempt in-place linking if the user is currently anonymous
@@ -143,7 +116,6 @@ class AuthProvider extends ChangeNotifier {
         );
         await guest.linkWithCredential(credential);
         user = _auth.currentUser;
-        _generateVerificationCode();
         notifyListeners();
         return;
       } on FirebaseAuthException catch (e) {
@@ -172,12 +144,11 @@ class AuthProvider extends ChangeNotifier {
       );
     }
 
-    _generateVerificationCode();
+    user = _auth.currentUser;
     notifyListeners();
   }
 
   Future<void> signInWithGoogle() async {
-    _isCodeVerified = false;
     final guest = user;
     final googleProvider = GoogleAuthProvider();
 
@@ -189,7 +160,6 @@ class AuthProvider extends ChangeNotifier {
           await guest.linkWithProvider(googleProvider);
         }
         user = _auth.currentUser;
-        _generateVerificationCode();
         notifyListeners();
         return;
       } on FirebaseAuthException catch (e) {
@@ -219,7 +189,7 @@ class AuthProvider extends ChangeNotifier {
       );
     }
 
-    _generateVerificationCode();
+    user = _auth.currentUser;
     notifyListeners();
   }
 
@@ -232,7 +202,6 @@ class AuthProvider extends ChangeNotifier {
     );
     await current.linkWithCredential(credential);
     user = _auth.currentUser;
-    _generateVerificationCode();
     notifyListeners();
   }
 
@@ -246,14 +215,12 @@ class AuthProvider extends ChangeNotifier {
       await current.linkWithProvider(googleProvider);
     }
     user = _auth.currentUser;
-    _generateVerificationCode();
     notifyListeners();
   }
 
   Future<void> signInAnonymously() async {
-    _isCodeVerified = false;
     await _auth.signInAnonymously();
-    _generateVerificationCode();
+    user = _auth.currentUser;
     notifyListeners();
   }
 
@@ -261,8 +228,6 @@ class AuthProvider extends ChangeNotifier {
       _auth.sendPasswordResetEmail(email: email.trim());
 
   Future<void> signOut() async {
-    _isCodeVerified = false;
-    _verificationCode = null;
     await _auth.signOut();
   }
 
@@ -272,8 +237,6 @@ class AuthProvider extends ChangeNotifier {
   }) async {
     final service = deletionService ?? AccountDeletionService(auth: _auth);
     await service.deleteAccount(onReauthenticate: onReauthenticate);
-    _isCodeVerified = false;
-    _verificationCode = null;
     user = null;
     notifyListeners();
   }

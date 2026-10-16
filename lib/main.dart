@@ -12,7 +12,7 @@ import 'providers/theme_provider.dart';
 import 'providers/expense_provider.dart';
 import 'screens/auth_screen.dart';
 import 'screens/dashboard.dart';
-import 'screens/verify_code_screen.dart';
+import 'screens/verify_email_screen.dart';
 import 'theme.dart';
 
 Future<void> main() async {
@@ -104,7 +104,7 @@ class AuthGate extends StatelessWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (auth.user == null) return const AuthScreen();
-    if (!auth.isCodeVerified) return const VerifyCodeScreen();
+    if (auth.requiresEmailVerification) return const VerifyEmailScreen();
 
     return ChangeNotifierProvider(
       key: ValueKey(auth.user!.uid),
