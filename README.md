@@ -16,6 +16,8 @@ Pocket is a Flutter personal finance project built with **Firebase Authenticatio
 
 ## Features
 
+**Start here:** [App walkthrough](docs/DEMO.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) · [Contribution guide](CONTRIBUTING.md)
+
 | Area | What you can do |
 | --- | --- |
 | Transactions | Record, edit, search, and delete income and expenses with categories and notes. |

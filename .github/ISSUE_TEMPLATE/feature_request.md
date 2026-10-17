@@ -17,3 +17,6 @@ A clear and concise description of any alternative solutions or features you've 
 
 **Additional context**
 Add any other context, mockups, or screenshots about the feature request here.
+
+**Success criteria**
+Give a concrete example of what a user should be able to do when this is complete.

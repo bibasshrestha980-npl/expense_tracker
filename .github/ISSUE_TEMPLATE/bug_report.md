@@ -22,6 +22,11 @@ A clear and concise description of what you expected to happen.
 **Device / Environment:**
  - OS: [e.g. Android 14, iOS 17, Windows 11, Chrome]
  - Flutter version: [e.g. 3.47.0]
+ - App commit: [output of git rev-parse --short HEAD]
+ - Language, theme, and calendar mode: [English/Nepali, light/dark, BS/AD]
+
+**Reproduction data**
+Use fictional amounts and records. Remove email addresses, credentials, tokens, and personal financial information from screenshots and logs.
 
 **Additional context**
 Add any other context, logs, or screenshots about the problem here.
