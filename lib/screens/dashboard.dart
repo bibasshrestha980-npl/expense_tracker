@@ -152,6 +152,8 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final localeProvider = context.watch<LocaleProvider?>();
+    final isNepali = localeProvider?.isNepali ?? false;
     final titles = getTitles(l10n);
     final p = context.watch<ExpenseProvider>();
     final auth = context.watch<AuthProvider>();
@@ -368,13 +370,11 @@ class _DashboardState extends State<Dashboard> {
                         ],
                         if (wide) ...[
                           IconButton(
-                            tooltip:
-                                context.watch<LocaleProvider?>()?.isNepali ==
-                                        true
-                                    ? (l10n?.switchToEnglish ??
-                                        'Switch to English')
-                                    : (l10n?.switchToNepali ??
-                                        'नेपालीमा बदल्नुहोस्'),
+                            tooltip: isNepali
+                                ? (l10n?.switchToEnglish ??
+                                    'Switch to English')
+                                : (l10n?.switchToNepali ??
+                                    'नेपालीमा बदल्नुहोस्'),
                             icon: const Icon(Icons.translate_rounded),
                             onPressed: () {
                               final lp = context.read<LocaleProvider?>();
@@ -401,7 +401,13 @@ class _DashboardState extends State<Dashboard> {
                               enabled: false,
                               child: Text(
                                 auth.user?.email ??
-                                    (l10n?.yourAccount ?? 'Your account'),
+                                    (auth.user?.isAnonymous == true
+                                        ? (l10n?.guestSession ??
+                                            'Guest Session')
+                                        : (l10n?.yourAccount ??
+                                            'Your account')),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             PopupMenuItem(
@@ -410,14 +416,15 @@ class _DashboardState extends State<Dashboard> {
                                 children: [
                                   const Icon(Icons.translate_rounded, size: 18),
                                   const SizedBox(width: 10),
-                                  Text(
-                                    context
-                                                .watch<LocaleProvider?>()
-                                                ?.isNepali ==
-                                            true
-                                        ? (l10n?.languageEnglish ?? 'English')
-                                        : (l10n?.languageNepali ??
-                                            'नेपाली (Nepali)'),
+                                  Expanded(
+                                    child: Text(
+                                      isNepali
+                                          ? (l10n?.languageEnglish ?? 'English')
+                                          : (l10n?.languageNepali ??
+                                              'नेपाली (Nepali)'),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),

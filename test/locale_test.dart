@@ -205,8 +205,16 @@ void main() {
       expect(find.text('रकम थप्नुहोस्'), findsOneWidget); // Add money
       expect(find.text('खर्च थप्नुहोस्'), findsOneWidget); // Add expense
       expect(find.text('अलिकति स्पष्टता। धेरै नियन्त्रण।'), findsOneWidget); // Hero title
-      expect(find.text('नेपाली (वि.सं.)'), findsOneWidget); // Calendar segment
       expect(find.text('प्रतिवेदन सेयर'), findsOneWidget); // Share report
+
+      // Open Account popup menu and verify it works without error
+      await tester.tap(find.byTooltip('Account'));
+      await tester.pumpAndSettle();
+      expect(find.text('English (अंग्रेजी)'), findsOneWidget);
+      expect(find.text('तपाईंको खाता'), findsOneWidget);
+      // Dismiss popup menu
+      await tester.tapAt(const Offset(10, 10));
+      await tester.pumpAndSettle();
 
       // Navigate to Transactions in Nepali
       await tester.tap(find.text('कारोबारहरू').first);

@@ -1,9 +1,22 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Explicitly permit authenticated users to manage and delete their own user document
+    function encrypted(d) {
+      return d.keys().hasAll(['v','nonce','ciphertext','mac'])
+        && d.keys().hasOnly(['v','nonce','ciphertext','mac'])
+        && d.v == 1 && d.nonce is string && d.nonce.size() == 16
+        && d.mac is string && d.mac.size() == 24
+        && d.ciphertext is string && d.ciphertext.size() > 0 && d.ciphertext.size() <= 16384;
+    }
+    match /users/{userId}/vault/{vaultId} {
+      allow get, delete: if request.auth != null && request.auth.uid == userId && vaultId == 'config';
+      allow create: if request.auth != null && request.auth.uid == userId && vaultId == 'config' && encrypted(request.resource.data);
+      allow update, list: if false;
+    }
+    // No client profile fields are currently used. Prevent arbitrary role/claim fields.
     match /users/{userId} {
-      allow read, write, delete: if request.auth != null && request.auth.uid == userId;
+      allow get, delete: if request.auth != null && request.auth.uid == userId;
+      allow list, create, update: if false;
     }
 
     // User expense and income transactions
@@ -24,7 +37,10 @@ service cloud.firestore {
       }
 
       allow read, delete: if owner();
-      allow create, update: if owner() && valid();
+      allow create, update: if owner() && (
+        (exists(/databases/$(database)/documents/users/$(userId)/vault/config) && encrypted(request.resource.data))
+        || (!exists(/databases/$(database)/documents/users/$(userId)/vault/config) && valid())
+      );
     }
   }
 }

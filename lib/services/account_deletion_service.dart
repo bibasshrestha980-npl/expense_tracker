@@ -110,6 +110,10 @@ class AccountDeletionService {
         }
       }
 
+      await _request(
+        userDocRef.collection('vault').doc('config').delete(),
+        'Deleting vault metadata',
+      );
       await _request(userDocRef.delete(), 'Deleting account profile');
     } catch (e) {
       debugPrint('Firestore data cleanup warning: $e');

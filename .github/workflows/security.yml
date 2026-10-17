@@ -1,0 +1,26 @@
+name: Security rules
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  firestore-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: security/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci --prefix security
+      - run: npm audit --prefix security --audit-level=high
+      - run: npx --yes firebase-tools@15.31.0 emulators:exec --only firestore --project demo-pocket-security --config firebase.security.json "npm --prefix security test"

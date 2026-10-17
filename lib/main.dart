@@ -8,12 +8,12 @@ import 'l10n/generated/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
+import 'services/app_integrity.dart';
 import 'providers/auth_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
-import 'providers/expense_provider.dart';
 import 'screens/auth_screen.dart';
-import 'screens/dashboard.dart';
+import 'screens/vault_gate.dart';
 import 'screens/verify_email_screen.dart';
 import 'theme.dart';
 
@@ -24,10 +24,10 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    // Explicitly configure Firestore offline persistence and cache size
+    await activateAppIntegrity();
+    // Financial records stay in memory instead of an unlimited persistent cache.
     FirebaseFirestore.instance.settings = const Settings(
-      persistenceEnabled: true,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+      persistenceEnabled: false,
     );
   } catch (_) {
     setupError = 'Firebase could not start. Check your connection and follow README.md to configure Firebase, then restart.';
@@ -129,10 +129,6 @@ class AuthGate extends StatelessWidget {
     if (auth.user == null) return const AuthScreen();
     if (auth.requiresEmailVerification) return const VerifyEmailScreen();
 
-    return ChangeNotifierProvider(
-      key: ValueKey(auth.user!.uid),
-      create: (_) => ExpenseProvider(auth.user!.uid),
-      child: const Dashboard(),
-    );
+    return VaultGate(key: ValueKey(auth.user!.uid), uid: auth.user!.uid);
   }
 }

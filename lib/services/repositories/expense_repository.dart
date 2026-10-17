@@ -127,6 +127,12 @@ class FirestoreExpenseRepository implements ExpenseRepository {
   }) async {
     if (fromUid.isEmpty || toUid.isEmpty || fromUid == toUid) return 0;
 
+    // Never write plaintext into an account that has enabled the encrypted vault.
+    // Source records remain under their original UID; linking preserves that UID.
+    if ((await firestore.doc('users/$toUid/vault/config').get()).exists) {
+      return 0;
+    }
+
     final expenses = preloadedExpenses ?? await getExpenses(fromUid);
     if (expenses.isEmpty) return 0;
 
