@@ -3,6 +3,49 @@ import 'package:expense_tracker/services/sms_wallet_parser.dart';
 
 void main() {
   group('SmsWalletParser Tests', () {
+    test('Parses plain user input: income 60000', () {
+      final parsed = SmsWalletParser.parse('income 60000');
+      expect(parsed, isNotNull);
+      expect(parsed!.amount, 60000.0);
+      expect(parsed.amountCents, 6000000);
+      expect(parsed.isIncome, isTrue);
+      expect(parsed.category, 'Other income');
+      expect(parsed.title, 'Income');
+    });
+
+    test('Parses plain user input: salary 50000', () {
+      final parsed = SmsWalletParser.parse('salary 50000');
+      expect(parsed, isNotNull);
+      expect(parsed!.amount, 50000.0);
+      expect(parsed.isIncome, isTrue);
+      expect(parsed.category, 'Salary');
+      expect(parsed.title, 'Monthly Salary');
+    });
+
+    test('Parses plain user input: freelance 25000', () {
+      final parsed = SmsWalletParser.parse('freelance 25000');
+      expect(parsed, isNotNull);
+      expect(parsed!.amount, 25000.0);
+      expect(parsed.isIncome, isTrue);
+      expect(parsed.category, 'Freelance');
+      expect(parsed.title, 'Freelance Payment');
+    });
+
+    test('Parses plain number with defaultIsIncome = true', () {
+      final parsed = SmsWalletParser.parse('60000', defaultIsIncome: true);
+      expect(parsed, isNotNull);
+      expect(parsed!.amount, 60000.0);
+      expect(parsed.isIncome, isTrue);
+    });
+
+    test('Parses plain expense: food 500', () {
+      final parsed = SmsWalletParser.parse('food 500');
+      expect(parsed, isNotNull);
+      expect(parsed!.amount, 500.0);
+      expect(parsed.isIncome, isFalse);
+      expect(parsed.category, 'Food');
+    });
+
     test('Parses eSewa restaurant payment correctly', () {
       const sms = 'Paid Rs. 450 to Himalayan Java via eSewa. Txn ID: ESW10928374.';
       final parsed = SmsWalletParser.parse(sms);

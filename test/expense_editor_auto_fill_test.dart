@@ -102,4 +102,38 @@ void main() {
     expect(find.widgetWithText(TextFormField, 'Himalayan Java Coffee'), findsOneWidget);
     expect(find.widgetWithText(TextFormField, 'Ref: ESW554433'), findsOneWidget);
   });
+
+  testWidgets('ExpenseEditor auto-fills income when user enters income 60000', (tester) async {
+    final expenses = AutoFillTestExpenses();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: pocketTheme(),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ExpenseEditor(provider: expenses, income: true),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final autoFillBtn = find.text('Auto-fill from SMS / Wallet');
+    expect(autoFillBtn, findsOneWidget);
+
+    await tester.tap(autoFillBtn);
+    await tester.pumpAndSettle();
+
+    final inputField = find.byKey(const Key('sms_input_field'));
+    await tester.enterText(inputField, 'income 60000');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Rs. 60000.00'), findsOneWidget);
+    expect(find.textContaining('Income'), findsWidgets);
+
+    await tester.tap(find.text('Apply Details'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(TextFormField, '60000.00'), findsOneWidget);
+  });
 }

@@ -217,6 +217,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
       context: context,
       builder: (ctx) => _SmsParserDialog(
         isNepali: _isNepaliLocale,
+        isIncome: _income,
         onApply: (parsed) {
           setState(() {
             _amount.text = parsed.amount.toStringAsFixed(2);
@@ -664,10 +665,12 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
 
 class _SmsParserDialog extends StatefulWidget {
   final bool isNepali;
+  final bool isIncome;
   final ValueChanged<ParsedTransaction> onApply;
 
   const _SmsParserDialog({
     required this.isNepali,
+    this.isIncome = false,
     required this.onApply,
   });
 
@@ -695,7 +698,10 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final parsed = SmsWalletParser.parse(_controller.text);
+    final parsed = SmsWalletParser.parse(
+      _controller.text,
+      defaultIsIncome: widget.isIncome,
+    );
     final theme = Theme.of(context);
 
     return AlertDialog(

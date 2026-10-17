@@ -26,14 +26,24 @@ class ParsedTransaction {
 class SmsWalletParser {
   /// Parses raw SMS, clipboard text, or digital receipt string into a [ParsedTransaction].
   /// Returns `null` if no valid financial transaction can be detected.
-  static ParsedTransaction? parse(String text) {
+  static ParsedTransaction? parse(String text, {bool defaultIsIncome = false}) {
     final clean = text.trim();
     if (clean.isEmpty) return null;
+
+    final lower = clean.toLowerCase();
+    // Ignore authentication OTP and security messages
+    if (lower.contains('otp') ||
+        lower.contains('verification code') ||
+        lower.contains('security code') ||
+        lower.contains('do not share') ||
+        lower.contains('password')) {
+      return null;
+    }
 
     final amount = _extractAmount(clean);
     if (amount == null || amount <= 0) return null;
 
-    final isIncome = _detectIsIncome(clean);
+    final isIncome = _detectIsIncome(clean, defaultIsIncome: defaultIsIncome);
     final referenceId = _extractReferenceId(clean);
     final merchant = _extractMerchant(clean);
     final category = _detectCategory(clean, merchant, isIncome);
@@ -52,6 +62,7 @@ class SmsWalletParser {
 
   /// Extracts transaction amount from patterns like:
   /// - `Rs. 1,500.00` / `Rs 1500` / `NPR 2,500.50` / `रु ५००` / `रु. १,२००`
+  /// - `income 60000` / `salary 50000` / `60000`
   static double? _extractAmount(String text) {
     // 1. Normalized Nepali digits to English digits
     final normalized = _convertNepaliDigits(text);
@@ -71,29 +82,55 @@ class SmsWalletParser {
       }
     }
 
-    // Secondary pattern: `debited by / credited with / paid / transferred ... [number]`
-    final verbPattern = RegExp(
-      r'(?:debited|credited|paid|transferred|amount of|sum of)\s*(?:by|with|of)?\s*(?:Rs\.?|NPR)?\s*([0-9,]+(?:\.[0-9]+)?)',
+    // Secondary pattern: keywords followed by number:
+    // e.g. "income 60000", "salary: 50000", "debited by 2500", "paid 450", "credited 10000"
+    final keywordPattern = RegExp(
+      r'(?:debited|credited|paid|transferred|income|salary|expense|spent|received|deposited|deposit|allowance|freelance|gift|refund|amount|sum|cost|bill|fare|fee|bonus|तलब|आम्दानी|कमाई|खर्च)\s*(?:by|with|of|is|:|=|for)?\s*(?:Rs\.?|NPR|NRs\.?|रु\.?)?\s*([0-9,]+(?:\.[0-9]+)?)',
       caseSensitive: false,
     );
-    final verbMatch = verbPattern.firstMatch(normalized);
-    if (verbMatch != null) {
-      final rawNum = verbMatch.group(1)?.replaceAll(',', '');
+    final keyMatch = keywordPattern.firstMatch(normalized);
+    if (keyMatch != null) {
+      final rawNum = keyMatch.group(1)?.replaceAll(',', '');
       if (rawNum != null) {
         final val = double.tryParse(rawNum);
         if (val != null && val > 0) return val;
       }
     }
 
-    // Fallback: search for numbers with decimals like 1250.00 or integers >= 10
-    final genericNumPattern = RegExp(
-      r'(?:^|\s)([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})|[0-9]+(?:\.[0-9]{2}))(?:\s|$)',
+    // Reverse keyword pattern: number followed by keyword (e.g. "60000 income", "50000 salary", "500 momo")
+    final reverseKeywordPattern = RegExp(
+      r'([0-9,]+(?:\.[0-9]+)?)\s*(?:Rs\.?|NPR|NRs\.?|रु\.?)?\s*(?:debited|credited|paid|transferred|income|salary|expense|spent|received|deposited|bonus|allowance|freelance|gift|refund|तलब|आम्दानी|कमाई|खर्च)',
+      caseSensitive: false,
     );
-    final genMatch = genericNumPattern.firstMatch(normalized);
-    if (genMatch != null) {
-      final rawNum = genMatch.group(1)?.replaceAll(',', '');
+    final revMatch = reverseKeywordPattern.firstMatch(normalized);
+    if (revMatch != null) {
+      final rawNum = revMatch.group(1)?.replaceAll(',', '');
       if (rawNum != null) {
         final val = double.tryParse(rawNum);
+        if (val != null && val > 0) return val;
+      }
+    }
+
+    // Fallback: any number in the string (integers or decimals), excluding common account/code numbers
+    // Remove reference patterns, account patterns first
+    final sanitized = normalized
+        .replaceAll(
+          RegExp(
+            r'(?:Txn\s*ID|Ref\s*No|Trace|A/c|Account|\*)[A-Za-z0-9_\-:*]+',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .replaceAll(
+          RegExp(r'\b(?:202[0-9]|208[0-9])\b'),
+          '',
+        ); // filter out year 2026, 2083 etc.
+
+    final anyNumberPattern = RegExp(r'\b([0-9,]+(?:\.[0-9]+)?)\b');
+    for (final m in anyNumberPattern.allMatches(sanitized)) {
+      final raw = m.group(1)?.replaceAll(',', '');
+      if (raw != null) {
+        final val = double.tryParse(raw);
         if (val != null && val > 0) return val;
       }
     }
@@ -102,31 +139,65 @@ class SmsWalletParser {
   }
 
   /// Determines whether the transaction is an Income (credit) or Expense (debit).
-  static bool _detectIsIncome(String text) {
+  static bool _detectIsIncome(String text, {bool defaultIsIncome = false}) {
     final lower = text.toLowerCase();
 
     // Check strong credit/income keywords first
     final creditKeywords = [
+      'income',
       'credited',
       'credit',
       'received',
       'deposited',
+      'deposit',
       'cashback',
       'refund',
       'salary',
       'stipend',
       'bonus',
+      'allowance',
+      'freelance',
+      'earning',
+      'earnings',
+      'gift',
       'जम्मा',
       'आएको',
       'प्राप्त',
       'फिर्ता',
+      'आम्दानी',
+      'तलब',
+      'कमाई',
     ];
 
     for (final kw in creditKeywords) {
       if (lower.contains(kw)) return true;
     }
 
-    return false; // Default to Expense (debit)
+    // Check debit/expense keywords
+    final debitKeywords = [
+      'debited',
+      'debit',
+      'paid',
+      'spent',
+      'expense',
+      'payment',
+      'sent',
+      'withdrawn',
+      'purchase',
+      'fare',
+      'fee',
+      'bill',
+      'काटिएको',
+      'तिरेको',
+      'गएको',
+      'खर्च',
+    ];
+
+    for (final kw in debitKeywords) {
+      if (lower.contains(kw)) return false;
+    }
+
+    return defaultIsIncome;
   }
 
   /// Extracts reference number or transaction ID if present.
@@ -210,22 +281,29 @@ class SmsWalletParser {
       if (lower.contains('salary') || lower.contains('payroll') || lower.contains('तलब')) {
         return 'Salary';
       }
-      if (lower.contains('bonus') || lower.contains('cashback') || lower.contains('reward')) {
-        return 'Bonus';
+      if (lower.contains('freelance') || lower.contains('consulting') || lower.contains('contract') || lower.contains('client')) {
+        return 'Freelance';
       }
-      if (lower.contains('dividend') || lower.contains('interest') || lower.contains('stock')) {
-        return 'Investments';
+      if (lower.contains('allowance') || lower.contains('भत्ता') || lower.contains('pocket money')) {
+        return 'Allowance';
       }
-      if (lower.contains('refund') || lower.contains('reimbursement')) {
+      if (lower.contains('gift') || lower.contains('उपहार') || lower.contains('dakshina') || lower.contains('दक्षिणा')) {
+        return 'Gift';
+      }
+      if (lower.contains('refund') || lower.contains('reimbursement') || lower.contains('cashback') || lower.contains('फिर्ता')) {
         return 'Refund';
       }
-      return 'Other Income';
+      if (lower.contains('opening') || lower.contains('balance') || lower.contains('surplus')) {
+        return 'Opening balance';
+      }
+      return 'Other income';
     }
 
     final combined = '${merchant ?? ''} $text'.toLowerCase();
 
     // Food & Dining
-    if (combined.contains('foodmandu') ||
+    if (combined.contains('food') ||
+        combined.contains('foodmandu') ||
         combined.contains('bhoj') ||
         combined.contains('java') ||
         combined.contains('cafe') ||
@@ -348,8 +426,20 @@ class SmsWalletParser {
 
     if (isIncome) {
       if (category == 'Salary') return 'Monthly Salary';
-      if (category == 'Bonus') return 'Cashback / Bonus Received';
-      return 'Money In';
+      if (category == 'Freelance') return 'Freelance Payment';
+      if (category == 'Allowance') return 'Monthly Allowance';
+      if (category == 'Gift') return 'Gift / Dakshina';
+      if (category == 'Refund') return 'Refund / Cashback';
+      final cleanText = text.replaceAll(RegExp(r'[0-9,.:]'), '').trim();
+      if (cleanText.isNotEmpty && cleanText.length <= 40) {
+        final words = cleanText.split(' ').where((w) => w.isNotEmpty);
+        if (words.isNotEmpty) {
+          return words
+              .map((w) => '${w[0].toUpperCase()}${w.substring(1)}')
+              .join(' ');
+        }
+      }
+      return 'Income';
     }
 
     // Contextual expense title
