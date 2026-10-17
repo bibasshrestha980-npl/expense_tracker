@@ -3,6 +3,7 @@ import 'package:expense_tracker/providers/auth_provider.dart';
 import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:expense_tracker/providers/locale_provider.dart';
 import 'package:expense_tracker/screens/dashboard.dart';
+import 'package:expense_tracker/screens/expense_editor.dart';
 import 'package:expense_tracker/screens/settings_screen.dart';
 import 'package:expense_tracker/theme.dart';
 import 'package:flutter/material.dart';
@@ -234,6 +235,58 @@ void main() {
       expect(find.text('Recorded balance'), findsOneWidget);
       expect(find.text('Money in'), findsOneWidget);
       expect(find.text('Add money'), findsOneWidget);
+    });
+
+    testWidgets('ExpenseEditor renders AI suggestions in Nepali when locale is Nepali', (
+      tester,
+    ) async {
+      final prefs = MemoryPreferences()..saved = 'ne';
+      final localeProvider = LocaleProvider(preferences: prefs);
+      final expenses = TestExpenses();
+      addTearDown(localeProvider.dispose);
+      addTearDown(expenses.dispose);
+      await localeProvider.load();
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: localeProvider),
+            ChangeNotifierProvider<ExpenseProvider>.value(value: expenses),
+          ],
+          child: Builder(
+            builder: (context) {
+              return MaterialApp(
+                theme: pocketTheme(),
+                locale: context.watch<LocaleProvider>().locale,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: Scaffold(
+                  body: ExpenseEditor(provider: expenses, income: true),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify Nepali AI suggestion chips for Salary:
+      // 'मासिक तलब', 'पेस्की तलब', 'बोनस रकम'
+      expect(find.text('मासिक तलब'), findsOneWidget);
+      expect(find.text('पेस्की तलब'), findsOneWidget);
+      expect(find.text('बोनस रकम'), findsOneWidget);
+      expect(find.text('वि.सं.'), findsOneWidget);
+      expect(find.text('ई.सं.'), findsOneWidget);
+
+      // Tap 'पेस्की तलब' chip
+      await tester.tap(find.text('पेस्की तलब'));
+      await tester.pumpAndSettle();
+
+      final titleField = find.byType(TextFormField).first;
+      expect(
+        tester.widget<TextFormField>(titleField).controller!.text,
+        'पेस्की तलब',
+      );
     });
   });
 }

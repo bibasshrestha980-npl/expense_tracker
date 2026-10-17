@@ -52,21 +52,52 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     if (e == null && _income) _title.text = _category;
   }
 
+  bool get _isNepaliLocale =>
+      Localizations.maybeLocaleOf(context)?.languageCode == 'ne';
+
   int _aiSuggestionIndex = 0;
 
-  List<String> _getAiSuggestions(String category) =>
-      aiCategorySuggestions[category] ?? [category];
+  List<String> _getAiSuggestions(String category) {
+    if (_isNepaliLocale) {
+      return aiCategorySuggestionsNe[category] ??
+          aiCategorySuggestions[category] ??
+          [category];
+    }
+    return aiCategorySuggestions[category] ?? [category];
+  }
 
   String _getAiPrimarySuggestion(String category) {
     if (category == 'Food') {
       final hour = DateTime.now().hour;
+      if (_isNepaliLocale) {
+        if (hour >= 5 && hour < 11) return 'बिहानी चिया नास्ता';
+        if (hour >= 11 && hour < 15) return 'दिउँसोको खाजा / खाना';
+        if (hour >= 15 && hour < 19) return 'मोमो र चाउमिन';
+        return 'बेलुकीको खाना';
+      }
       if (hour >= 5 && hour < 11) return 'Breakfast & Tea';
       if (hour >= 11 && hour < 15) return 'Lunch / Khaja';
       if (hour >= 15 && hour < 19) return 'Momo & Chowmein';
       return 'Dinner & Groceries';
     }
     final list = _getAiSuggestions(category);
-    return list.isNotEmpty ? list.first : category;
+    return list.isNotEmpty
+        ? list.first
+        : (_isNepaliLocale ? localizedCategory(context, category) : category);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.expense == null && !_titleEdited) {
+      if (_income) {
+        _title.text = _isNepaliLocale
+            ? localizedCategory(context, _category)
+            : _category;
+      } else if (_title.text.isEmpty) {
+        _title.text = _getAiPrimarySuggestion(_category);
+      }
+    }
   }
 
   void _cycleAiSuggestion() {
@@ -113,7 +144,9 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
       if (_income) {
         if (_title.text.trim().isEmpty ||
             (widget.expense == null && !_titleEdited)) {
-          _title.text = category;
+          _title.text = _isNepaliLocale
+              ? localizedCategory(context, category)
+              : category;
           _titleEdited = false;
         }
       } else {
@@ -493,9 +526,15 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                     ),
                     const SizedBox(height: 12),
                     SegmentedButton<bool>(
-                      segments: const [
-                        ButtonSegment(value: true, label: Text('BS')),
-                        ButtonSegment(value: false, label: Text('AD')),
+                      segments: [
+                        ButtonSegment(
+                          value: true,
+                          label: Text(_isNepaliLocale ? 'वि.सं.' : 'BS'),
+                        ),
+                        ButtonSegment(
+                          value: false,
+                          label: Text(_isNepaliLocale ? 'ई.सं.' : 'AD'),
+                        ),
                       ],
                       selected: {_nepali},
                       onSelectionChanged: (value) =>
