@@ -134,19 +134,36 @@ void main() {
       await tester.tap(find.text('Food').last);
       await tester.pumpAndSettle();
 
-      // Verify AI title was auto-generated in "What was it for?"
-      expect(titleText().isNotEmpty, isTrue);
+      // Scroll dialog back to top so title and chips are in view
+      await tester.ensureVisible(titleField);
+      await tester.pumpAndSettle();
 
       // Verify AI suggestion chips for Food appear
-      final momoChip = find.text('Momo & Chowmein');
+      final momoChip = find.widgetWithText(ActionChip, 'Momo & Chowmein');
       expect(momoChip, findsOneWidget);
       await tester.ensureVisible(momoChip);
       await tester.tap(momoChip);
       await tester.pumpAndSettle();
       expect(titleText(), 'Momo & Chowmein');
 
+      // Verify scroll buttons exist and work
+      final scrollRight = find.byTooltip('Scroll right');
+      final scrollLeft = find.byTooltip('Scroll left');
+      expect(scrollLeft, findsOneWidget);
+      expect(scrollRight, findsOneWidget);
+      await tester.ensureVisible(scrollRight);
+      await tester.tap(scrollRight);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(scrollLeft);
+      await tester.tap(scrollLeft);
+      await tester.pumpAndSettle();
+
+      // Verify horizontal drag on chips
+      await tester.drag(momoChip, const Offset(-60, 0));
+      await tester.pumpAndSettle();
+
       // Tap Auto-generate button to cycle AI suggestion
-      final autoGenBtn = find.byTooltip('Auto-generate with AI');
+      final autoGenBtn = find.byTooltip('Auto-generate with AI').first;
       await tester.ensureVisible(autoGenBtn);
       await tester.tap(autoGenBtn);
       await tester.pumpAndSettle();

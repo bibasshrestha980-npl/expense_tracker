@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 
 import 'l10n/generated/app_localizations.dart';
@@ -40,6 +41,18 @@ Future<void> main() async {
   );
 }
 
+class PocketScrollBehavior extends MaterialScrollBehavior {
+  const PocketScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.trackpad,
+    PointerDeviceKind.stylus,
+  };
+}
+
 class ExpenseApp extends StatelessWidget {
   final String? setupError;
   const ExpenseApp({super.key, this.setupError});
@@ -49,6 +62,7 @@ class ExpenseApp extends StatelessWidget {
       ? MaterialApp(
           title: 'Pocket • Expense Tracker',
           debugShowCheckedModeBanner: false,
+          scrollBehavior: const PocketScrollBehavior(),
           theme: pocketTheme(),
           darkTheme: pocketTheme(brightness: Brightness.dark),
           themeMode: context.watch<ThemeProvider?>()?.mode ?? ThemeMode.system,
@@ -83,6 +97,7 @@ class ExpenseApp extends StatelessWidget {
           child: MaterialApp(
             title: 'Pocket • Expense Tracker',
             debugShowCheckedModeBanner: false,
+            scrollBehavior: const PocketScrollBehavior(),
             theme: pocketTheme(),
             darkTheme: pocketTheme(brightness: Brightness.dark),
             themeMode:

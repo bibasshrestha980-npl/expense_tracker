@@ -123,9 +123,9 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text('Daily spending'), findsOneWidget);
           expect(tester.takeException(), isNull);
-          await tester.ensureVisible(find.text('Add expense'));
           await tester.tap(find.text('Add expense'));
           await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
           await tester.ensureVisible(
             find.byIcon(Icons.calendar_today_outlined),
           );

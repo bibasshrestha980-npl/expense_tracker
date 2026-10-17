@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show PointerDeviceKind, PointerScrollEvent;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -26,6 +27,7 @@ class ExpenseEditor extends StatefulWidget {
 class _ExpenseEditorState extends State<ExpenseEditor> {
   final _form = GlobalKey<FormState>();
   late final TextEditingController _title, _amount, _note;
+  final _chipsScrollController = ScrollController();
   late DateTime _date;
   late String _category;
   bool _busy = false;
@@ -75,6 +77,31 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
       _title.text = next;
       _titleEdited = true;
     });
+    if (_chipsScrollController.hasClients) {
+      final target = (_aiSuggestionIndex * 110.0).clamp(
+        0.0,
+        _chipsScrollController.position.maxScrollExtent,
+      );
+      _chipsScrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
+  void _scrollChips(double offset) {
+    if (_chipsScrollController.hasClients) {
+      final target = (_chipsScrollController.offset + offset).clamp(
+        0.0,
+        _chipsScrollController.position.maxScrollExtent,
+      );
+      _chipsScrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   void _selectCategory(String? category) {
@@ -97,14 +124,21 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
         }
       }
     });
+    if (_chipsScrollController.hasClients) {
+      _chipsScrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    }
   }
-
 
   @override
   void dispose() {
     _title.dispose();
     _amount.dispose();
     _note.dispose();
+    _chipsScrollController.dispose();
     super.dispose();
   }
 
@@ -211,97 +245,171 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                       const Icon(Icons.auto_awesome, size: 13, color: accent),
                       const SizedBox(width: 5),
                       Expanded(
-                        child: Text(
-                          'AI suggestions for $_category:',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: context.appMuted,
+                        child: Tooltip(
+                          message: 'Suggestions for $_category',
+                          child: Text(
+                            'AI suggestions:',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: context.appMuted,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      InkWell(
-                        borderRadius: BorderRadius.circular(4),
-                        onTap: _cycleAiSuggestion,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
+                      Tooltip(
+                        message: 'Scroll left',
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4),
+                          onTap: () => _scrollChips(-120),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 2,
+                            ),
+                            child: Icon(
+                              Icons.chevron_left_rounded,
+                              size: 18,
+                              color: context.appMuted,
+                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.refresh_rounded,
-                                size: 13,
-                                color: accent,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Auto-generate',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Tooltip(
+                        message: 'Scroll right',
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4),
+                          onTap: () => _scrollChips(120),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 2,
+                              vertical: 2,
+                            ),
+                            child: Icon(
+                              Icons.chevron_right_rounded,
+                              size: 18,
+                              color: context.appMuted,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Tooltip(
+                        message: 'Auto-generate with AI',
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4),
+                          onTap: _cycleAiSuggestion,
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.refresh_rounded,
+                                  size: 13,
                                   color: accent,
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 4),
+                                Text(
+                                  'Auto',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: accent,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _getAiSuggestions(_category).map((s) {
-                        final isSelected =
-                            _title.text.trim().toLowerCase() ==
-                            s.toLowerCase();
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 6),
-                          child: ActionChip(
-                            visualDensity: VisualDensity.compact,
-                            labelPadding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                            ),
-                            backgroundColor:
-                                isSelected ? const Color(0xffe6f3ed) : null,
-                            side: isSelected
-                                ? const BorderSide(color: accent, width: 1.2)
-                                : null,
-                            avatar: isSelected
-                                ? const Icon(
-                                    Icons.check_circle_rounded,
-                                    size: 14,
-                                    color: accent,
-                                  )
-                                : const Icon(
-                                    Icons.auto_awesome,
-                                    size: 12,
-                                    color: accent,
+                  ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      dragDevices: {
+                        PointerDeviceKind.touch,
+                        PointerDeviceKind.mouse,
+                        PointerDeviceKind.trackpad,
+                        PointerDeviceKind.stylus,
+                      },
+                    ),
+                    child: Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (pointerSignal is PointerScrollEvent &&
+                            _chipsScrollController.hasClients) {
+                          final delta = pointerSignal.scrollDelta.dy != 0
+                              ? pointerSignal.scrollDelta.dy
+                              : pointerSignal.scrollDelta.dx;
+                          if (delta != 0) {
+                            final target =
+                                (_chipsScrollController.offset + delta).clamp(
+                              0.0,
+                              _chipsScrollController.position.maxScrollExtent,
+                            );
+                            _chipsScrollController.jumpTo(target);
+                          }
+                        }
+                      },
+                      child: SingleChildScrollView(
+                        controller: _chipsScrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(
+                          parent: AlwaysScrollableScrollPhysics(),
+                        ),
+                        child: Row(
+                          children: _getAiSuggestions(_category).map((s) {
+                            final isSelected =
+                                _title.text.trim().toLowerCase() ==
+                                s.toLowerCase();
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: ActionChip(
+                                visualDensity: VisualDensity.compact,
+                                labelPadding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                ),
+                                backgroundColor:
+                                    isSelected ? const Color(0xffe6f3ed) : null,
+                                side: isSelected
+                                    ? const BorderSide(color: accent, width: 1.2)
+                                    : null,
+                                avatar: isSelected
+                                    ? const Icon(
+                                        Icons.check_circle_rounded,
+                                        size: 14,
+                                        color: accent,
+                                      )
+                                    : const Icon(
+                                        Icons.auto_awesome,
+                                        size: 12,
+                                        color: accent,
+                                      ),
+                                label: Text(
+                                  s,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w500,
+                                    color: isSelected ? accent : null,
                                   ),
-                            label: Text(
-                              s,
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
-                                color: isSelected ? accent : null,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _title.text = s;
+                                    _titleEdited = true;
+                                  });
+                                },
                               ),
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                _title.text = s;
-                                _titleEdited = true;
-                              });
-                            },
-                          ),
-                        );
-                      }).toList(),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 10),
