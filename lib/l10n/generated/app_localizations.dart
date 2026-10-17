@@ -409,6 +409,780 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save language preference. Please try again.'**
   String get languageSaveFailed;
+
+  /// No description provided for @navOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get navOverview;
+
+  /// No description provided for @navTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Transactions'**
+  String get navTransactions;
+
+  /// No description provided for @navInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Insights'**
+  String get navInsights;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @sidebarSlogan.
+  ///
+  /// In en, this message translates to:
+  /// **'YOUR MONEY, MADE CLEAR'**
+  String get sidebarSlogan;
+
+  /// No description provided for @sidebarCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make every rupee count'**
+  String get sidebarCardTitle;
+
+  /// No description provided for @sidebarCardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Log the small things. Understand the bigger picture.'**
+  String get sidebarCardDesc;
+
+  /// No description provided for @sidebarFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal expense tracker'**
+  String get sidebarFooter;
+
+  /// No description provided for @shareReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Report'**
+  String get shareReport;
+
+  /// No description provided for @personalAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal account'**
+  String get personalAccount;
+
+  /// No description provided for @yourAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get yourAccount;
+
+  /// No description provided for @switchToEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to English'**
+  String get switchToEnglish;
+
+  /// No description provided for @switchToNepali.
+  ///
+  /// In en, this message translates to:
+  /// **'नेपालीमा बदल्नुहोस्'**
+  String get switchToNepali;
+
+  /// No description provided for @signOutFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out failed. Please try again.'**
+  String get signOutFailed;
+
+  /// No description provided for @heroOverviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A little clarity. A lot of control.'**
+  String get heroOverviewTitle;
+
+  /// No description provided for @heroOverviewSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Here is how your month is shaping up.'**
+  String get heroOverviewSubtitle;
+
+  /// No description provided for @heroTransactionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Every expense, in one place.'**
+  String get heroTransactionsTitle;
+
+  /// No description provided for @heroTransactionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, review and organize your daily spending.'**
+  String get heroTransactionsSubtitle;
+
+  /// No description provided for @heroInsightsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand your spending.'**
+  String get heroInsightsTitle;
+
+  /// No description provided for @heroInsightsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your everyday expenses into useful insights.'**
+  String get heroInsightsSubtitle;
+
+  /// No description provided for @heroSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Account & Preferences.'**
+  String get heroSettingsTitle;
+
+  /// No description provided for @heroSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage calendar, currency, and data privacy options.'**
+  String get heroSettingsSubtitle;
+
+  /// No description provided for @addMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Add money'**
+  String get addMoney;
+
+  /// No description provided for @addExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get addExpense;
+
+  /// No description provided for @calendarNepaliBs.
+  ///
+  /// In en, this message translates to:
+  /// **'Nepali (BS)'**
+  String get calendarNepaliBs;
+
+  /// No description provided for @calendarEnglishAd.
+  ///
+  /// In en, this message translates to:
+  /// **'English (AD)'**
+  String get calendarEnglishAd;
+
+  /// No description provided for @previousMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous month'**
+  String get previousMonth;
+
+  /// No description provided for @nextMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Next month'**
+  String get nextMonth;
+
+  /// No description provided for @currencyNpr.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency: Nepalese Rupee (NPR)'**
+  String get currencyNpr;
+
+  /// No description provided for @recordedBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded balance'**
+  String get recordedBalance;
+
+  /// No description provided for @recordedBalanceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All recorded income minus expenses'**
+  String get recordedBalanceSubtitle;
+
+  /// No description provided for @moneyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Money in'**
+  String get moneyIn;
+
+  /// No description provided for @moneyInSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Income for selected month'**
+  String get moneyInSubtitle;
+
+  /// No description provided for @moneyOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Money out'**
+  String get moneyOut;
+
+  /// No description provided for @moneyOutSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses for selected month'**
+  String get moneyOutSubtitle;
+
+  /// No description provided for @monthlyNet.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly net'**
+  String get monthlyNet;
+
+  /// No description provided for @transactionsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 transaction} other{{count} transactions}}'**
+  String transactionsCount(int count);
+
+  /// No description provided for @onboardingTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.'**
+  String get onboardingTip;
+
+  /// No description provided for @dailySpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily spending'**
+  String get dailySpending;
+
+  /// No description provided for @addExpenseToStartTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an expense to start your spending timeline.'**
+  String get addExpenseToStartTimeline;
+
+  /// No description provided for @highestDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest day: {amount}'**
+  String highestDay(String amount);
+
+  /// No description provided for @dayOfMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Day of month'**
+  String get dayOfMonth;
+
+  /// No description provided for @spendingByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by category'**
+  String get spendingByCategory;
+
+  /// No description provided for @categoriesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your categories will appear here.'**
+  String get categoriesEmpty;
+
+  /// No description provided for @monthlyPerspective.
+  ///
+  /// In en, this message translates to:
+  /// **'Your monthly perspective'**
+  String get monthlyPerspective;
+
+  /// No description provided for @noSpendingLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No spending recorded last month to compare yet.'**
+  String get noSpendingLastMonth;
+
+  /// No description provided for @moreThanLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} more than last month.'**
+  String moreThanLastMonth(String amount);
+
+  /// No description provided for @lessThanLastMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} less than last month.'**
+  String lessThanLastMonth(String amount);
+
+  /// No description provided for @monthlyComparisonNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparisons use whole calendar months. A month still in progress may have a lower total.'**
+  String get monthlyComparisonNotice;
+
+  /// No description provided for @recentTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent transactions'**
+  String get recentTransactions;
+
+  /// No description provided for @transactionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction history'**
+  String get transactionHistory;
+
+  /// No description provided for @filterAllTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'All transactions'**
+  String get filterAllTransactions;
+
+  /// No description provided for @filterIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get filterIncome;
+
+  /// No description provided for @filterExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get filterExpenses;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search title or note'**
+  String get searchHint;
+
+  /// No description provided for @clearSearchTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get clearSearchTooltip;
+
+  /// No description provided for @resultsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} results'**
+  String resultsCount(int count);
+
+  /// No description provided for @sortNewestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get sortNewestFirst;
+
+  /// No description provided for @sortOldestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get sortOldestFirst;
+
+  /// No description provided for @sortHighestAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest amount'**
+  String get sortHighestAmount;
+
+  /// No description provided for @sortLowestAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest amount'**
+  String get sortLowestAmount;
+
+  /// No description provided for @noMatchingTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching transactions'**
+  String get noMatchingTransactions;
+
+  /// No description provided for @freshStartThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'A fresh start for this month'**
+  String get freshStartThisMonth;
+
+  /// No description provided for @emptyTransactionsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Add money or an expense, or try another month or filter.'**
+  String get emptyTransactionsPrompt;
+
+  /// No description provided for @editTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit transaction'**
+  String get editTransaction;
+
+  /// No description provided for @deleteTransaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete transaction'**
+  String get deleteTransaction;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAll;
+
+  /// No description provided for @copyCsvTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy filtered transactions as CSV'**
+  String get copyCsvTooltip;
+
+  /// No description provided for @deleteTransactionDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this transaction?'**
+  String get deleteTransactionDialogTitle;
+
+  /// No description provided for @actionCannotBeUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get actionCannotBeUndone;
+
+  /// No description provided for @keepExpense.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep expense'**
+  String get keepExpense;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @transactionSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction saved successfully.'**
+  String get transactionSavedSuccess;
+
+  /// No description provided for @transactionDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction deleted.'**
+  String get transactionDeletedSuccess;
+
+  /// No description provided for @couldNotDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete. Please try again.'**
+  String get couldNotDeleteError;
+
+  /// No description provided for @unableToLoadExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load your expenses'**
+  String get unableToLoadExpenses;
+
+  /// No description provided for @addMoneyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add money'**
+  String get addMoneyTitle;
+
+  /// No description provided for @editIncomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit income'**
+  String get editIncomeTitle;
+
+  /// No description provided for @addExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add expense'**
+  String get addExpenseTitle;
+
+  /// No description provided for @editExpenseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit expense'**
+  String get editExpenseTitle;
+
+  /// No description provided for @expenseEditorSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep the details clear. Your totals and insights update automatically.'**
+  String get expenseEditorSubtitle;
+
+  /// No description provided for @whereFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Where did the money come from?'**
+  String get whereFromLabel;
+
+  /// No description provided for @whatForLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What was it for?'**
+  String get whatForLabel;
+
+  /// No description provided for @octoberSalaryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. October salary'**
+  String get octoberSalaryHint;
+
+  /// No description provided for @lunchCafeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Lunch at the cafe'**
+  String get lunchCafeHint;
+
+  /// No description provided for @enterTitleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a title'**
+  String get enterTitleError;
+
+  /// No description provided for @aiSuggestionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'AI suggestions:'**
+  String get aiSuggestionsLabel;
+
+  /// No description provided for @aiSuggestionsForCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestions for {category}'**
+  String aiSuggestionsForCategory(String category);
+
+  /// No description provided for @autoGenerateAiTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-generate with AI'**
+  String get autoGenerateAiTooltip;
+
+  /// No description provided for @scrollLeftTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll left'**
+  String get scrollLeftTooltip;
+
+  /// No description provided for @scrollRightTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll right'**
+  String get scrollRightTooltip;
+
+  /// No description provided for @autoGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get autoGenerate;
+
+  /// No description provided for @clearTitleTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear title'**
+  String get clearTitleTooltip;
+
+  /// No description provided for @amountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get amountLabel;
+
+  /// No description provided for @amountReceivedHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount you received'**
+  String get amountReceivedHelper;
+
+  /// No description provided for @amountPaidHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the amount you paid'**
+  String get amountPaidHelper;
+
+  /// No description provided for @invalidAmountError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a positive amount with up to 2 decimals'**
+  String get invalidAmountError;
+
+  /// No description provided for @categoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get categoryLabel;
+
+  /// No description provided for @noteOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get noteOptionalLabel;
+
+  /// No description provided for @saveIncomeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save income'**
+  String get saveIncomeButton;
+
+  /// No description provided for @saveExpenseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save expense'**
+  String get saveExpenseButton;
+
+  /// No description provided for @savingButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingButton;
+
+  /// No description provided for @couldNotSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save. Check your connection and try again.'**
+  String get couldNotSaveError;
+
+  /// No description provided for @monthlyFinancialReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Financial Report'**
+  String get monthlyFinancialReportTitle;
+
+  /// No description provided for @reportIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Income'**
+  String get reportIncome;
+
+  /// No description provided for @reportExpenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Expenses'**
+  String get reportExpenses;
+
+  /// No description provided for @reportNetSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Savings'**
+  String get reportNetSavings;
+
+  /// No description provided for @reportSavingsRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Savings Rate'**
+  String get reportSavingsRate;
+
+  /// No description provided for @reportSpendingByCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending by Category'**
+  String get reportSpendingByCategory;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @exportCsv.
+  ///
+  /// In en, this message translates to:
+  /// **'Export CSV'**
+  String get exportCsv;
+
+  /// No description provided for @shareSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Share Summary'**
+  String get shareSummary;
+
+  /// No description provided for @reportSummaryCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial report summary copied! Ready to share or paste.'**
+  String get reportSummaryCopied;
+
+  /// No description provided for @reportCsvCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly CSV transactions copied to clipboard!'**
+  String get reportCsvCopied;
+
+  /// No description provided for @catFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get catFood;
+
+  /// No description provided for @catTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get catTransport;
+
+  /// No description provided for @catShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get catShopping;
+
+  /// No description provided for @catBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills'**
+  String get catBills;
+
+  /// No description provided for @catHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get catHealth;
+
+  /// No description provided for @catEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get catEducation;
+
+  /// No description provided for @catOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get catOther;
+
+  /// No description provided for @catSalary.
+  ///
+  /// In en, this message translates to:
+  /// **'Salary'**
+  String get catSalary;
+
+  /// No description provided for @catFreelance.
+  ///
+  /// In en, this message translates to:
+  /// **'Freelance'**
+  String get catFreelance;
+
+  /// No description provided for @catAllowance.
+  ///
+  /// In en, this message translates to:
+  /// **'Allowance'**
+  String get catAllowance;
+
+  /// No description provided for @catGift.
+  ///
+  /// In en, this message translates to:
+  /// **'Gift'**
+  String get catGift;
+
+  /// No description provided for @catRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Refund'**
+  String get catRefund;
+
+  /// No description provided for @catOpeningBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening balance'**
+  String get catOpeningBalance;
+
+  /// No description provided for @catOtherIncome.
+  ///
+  /// In en, this message translates to:
+  /// **'Other income'**
+  String get catOtherIncome;
+
+  /// No description provided for @catAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get catAll;
 }
 
 class _AppLocalizationsDelegate

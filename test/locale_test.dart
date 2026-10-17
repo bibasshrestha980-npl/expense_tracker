@@ -1,6 +1,8 @@
 import 'package:expense_tracker/l10n/generated/app_localizations.dart';
 import 'package:expense_tracker/providers/auth_provider.dart';
+import 'package:expense_tracker/providers/expense_provider.dart';
 import 'package:expense_tracker/providers/locale_provider.dart';
+import 'package:expense_tracker/screens/dashboard.dart';
 import 'package:expense_tracker/screens/settings_screen.dart';
 import 'package:expense_tracker/theme.dart';
 import 'package:flutter/material.dart';
@@ -152,6 +154,86 @@ void main() {
       expect(find.text('Preferences'), findsOneWidget);
       expect(localeProvider.isEnglish, isTrue);
       expect(prefs.saved, 'en');
+    });
+
+    testWidgets('Dashboard renders in full Nepali and live toggles with English', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1200, 1000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final prefs = MemoryPreferences()..saved = 'ne';
+      final localeProvider = LocaleProvider(preferences: prefs);
+      final expenses = TestExpenses();
+      addTearDown(localeProvider.dispose);
+      addTearDown(expenses.dispose);
+      await localeProvider.load();
+
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider.value(value: localeProvider),
+            ChangeNotifierProvider<AuthProvider>(create: (_) => TestAuth()),
+            ChangeNotifierProvider<ExpenseProvider>.value(value: expenses),
+          ],
+          child: Builder(
+            builder: (context) {
+              return MaterialApp(
+                theme: pocketTheme(),
+                locale: context.watch<LocaleProvider>().locale,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: const Dashboard(),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify Nepali dashboard strings
+      expect(find.text('समीक्षा'), findsWidgets); // Nav item
+      expect(find.text('कारोबारहरू'), findsWidgets); // Nav item
+      expect(find.text('अन्तरदृष्टि'), findsWidgets); // Nav item
+      expect(find.text('सेटिङहरू'), findsWidgets); // Nav item
+      expect(find.text('अभिलेख मौज्दात'), findsOneWidget); // Recorded balance
+      expect(find.text('आएको रकम'), findsOneWidget); // Money in
+      expect(find.text('गएको रकम'), findsOneWidget); // Money out
+      expect(find.text('रकम थप्नुहोस्'), findsOneWidget); // Add money
+      expect(find.text('खर्च थप्नुहोस्'), findsOneWidget); // Add expense
+      expect(find.text('अलिकति स्पष्टता। धेरै नियन्त्रण।'), findsOneWidget); // Hero title
+      expect(find.text('नेपाली (वि.सं.)'), findsOneWidget); // Calendar segment
+      expect(find.text('प्रतिवेदन सेयर'), findsOneWidget); // Share report
+
+      // Navigate to Transactions in Nepali
+      await tester.tap(find.text('कारोबारहरू').first);
+      await tester.pumpAndSettle();
+      expect(find.text('कारोबार इतिहास'), findsOneWidget);
+      expect(find.text('सबै कारोबार'), findsOneWidget);
+      expect(find.text('शीर्षक वा टिपोट खोज्नुहोस्'), findsOneWidget);
+
+      // Navigate to Insights in Nepali
+      await tester.tap(find.text('अन्तरदृष्टि').first);
+      await tester.pumpAndSettle();
+      expect(find.text('दैनिक खर्च'), findsOneWidget);
+      expect(find.text('श्रेणी अनुसार खर्च'), findsOneWidget);
+
+      // Switch language to English
+      await localeProvider.setLanguageCode('en');
+      await tester.pumpAndSettle();
+
+      // Verify English strings are restored
+      expect(find.text('Insights'), findsWidgets);
+      expect(find.text('Daily spending'), findsOneWidget);
+      expect(find.text('Spending by category'), findsOneWidget);
+
+      await tester.tap(find.text('Overview').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Recorded balance'), findsOneWidget);
+      expect(find.text('Money in'), findsOneWidget);
+      expect(find.text('Add money'), findsOneWidget);
     });
   });
 }

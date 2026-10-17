@@ -62,5 +62,174 @@
   "languageSystem": "Follow system",
   "languageEnglish": "English",
   "languageNepali": "नेपाली (Nepali)",
-  "languageSaveFailed": "Could not save language preference. Please try again."
+  "languageSaveFailed": "Could not save language preference. Please try again.",
+
+  "navOverview": "Overview",
+  "navTransactions": "Transactions",
+  "navInsights": "Insights",
+  "navSettings": "Settings",
+  "sidebarSlogan": "YOUR MONEY, MADE CLEAR",
+  "sidebarCardTitle": "Make every rupee count",
+  "sidebarCardDesc": "Log the small things. Understand the bigger picture.",
+  "sidebarFooter": "Personal expense tracker",
+  "shareReport": "Share Report",
+  "personalAccount": "Personal account",
+  "yourAccount": "Your account",
+  "switchToEnglish": "Switch to English",
+  "switchToNepali": "नेपालीमा बदल्नुहोस्",
+  "signOutFailed": "Sign out failed. Please try again.",
+
+  "heroOverviewTitle": "A little clarity. A lot of control.",
+  "heroOverviewSubtitle": "Here is how your month is shaping up.",
+  "heroTransactionsTitle": "Every expense, in one place.",
+  "heroTransactionsSubtitle": "Search, review and organize your daily spending.",
+  "heroInsightsTitle": "Understand your spending.",
+  "heroInsightsSubtitle": "Turn your everyday expenses into useful insights.",
+  "heroSettingsTitle": "Account & Preferences.",
+  "heroSettingsSubtitle": "Manage calendar, currency, and data privacy options.",
+
+  "addMoney": "Add money",
+  "addExpense": "Add expense",
+  "calendarNepaliBs": "Nepali (BS)",
+  "calendarEnglishAd": "English (AD)",
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "currencyNpr": "Currency: Nepalese Rupee (NPR)",
+
+  "recordedBalance": "Recorded balance",
+  "recordedBalanceSubtitle": "All recorded income minus expenses",
+  "moneyIn": "Money in",
+  "moneyInSubtitle": "Income for selected month",
+  "moneyOut": "Money out",
+  "moneyOutSubtitle": "Expenses for selected month",
+  "monthlyNet": "Monthly net",
+  "transactionsCount": "{count, plural, =1{1 transaction} other{{count} transactions}}",
+  "@transactionsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "onboardingTip": "Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.",
+
+  "dailySpending": "Daily spending",
+  "addExpenseToStartTimeline": "Add an expense to start your spending timeline.",
+  "highestDay": "Highest day: {amount}",
+  "@highestDay": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "dayOfMonth": "Day of month",
+  "spendingByCategory": "Spending by category",
+  "categoriesEmpty": "Your categories will appear here.",
+  "monthlyPerspective": "Your monthly perspective",
+  "noSpendingLastMonth": "No spending recorded last month to compare yet.",
+  "moreThanLastMonth": "{amount} more than last month.",
+  "@moreThanLastMonth": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "lessThanLastMonth": "{amount} less than last month.",
+  "@lessThanLastMonth": {
+    "placeholders": {
+      "amount": { "type": "String" }
+    }
+  },
+  "monthlyComparisonNotice": "Comparisons use whole calendar months. A month still in progress may have a lower total.",
+
+  "recentTransactions": "Recent transactions",
+  "transactionHistory": "Transaction history",
+  "filterAllTransactions": "All transactions",
+  "filterIncome": "Income",
+  "filterExpenses": "Expenses",
+  "searchHint": "Search title or note",
+  "clearSearchTooltip": "Clear search",
+  "resultsCount": "{count} results",
+  "@resultsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "sortNewestFirst": "Newest first",
+  "sortOldestFirst": "Oldest first",
+  "sortHighestAmount": "Highest amount",
+  "sortLowestAmount": "Lowest amount",
+  "noMatchingTransactions": "No matching transactions",
+  "freshStartThisMonth": "A fresh start for this month",
+  "emptyTransactionsPrompt": "Add money or an expense, or try another month or filter.",
+  "editTransaction": "Edit transaction",
+  "deleteTransaction": "Delete transaction",
+  "viewAll": "View all",
+  "copyCsvTooltip": "Copy filtered transactions as CSV",
+
+  "deleteTransactionDialogTitle": "Delete this transaction?",
+  "actionCannotBeUndone": "This action cannot be undone.",
+  "keepExpense": "Keep expense",
+  "delete": "Delete",
+  "transactionSavedSuccess": "Transaction saved successfully.",
+  "transactionDeletedSuccess": "Transaction deleted.",
+  "couldNotDeleteError": "Could not delete. Please try again.",
+  "unableToLoadExpenses": "Unable to load your expenses",
+
+  "addMoneyTitle": "Add money",
+  "editIncomeTitle": "Edit income",
+  "addExpenseTitle": "Add expense",
+  "editExpenseTitle": "Edit expense",
+  "expenseEditorSubtitle": "Keep the details clear. Your totals and insights update automatically.",
+  "whereFromLabel": "Where did the money come from?",
+  "whatForLabel": "What was it for?",
+  "octoberSalaryHint": "e.g. October salary",
+  "lunchCafeHint": "e.g. Lunch at the cafe",
+  "enterTitleError": "Enter a title",
+  "aiSuggestionsLabel": "AI suggestions:",
+  "aiSuggestionsForCategory": "Suggestions for {category}",
+  "@aiSuggestionsForCategory": {
+    "placeholders": {
+      "category": { "type": "String" }
+    }
+  },
+  "autoGenerateAiTooltip": "Auto-generate with AI",
+  "scrollLeftTooltip": "Scroll left",
+  "scrollRightTooltip": "Scroll right",
+  "autoGenerate": "Auto",
+  "clearTitleTooltip": "Clear title",
+  "amountLabel": "Amount",
+  "amountReceivedHelper": "Enter the amount you received",
+  "amountPaidHelper": "Enter the amount you paid",
+  "invalidAmountError": "Enter a positive amount with up to 2 decimals",
+  "categoryLabel": "Category",
+  "noteOptionalLabel": "Note (optional)",
+  "saveIncomeButton": "Save income",
+  "saveExpenseButton": "Save expense",
+  "savingButton": "Saving…",
+  "couldNotSaveError": "Could not save. Check your connection and try again.",
+
+  "monthlyFinancialReportTitle": "Monthly Financial Report",
+  "reportIncome": "Income",
+  "reportExpenses": "Expenses",
+  "reportNetSavings": "Net Savings",
+  "reportSavingsRate": "Savings Rate",
+  "reportSpendingByCategory": "Spending by Category",
+  "close": "Close",
+  "exportCsv": "Export CSV",
+  "shareSummary": "Share Summary",
+  "reportSummaryCopied": "Financial report summary copied! Ready to share or paste.",
+  "reportCsvCopied": "Monthly CSV transactions copied to clipboard!",
+
+  "catFood": "Food",
+  "catTransport": "Transport",
+  "catShopping": "Shopping",
+  "catBills": "Bills",
+  "catHealth": "Health",
+  "catEducation": "Education",
+  "catOther": "Other",
+  "catSalary": "Salary",
+  "catFreelance": "Freelance",
+  "catAllowance": "Allowance",
+  "catGift": "Gift",
+  "catRefund": "Refund",
+  "catOpeningBalance": "Opening balance",
+  "catOtherIncome": "Other income",
+  "catAll": "All"
 }

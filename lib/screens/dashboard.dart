@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:nepali_utils/nepali_utils.dart';
 import 'package:provider/provider.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/expense.dart';
 import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
@@ -19,6 +20,45 @@ import '../models/calendar_period.dart';
 String money(int cents) =>
     NumberFormat.currency(symbol: 'NPR ', decimalDigits: 2).format(cents / 100);
 
+String localizedCategory(BuildContext context, String cat) {
+  final l10n = AppLocalizations.of(context);
+  if (l10n == null) return cat;
+  switch (cat) {
+    case 'Food':
+      return l10n.catFood;
+    case 'Transport':
+      return l10n.catTransport;
+    case 'Shopping':
+      return l10n.catShopping;
+    case 'Bills':
+      return l10n.catBills;
+    case 'Health':
+      return l10n.catHealth;
+    case 'Education':
+      return l10n.catEducation;
+    case 'Other':
+      return l10n.catOther;
+    case 'Salary':
+      return l10n.catSalary;
+    case 'Freelance':
+      return l10n.catFreelance;
+    case 'Allowance':
+      return l10n.catAllowance;
+    case 'Gift':
+      return l10n.catGift;
+    case 'Refund':
+      return l10n.catRefund;
+    case 'Opening balance':
+      return l10n.catOpeningBalance;
+    case 'Other income':
+      return l10n.catOtherIncome;
+    case 'All':
+      return l10n.catAll;
+    default:
+      return cat;
+  }
+}
+
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
   @override
@@ -28,7 +68,14 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int page = 0;
   final search = TextEditingController();
-  static const titles = ['Overview', 'Transactions', 'Insights', 'Settings'];
+
+  List<String> getTitles(AppLocalizations? l10n) => [
+    l10n?.navOverview ?? 'Overview',
+    l10n?.navTransactions ?? 'Transactions',
+    l10n?.navInsights ?? 'Insights',
+    l10n?.navSettings ?? 'Settings',
+  ];
+
   @override
   void dispose() {
     search.dispose();
@@ -45,28 +92,37 @@ class _DashboardState extends State<Dashboard> {
       barrierDismissible: false,
       builder: (_) => ExpenseEditor(provider: p, expense: e, income: income),
     );
-    if (saved == true && mounted) message('Transaction saved successfully.');
+    if (saved == true && mounted) {
+      final l10n = AppLocalizations.of(context);
+      message(
+        l10n?.transactionSavedSuccess ?? 'Transaction saved successfully.',
+      );
+    }
   }
 
   void message(String text) => ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
   );
+
   Future<void> remove(ExpenseProvider p, Expense e) async {
+    final l10n = AppLocalizations.of(context);
     final yes = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: const Text('Delete this transaction?'),
+        title: Text(
+          l10n?.deleteTransactionDialogTitle ?? 'Delete this transaction?',
+        ),
         content: Text(
-          '${e.title}\n${money(e.amountCents)}\n\nThis action cannot be undone.',
+          '${e.title}\n${money(e.amountCents)}\n\n${l10n?.actionCannotBeUndone ?? 'This action cannot be undone.'}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Keep expense'),
+            child: Text(l10n?.keepExpense ?? 'Keep expense'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Delete'),
+            child: Text(l10n?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -74,9 +130,15 @@ class _DashboardState extends State<Dashboard> {
     if (yes != true) return;
     try {
       await p.delete(e.id);
-      if (mounted) message('Transaction deleted.');
+      if (mounted) {
+        message(l10n?.transactionDeletedSuccess ?? 'Transaction deleted.');
+      }
     } catch (_) {
-      if (mounted) message('Could not delete. Please try again.');
+      if (mounted) {
+        message(
+          l10n?.couldNotDeleteError ?? 'Could not delete. Please try again.',
+        );
+      }
     }
   }
 
@@ -89,31 +151,50 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final titles = getTitles(l10n);
     final p = context.watch<ExpenseProvider>();
     final auth = context.watch<AuthProvider>();
     final wide = MediaQuery.sizeOf(context).width >= 950;
+
+    final heroTitles = [
+      l10n?.heroOverviewTitle ?? 'A little clarity. A lot of control.',
+      l10n?.heroTransactionsTitle ?? 'Every expense, in one place.',
+      l10n?.heroInsightsTitle ?? 'Understand your spending.',
+      l10n?.heroSettingsTitle ?? 'Account & Preferences.',
+    ];
+    final heroSubtitles = [
+      l10n?.heroOverviewSubtitle ?? 'Here is how your month is shaping up.',
+      l10n?.heroTransactionsSubtitle ??
+          'Search, review and organize your daily spending.',
+      l10n?.heroInsightsSubtitle ??
+          'Turn your everyday expenses into useful insights.',
+      l10n?.heroSettingsSubtitle ??
+          'Manage calendar, currency, and data privacy options.',
+    ];
+
     return Scaffold(
       bottomNavigationBar: wide
           ? null
           : NavigationBar(
               selectedIndex: page,
               onDestinationSelected: (i) => setState(() => page = i),
-              destinations: const [
+              destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.space_dashboard_outlined),
-                  label: 'Overview',
+                  icon: const Icon(Icons.space_dashboard_outlined),
+                  label: titles[0],
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.receipt_long_outlined),
-                  label: 'Transactions',
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  label: titles[1],
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.bar_chart_rounded),
-                  label: 'Insights',
+                  icon: const Icon(Icons.bar_chart_rounded),
+                  label: titles[2],
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  label: 'Settings',
+                  icon: const Icon(Icons.settings_outlined),
+                  label: titles[3],
                 ),
               ],
             ),
@@ -149,7 +230,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'YOUR MONEY, MADE CLEAR',
+                      l10n?.sidebarSlogan ?? 'YOUR MONEY, MADE CLEAR',
                       style: TextStyle(
                         fontSize: 10,
                         letterSpacing: 1.5,
@@ -199,13 +280,14 @@ class _DashboardState extends State<Dashboard> {
                             color: context.appAccent,
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            'Make every rupee count',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                          Text(
+                            l10n?.sidebarCardTitle ?? 'Make every rupee count',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Log the small things. Understand the bigger picture.',
+                            l10n?.sidebarCardDesc ??
+                                'Log the small things. Understand the bigger picture.',
                             style: TextStyle(
                               color: context.appMuted,
                               fontSize: 12,
@@ -216,7 +298,7 @@ class _DashboardState extends State<Dashboard> {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Personal expense tracker',
+                      l10n?.sidebarFooter ?? 'Personal expense tracker',
                       style: TextStyle(fontSize: 11, color: context.appMuted),
                     ),
                   ],
@@ -255,12 +337,12 @@ class _DashboardState extends State<Dashboard> {
                               Icons.summarize_outlined,
                               size: 16,
                             ),
-                            label: const Text('Share Report'),
+                            label: Text(l10n?.shareReport ?? 'Share Report'),
                           ),
                           const SizedBox(width: 14),
                         ] else ...[
                           IconButton(
-                            tooltip: 'Share Report',
+                            tooltip: l10n?.shareReport ?? 'Share Report',
                             icon: const Icon(Icons.summarize_outlined),
                             onPressed: () => showDialog<void>(
                               context: context,
@@ -276,7 +358,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            'Personal account',
+                            l10n?.personalAccount ?? 'Personal account',
                             style: TextStyle(
                               color: context.appMuted,
                               fontSize: 12,
@@ -287,9 +369,12 @@ class _DashboardState extends State<Dashboard> {
                         if (wide) ...[
                           IconButton(
                             tooltip:
-                                context.watch<LocaleProvider?>()?.isNepali == true
-                                    ? 'Switch to English'
-                                    : 'नेपालीमा बदल्नुहोस्',
+                                context.watch<LocaleProvider?>()?.isNepali ==
+                                        true
+                                    ? (l10n?.switchToEnglish ??
+                                        'Switch to English')
+                                    : (l10n?.switchToNepali ??
+                                        'नेपालीमा बदल्नुहोस्'),
                             icon: const Icon(Icons.translate_rounded),
                             onPressed: () {
                               final lp = context.read<LocaleProvider?>();
@@ -314,7 +399,10 @@ class _DashboardState extends State<Dashboard> {
                           itemBuilder: (_) => [
                             PopupMenuItem(
                               enabled: false,
-                              child: Text(auth.user?.email ?? 'Your account'),
+                              child: Text(
+                                auth.user?.email ??
+                                    (l10n?.yourAccount ?? 'Your account'),
+                              ),
                             ),
                             PopupMenuItem(
                               value: 'language',
@@ -323,21 +411,24 @@ class _DashboardState extends State<Dashboard> {
                                   const Icon(Icons.translate_rounded, size: 18),
                                   const SizedBox(width: 10),
                                   Text(
-                                    context.watch<LocaleProvider?>()?.isNepali ==
+                                    context
+                                                .watch<LocaleProvider?>()
+                                                ?.isNepali ==
                                             true
-                                        ? 'English'
-                                        : 'नेपाली (Nepali)',
+                                        ? (l10n?.languageEnglish ?? 'English')
+                                        : (l10n?.languageNepali ??
+                                            'नेपाली (Nepali)'),
                                   ),
                                 ],
                               ),
                             ),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'settings',
-                              child: Text('Settings'),
+                              child: Text(l10n?.settings ?? 'Settings'),
                             ),
-                            const PopupMenuItem(
+                            PopupMenuItem(
                               value: 'logout',
-                              child: Text('Sign out'),
+                              child: Text(l10n?.signOut ?? 'Sign out'),
                             ),
                           ],
                           onSelected: (val) async {
@@ -356,7 +447,10 @@ class _DashboardState extends State<Dashboard> {
                               await auth.signOut();
                             } catch (_) {
                               if (mounted) {
-                                message('Sign out failed. Please try again.');
+                                message(
+                                  l10n?.signOutFailed ??
+                                      'Sign out failed. Please try again.',
+                                );
                               }
                             }
                           },
@@ -383,24 +477,14 @@ class _DashboardState extends State<Dashboard> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        [
-                                          'A little clarity. A lot of control.',
-                                          'Every expense, in one place.',
-                                          'Understand your spending.',
-                                          'Account & Preferences.',
-                                        ][page],
+                                        heroTitles[page],
                                         style: Theme.of(context)
                                             .textTheme
                                             .headlineSmall,
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        [
-                                          'Here is how your month is shaping up.',
-                                          'Search, review and organize your daily spending.',
-                                          'Turn your everyday expenses into useful insights.',
-                                          'Manage calendar, currency, and data privacy options.',
-                                        ][page],
+                                        heroSubtitles[page],
                                         style: TextStyle(
                                           color: context.appMuted,
                                         ),
@@ -414,12 +498,16 @@ class _DashboardState extends State<Dashboard> {
                                         Icons.add_card_outlined,
                                         size: 19,
                                       ),
-                                      label: const Text('Add money'),
+                                      label: Text(
+                                        l10n?.addMoney ?? 'Add money',
+                                      ),
                                     ),
                                     OutlinedButton.icon(
                                       onPressed: () => edit(p),
                                       icon: const Icon(Icons.add, size: 19),
-                                      label: const Text('Add expense'),
+                                      label: Text(
+                                        l10n?.addExpense ?? 'Add expense',
+                                      ),
                                     ),
                                   ],
                                 ],
@@ -431,14 +519,19 @@ class _DashboardState extends State<Dashboard> {
                                 const SizedBox(height: 18),
                                 SegmentedButton<bool>(
                                   showSelectedIcon: false,
-                                  segments: const [
+                                  segments: [
                                     ButtonSegment(
                                       value: true,
-                                      label: Text('Nepali (BS)'),
+                                      label: Text(
+                                        l10n?.calendarNepaliBs ?? 'Nepali (BS)',
+                                      ),
                                     ),
                                     ButtonSegment(
                                       value: false,
-                                      label: Text('English (AD)'),
+                                      label: Text(
+                                        l10n?.calendarEnglishAd ??
+                                            'English (AD)',
+                                      ),
                                     ),
                                   ],
                                   selected: {p.nepali},
@@ -456,7 +549,9 @@ class _DashboardState extends State<Dashboard> {
                                       child: Row(
                                         children: [
                                           IconButton(
-                                            tooltip: 'Previous month',
+                                            tooltip:
+                                                l10n?.previousMonth ??
+                                                'Previous month',
                                             onPressed: () => p.changeMonth(-1),
                                             icon: const Icon(
                                               Icons.chevron_left,
@@ -483,7 +578,8 @@ class _DashboardState extends State<Dashboard> {
                                             ],
                                           ),
                                           IconButton(
-                                            tooltip: 'Next month',
+                                            tooltip:
+                                                l10n?.nextMonth ?? 'Next month',
                                             onPressed: () => p.changeMonth(1),
                                             icon: const Icon(
                                               Icons.chevron_right,
@@ -495,7 +591,8 @@ class _DashboardState extends State<Dashboard> {
                                     const Spacer(),
                                     if (wide)
                                       Text(
-                                        'Currency: Nepalese Rupee (NPR)',
+                                        l10n?.currencyNpr ??
+                                            'Currency: Nepalese Rupee (NPR)',
                                         style: TextStyle(
                                           color: context.appMuted,
                                           fontSize: 12,
@@ -513,7 +610,8 @@ class _DashboardState extends State<Dashboard> {
                                   )
                                 else if (p.error != null)
                                   panel(
-                                    'Unable to load your expenses',
+                                    l10n?.unableToLoadExpenses ??
+                                        'Unable to load your expenses',
                                     Text(p.error!),
                                   )
                                 else ...[
@@ -526,15 +624,16 @@ class _DashboardState extends State<Dashboard> {
                                     const SizedBox(height: 24),
                                   ],
                                   if (page == 0 || page == 2) ...[
-                                    summary(p),
+                                    summary(p, l10n),
                                     const SizedBox(height: 12),
                                     Text(
-                                      'Monthly net: ${money(p.monthlyNet)}  |  ${p.monthlyTransactions.length} transactions',
+                                      '${l10n?.monthlyNet ?? 'Monthly net'}: ${money(p.monthlyNet)}  |  ${l10n?.transactionsCount(p.monthlyTransactions.length) ?? '${p.monthlyTransactions.length} transactions'}',
                                       style: TextStyle(color: context.appMuted),
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
+                                      l10n?.onboardingTip ??
+                                          'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
                                       style: TextStyle(
                                         color: context.appMuted,
                                         fontSize: 12,
@@ -544,12 +643,14 @@ class _DashboardState extends State<Dashboard> {
                                     LayoutBuilder(
                                       builder: (context, box) {
                                         final chart = panel(
-                                          'Daily spending',
-                                          dailyChart(p),
+                                          l10n?.dailySpending ??
+                                              'Daily spending',
+                                          dailyChart(p, l10n),
                                         );
                                         final breakdown = panel(
-                                          'Spending by category',
-                                          categoryBreakdown(p),
+                                          l10n?.spendingByCategory ??
+                                              'Spending by category',
+                                          categoryBreakdown(p, l10n),
                                         );
                                         return box.maxWidth > 750
                                             ? Row(
@@ -580,15 +681,31 @@ class _DashboardState extends State<Dashboard> {
                                   ],
                                   if (page == 2)
                                     panel(
-                                      'Your monthly perspective',
+                                      l10n?.monthlyPerspective ??
+                                          'Your monthly perspective',
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             p.previousTotal == 0
-                                                ? 'No spending recorded last month to compare yet.'
-                                                : '${money((p.total - p.previousTotal).abs())} ${p.total > p.previousTotal ? 'more' : 'less'} than last month.',
+                                                ? (l10n?.noSpendingLastMonth ??
+                                                    'No spending recorded last month to compare yet.')
+                                                : (p.total > p.previousTotal
+                                                    ? (l10n?.moreThanLastMonth(
+                                                            money(
+                                                              (p.total -
+                                                                      p.previousTotal)
+                                                                  .abs(),
+                                                            )) ??
+                                                        '${money((p.total - p.previousTotal).abs())} more than last month.')
+                                                    : (l10n?.lessThanLastMonth(
+                                                            money(
+                                                              (p.total -
+                                                                      p.previousTotal)
+                                                                  .abs(),
+                                                            )) ??
+                                                        '${money((p.total - p.previousTotal).abs())} less than last month.')),
                                             style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.w600,
@@ -596,7 +713,8 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                           const SizedBox(height: 10),
                                           Text(
-                                            'Comparisons use whole calendar months. A month still in progress may have a lower total.',
+                                            l10n?.monthlyComparisonNotice ??
+                                                'Comparisons use whole calendar months. A month still in progress may have a lower total.',
                                             style: TextStyle(
                                               color: context.appMuted,
                                             ),
@@ -605,7 +723,7 @@ class _DashboardState extends State<Dashboard> {
                                       ),
                                     )
                                   else
-                                    transactions(p),
+                                    transactions(p, l10n),
                                 ],
                               ],
                             ],
@@ -649,7 +767,8 @@ class _DashboardState extends State<Dashboard> {
       ),
     ),
   );
-  Widget summary(ExpenseProvider p) => LayoutBuilder(
+
+  Widget summary(ExpenseProvider p, AppLocalizations? l10n) => LayoutBuilder(
     builder: (_, box) {
       final cards = [
         Container(
@@ -663,17 +782,17 @@ class _DashboardState extends State<Dashboard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.account_balance_wallet_outlined,
                     color: Colors.white70,
                     size: 20,
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Text(
-                    'Recorded balance',
-                    style: TextStyle(color: Colors.white70),
+                    l10n?.recordedBalance ?? 'Recorded balance',
+                    style: const TextStyle(color: Colors.white70),
                   ),
                 ],
               ),
@@ -690,23 +809,24 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'All recorded income minus expenses',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+              Text(
+                l10n?.recordedBalanceSubtitle ??
+                    'All recorded income minus expenses',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),
         ),
         metric(
-          'Money in',
+          l10n?.moneyIn ?? 'Money in',
           money(p.income),
-          'Income for selected month',
+          l10n?.moneyInSubtitle ?? 'Income for selected month',
           Icons.south_west_rounded,
         ),
         metric(
-          'Money out',
+          l10n?.moneyOut ?? 'Money out',
           money(p.total),
-          'Expenses for selected month',
+          l10n?.moneyOutSubtitle ?? 'Expenses for selected month',
           Icons.north_east_rounded,
         ),
       ];
@@ -732,6 +852,7 @@ class _DashboardState extends State<Dashboard> {
             );
     },
   );
+
   Widget metric(
     String title,
     String value,
@@ -769,7 +890,8 @@ class _DashboardState extends State<Dashboard> {
       ),
     ),
   );
-  Widget dailyChart(ExpenseProvider p) {
+
+  Widget dailyChart(ExpenseProvider p, AppLocalizations? l10n) {
     final days = p.dailyTotals;
     final maxValue = days.fold<int>(0, math.max);
     return Column(
@@ -777,8 +899,10 @@ class _DashboardState extends State<Dashboard> {
       children: [
         Text(
           maxValue == 0
-              ? 'Add an expense to start your spending timeline.'
-              : 'Highest day: ${money(maxValue)}',
+              ? (l10n?.addExpenseToStartTimeline ??
+                  'Add an expense to start your spending timeline.')
+              : (l10n?.highestDay(money(maxValue)) ??
+                  'Highest day: ${money(maxValue)}'),
           style: TextStyle(color: context.appMuted, fontSize: 12),
         ),
         const SizedBox(height: 24),
@@ -819,7 +943,7 @@ class _DashboardState extends State<Dashboard> {
           children: [
             Text('01', style: TextStyle(color: context.appMuted, fontSize: 11)),
             Text(
-              'Day of month',
+              l10n?.dayOfMonth ?? 'Day of month',
               style: TextStyle(color: context.appMuted, fontSize: 11),
             ),
             Text(
@@ -832,7 +956,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget categoryBreakdown(ExpenseProvider p) {
+  Widget categoryBreakdown(ExpenseProvider p, AppLocalizations? l10n) {
     final ranked = categories.where((c) => p.categoryTotal(c) > 0).toList()
       ..sort((a, b) => p.categoryTotal(b).compareTo(p.categoryTotal(a)));
     if (ranked.isEmpty) {
@@ -840,7 +964,7 @@ class _DashboardState extends State<Dashboard> {
         height: 230,
         child: Center(
           child: Text(
-            'Your categories will appear here.',
+            l10n?.categoriesEmpty ?? 'Your categories will appear here.',
             style: TextStyle(color: context.appMuted),
           ),
         ),
@@ -857,7 +981,7 @@ class _DashboardState extends State<Dashboard> {
                     children: [
                       Icon(categoryIcon(c), color: categoryColor(c), size: 18),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(c)),
+                      Expanded(child: Text(localizedCategory(context, c))),
                       Text(
                         '${(p.categoryTotal(c) / p.total * 100).round()}%',
                         style: const TextStyle(fontWeight: FontWeight.w600),
@@ -885,12 +1009,23 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget transactions(ExpenseProvider p) {
+  Widget transactions(ExpenseProvider p, AppLocalizations? l10n) {
     final items = page == 0
         ? p.monthlyTransactions.take(5).toList()
         : p.visible;
+
+    String sortLabel(String v) => switch (v) {
+      'Newest first' => l10n?.sortNewestFirst ?? 'Newest first',
+      'Oldest first' => l10n?.sortOldestFirst ?? 'Oldest first',
+      'Highest amount' => l10n?.sortHighestAmount ?? 'Highest amount',
+      'Lowest amount' => l10n?.sortLowestAmount ?? 'Lowest amount',
+      _ => v,
+    };
+
     return panel(
-      page == 0 ? 'Recent transactions' : 'Transaction history',
+      page == 0
+          ? (l10n?.recentTransactions ?? 'Recent transactions')
+          : (l10n?.transactionHistory ?? 'Transaction history'),
       Column(
         children: [
           if (page == 1) ...[
@@ -899,7 +1034,14 @@ class _DashboardState extends State<Dashboard> {
               children: ['All', 'Income', 'Expenses']
                   .map(
                     (type) => ChoiceChip(
-                      label: Text(type == 'All' ? 'All transactions' : type),
+                      label: Text(
+                        type == 'All'
+                            ? (l10n?.filterAllTransactions ??
+                                'All transactions')
+                            : (type == 'Income'
+                                ? (l10n?.filterIncome ?? 'Income')
+                                : (l10n?.filterExpenses ?? 'Expenses')),
+                      ),
                       selected: p.transactionType == type,
                       onSelected: (_) => p.setType(type),
                     ),
@@ -911,10 +1053,10 @@ class _DashboardState extends State<Dashboard> {
               controller: search,
               onChanged: p.find,
               decoration: InputDecoration(
-                hintText: 'Search title or note',
+                hintText: l10n?.searchHint ?? 'Search title or note',
                 prefixIcon: const Icon(Icons.search),
                 suffixIcon: IconButton(
-                  tooltip: 'Clear search',
+                  tooltip: l10n?.clearSearchTooltip ?? 'Clear search',
                   onPressed: () {
                     search.clear();
                     p.find('');
@@ -938,7 +1080,11 @@ class _DashboardState extends State<Dashboard> {
                       ]
                       .map(
                         (c) => ChoiceChip(
-                          label: Text(c),
+                          label: Text(
+                            c == 'All'
+                                ? (l10n?.catAll ?? 'All')
+                                : localizedCategory(context, c),
+                          ),
                           selected: p.category == c,
                           onSelected: (_) => p.filter(c),
                         ),
@@ -950,7 +1096,7 @@ class _DashboardState extends State<Dashboard> {
               children: [
                 Expanded(
                   child: Text(
-                    '${items.length} results',
+                    l10n?.resultsCount(items.length) ?? '${items.length} results',
                     style: TextStyle(color: context.appMuted),
                   ),
                 ),
@@ -968,7 +1114,7 @@ class _DashboardState extends State<Dashboard> {
                             (v) => DropdownMenuItem(
                               value: v,
                               child: Text(
-                                v,
+                                sortLabel(v),
                                 style: const TextStyle(fontSize: 13),
                               ),
                             ),
@@ -993,8 +1139,10 @@ class _DashboardState extends State<Dashboard> {
                   const SizedBox(height: 14),
                   Text(
                     page == 1 && (p.search.isNotEmpty || p.category != 'All')
-                        ? 'No matching transactions'
-                        : 'A fresh start for this month',
+                        ? (l10n?.noMatchingTransactions ??
+                            'No matching transactions')
+                        : (l10n?.freshStartThisMonth ??
+                            'A fresh start for this month'),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -1002,7 +1150,8 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Add money or an expense, or try another month or filter.',
+                    l10n?.emptyTransactionsPrompt ??
+                        'Add money or an expense, or try another month or filter.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: context.appMuted),
                   ),
@@ -1049,7 +1198,7 @@ class _DashboardState extends State<Dashboard> {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(
-                                  '${e.category} · ${formatBsAndAdDate(e.date)}',
+                                  '${localizedCategory(context, e.category)} · ${formatBsAndAdDate(e.date)}',
                                   style: TextStyle(
                                     color: context.appMuted,
                                     fontSize: 12,
@@ -1080,17 +1229,22 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           PopupMenuButton<String>(
-                            tooltip: 'Transaction actions',
+                            tooltip: l10n?.editTransaction ?? 'Transaction actions',
                             onSelected: (v) =>
                                 v == 'edit' ? edit(p, e) : remove(p, e),
                             itemBuilder: (_) => [
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'edit',
-                                child: Text('Edit transaction'),
+                                child: Text(
+                                  l10n?.editTransaction ?? 'Edit transaction',
+                                ),
                               ),
-                              const PopupMenuItem(
+                              PopupMenuItem(
                                 value: 'delete',
-                                child: Text('Delete transaction'),
+                                child: Text(
+                                  l10n?.deleteTransaction ??
+                                      'Delete transaction',
+                                ),
                               ),
                             ],
                           ),
@@ -1107,10 +1261,11 @@ class _DashboardState extends State<Dashboard> {
       action: page == 0
           ? TextButton(
               onPressed: () => setState(() => page = 1),
-              child: const Text('View all'),
+              child: Text(l10n?.viewAll ?? 'View all'),
             )
           : IconButton(
-              tooltip: 'Copy filtered transactions as CSV',
+              tooltip:
+                  l10n?.copyCsvTooltip ?? 'Copy filtered transactions as CSV',
               onPressed: p.visible.isEmpty ? null : () => export(p),
               icon: const Icon(Icons.copy_all_outlined),
             ),

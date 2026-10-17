@@ -180,4 +180,422 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get languageSaveFailed =>
       'Could not save language preference. Please try again.';
+
+  @override
+  String get navOverview => 'Overview';
+
+  @override
+  String get navTransactions => 'Transactions';
+
+  @override
+  String get navInsights => 'Insights';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get sidebarSlogan => 'YOUR MONEY, MADE CLEAR';
+
+  @override
+  String get sidebarCardTitle => 'Make every rupee count';
+
+  @override
+  String get sidebarCardDesc =>
+      'Log the small things. Understand the bigger picture.';
+
+  @override
+  String get sidebarFooter => 'Personal expense tracker';
+
+  @override
+  String get shareReport => 'Share Report';
+
+  @override
+  String get personalAccount => 'Personal account';
+
+  @override
+  String get yourAccount => 'Your account';
+
+  @override
+  String get switchToEnglish => 'Switch to English';
+
+  @override
+  String get switchToNepali => 'नेपालीमा बदल्नुहोस्';
+
+  @override
+  String get signOutFailed => 'Sign out failed. Please try again.';
+
+  @override
+  String get heroOverviewTitle => 'A little clarity. A lot of control.';
+
+  @override
+  String get heroOverviewSubtitle => 'Here is how your month is shaping up.';
+
+  @override
+  String get heroTransactionsTitle => 'Every expense, in one place.';
+
+  @override
+  String get heroTransactionsSubtitle =>
+      'Search, review and organize your daily spending.';
+
+  @override
+  String get heroInsightsTitle => 'Understand your spending.';
+
+  @override
+  String get heroInsightsSubtitle =>
+      'Turn your everyday expenses into useful insights.';
+
+  @override
+  String get heroSettingsTitle => 'Account & Preferences.';
+
+  @override
+  String get heroSettingsSubtitle =>
+      'Manage calendar, currency, and data privacy options.';
+
+  @override
+  String get addMoney => 'Add money';
+
+  @override
+  String get addExpense => 'Add expense';
+
+  @override
+  String get calendarNepaliBs => 'Nepali (BS)';
+
+  @override
+  String get calendarEnglishAd => 'English (AD)';
+
+  @override
+  String get previousMonth => 'Previous month';
+
+  @override
+  String get nextMonth => 'Next month';
+
+  @override
+  String get currencyNpr => 'Currency: Nepalese Rupee (NPR)';
+
+  @override
+  String get recordedBalance => 'Recorded balance';
+
+  @override
+  String get recordedBalanceSubtitle => 'All recorded income minus expenses';
+
+  @override
+  String get moneyIn => 'Money in';
+
+  @override
+  String get moneyInSubtitle => 'Income for selected month';
+
+  @override
+  String get moneyOut => 'Money out';
+
+  @override
+  String get moneyOutSubtitle => 'Expenses for selected month';
+
+  @override
+  String get monthlyNet => 'Monthly net';
+
+  @override
+  String transactionsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count transactions',
+      one: '1 transaction',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get onboardingTip =>
+      'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.';
+
+  @override
+  String get dailySpending => 'Daily spending';
+
+  @override
+  String get addExpenseToStartTimeline =>
+      'Add an expense to start your spending timeline.';
+
+  @override
+  String highestDay(String amount) {
+    return 'Highest day: $amount';
+  }
+
+  @override
+  String get dayOfMonth => 'Day of month';
+
+  @override
+  String get spendingByCategory => 'Spending by category';
+
+  @override
+  String get categoriesEmpty => 'Your categories will appear here.';
+
+  @override
+  String get monthlyPerspective => 'Your monthly perspective';
+
+  @override
+  String get noSpendingLastMonth =>
+      'No spending recorded last month to compare yet.';
+
+  @override
+  String moreThanLastMonth(String amount) {
+    return '$amount more than last month.';
+  }
+
+  @override
+  String lessThanLastMonth(String amount) {
+    return '$amount less than last month.';
+  }
+
+  @override
+  String get monthlyComparisonNotice =>
+      'Comparisons use whole calendar months. A month still in progress may have a lower total.';
+
+  @override
+  String get recentTransactions => 'Recent transactions';
+
+  @override
+  String get transactionHistory => 'Transaction history';
+
+  @override
+  String get filterAllTransactions => 'All transactions';
+
+  @override
+  String get filterIncome => 'Income';
+
+  @override
+  String get filterExpenses => 'Expenses';
+
+  @override
+  String get searchHint => 'Search title or note';
+
+  @override
+  String get clearSearchTooltip => 'Clear search';
+
+  @override
+  String resultsCount(int count) {
+    return '$count results';
+  }
+
+  @override
+  String get sortNewestFirst => 'Newest first';
+
+  @override
+  String get sortOldestFirst => 'Oldest first';
+
+  @override
+  String get sortHighestAmount => 'Highest amount';
+
+  @override
+  String get sortLowestAmount => 'Lowest amount';
+
+  @override
+  String get noMatchingTransactions => 'No matching transactions';
+
+  @override
+  String get freshStartThisMonth => 'A fresh start for this month';
+
+  @override
+  String get emptyTransactionsPrompt =>
+      'Add money or an expense, or try another month or filter.';
+
+  @override
+  String get editTransaction => 'Edit transaction';
+
+  @override
+  String get deleteTransaction => 'Delete transaction';
+
+  @override
+  String get viewAll => 'View all';
+
+  @override
+  String get copyCsvTooltip => 'Copy filtered transactions as CSV';
+
+  @override
+  String get deleteTransactionDialogTitle => 'Delete this transaction?';
+
+  @override
+  String get actionCannotBeUndone => 'This action cannot be undone.';
+
+  @override
+  String get keepExpense => 'Keep expense';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get transactionSavedSuccess => 'Transaction saved successfully.';
+
+  @override
+  String get transactionDeletedSuccess => 'Transaction deleted.';
+
+  @override
+  String get couldNotDeleteError => 'Could not delete. Please try again.';
+
+  @override
+  String get unableToLoadExpenses => 'Unable to load your expenses';
+
+  @override
+  String get addMoneyTitle => 'Add money';
+
+  @override
+  String get editIncomeTitle => 'Edit income';
+
+  @override
+  String get addExpenseTitle => 'Add expense';
+
+  @override
+  String get editExpenseTitle => 'Edit expense';
+
+  @override
+  String get expenseEditorSubtitle =>
+      'Keep the details clear. Your totals and insights update automatically.';
+
+  @override
+  String get whereFromLabel => 'Where did the money come from?';
+
+  @override
+  String get whatForLabel => 'What was it for?';
+
+  @override
+  String get octoberSalaryHint => 'e.g. October salary';
+
+  @override
+  String get lunchCafeHint => 'e.g. Lunch at the cafe';
+
+  @override
+  String get enterTitleError => 'Enter a title';
+
+  @override
+  String get aiSuggestionsLabel => 'AI suggestions:';
+
+  @override
+  String aiSuggestionsForCategory(String category) {
+    return 'Suggestions for $category';
+  }
+
+  @override
+  String get autoGenerateAiTooltip => 'Auto-generate with AI';
+
+  @override
+  String get scrollLeftTooltip => 'Scroll left';
+
+  @override
+  String get scrollRightTooltip => 'Scroll right';
+
+  @override
+  String get autoGenerate => 'Auto';
+
+  @override
+  String get clearTitleTooltip => 'Clear title';
+
+  @override
+  String get amountLabel => 'Amount';
+
+  @override
+  String get amountReceivedHelper => 'Enter the amount you received';
+
+  @override
+  String get amountPaidHelper => 'Enter the amount you paid';
+
+  @override
+  String get invalidAmountError =>
+      'Enter a positive amount with up to 2 decimals';
+
+  @override
+  String get categoryLabel => 'Category';
+
+  @override
+  String get noteOptionalLabel => 'Note (optional)';
+
+  @override
+  String get saveIncomeButton => 'Save income';
+
+  @override
+  String get saveExpenseButton => 'Save expense';
+
+  @override
+  String get savingButton => 'Saving…';
+
+  @override
+  String get couldNotSaveError =>
+      'Could not save. Check your connection and try again.';
+
+  @override
+  String get monthlyFinancialReportTitle => 'Monthly Financial Report';
+
+  @override
+  String get reportIncome => 'Income';
+
+  @override
+  String get reportExpenses => 'Expenses';
+
+  @override
+  String get reportNetSavings => 'Net Savings';
+
+  @override
+  String get reportSavingsRate => 'Savings Rate';
+
+  @override
+  String get reportSpendingByCategory => 'Spending by Category';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get exportCsv => 'Export CSV';
+
+  @override
+  String get shareSummary => 'Share Summary';
+
+  @override
+  String get reportSummaryCopied =>
+      'Financial report summary copied! Ready to share or paste.';
+
+  @override
+  String get reportCsvCopied => 'Monthly CSV transactions copied to clipboard!';
+
+  @override
+  String get catFood => 'Food';
+
+  @override
+  String get catTransport => 'Transport';
+
+  @override
+  String get catShopping => 'Shopping';
+
+  @override
+  String get catBills => 'Bills';
+
+  @override
+  String get catHealth => 'Health';
+
+  @override
+  String get catEducation => 'Education';
+
+  @override
+  String get catOther => 'Other';
+
+  @override
+  String get catSalary => 'Salary';
+
+  @override
+  String get catFreelance => 'Freelance';
+
+  @override
+  String get catAllowance => 'Allowance';
+
+  @override
+  String get catGift => 'Gift';
+
+  @override
+  String get catRefund => 'Refund';
+
+  @override
+  String get catOpeningBalance => 'Opening balance';
+
+  @override
+  String get catOtherIncome => 'Other income';
+
+  @override
+  String get catAll => 'All';
 }

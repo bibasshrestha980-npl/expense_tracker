@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import '../models/calendar_period.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
@@ -60,13 +61,15 @@ class ReportDialog extends StatelessWidget {
   }
 
   Future<void> _shareText(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final text = _formatSummaryText();
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Financial report summary copied! Ready to share or paste.',
+            l10n?.reportSummaryCopied ??
+                'Financial report summary copied! Ready to share or paste.',
           ),
           behavior: SnackBarBehavior.floating,
         ),
@@ -75,6 +78,7 @@ class ReportDialog extends StatelessWidget {
   }
 
   Future<void> _exportCsv(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     String quote(String val) => '"${val.replaceAll('"', '""')}"';
     final lines = [
       'Date,Type,Title,Category,Amount (NPR),Note',
@@ -86,8 +90,11 @@ class ReportDialog extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: lines.join('\r\n')));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Monthly CSV transactions copied to clipboard!'),
+        SnackBar(
+          content: Text(
+            l10n?.reportCsvCopied ??
+                'Monthly CSV transactions copied to clipboard!',
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -96,6 +103,7 @@ class ReportDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final periodName = formatBsAndAdMonth(expenseProvider.period.anchor);
 
     final income = expenseProvider.income;
@@ -110,10 +118,10 @@ class ReportDialog extends StatelessWidget {
         children: [
           Icon(Icons.summarize_outlined, color: context.appAccent),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Monthly Financial Report',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              l10n?.monthlyFinancialReportTitle ?? 'Monthly Financial Report',
+              style: const TextStyle(fontWeight: FontWeight.bold),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -152,7 +160,7 @@ class ReportDialog extends StatelessWidget {
                   Expanded(
                     child: _metricBox(
                       context,
-                      'Income',
+                      l10n?.reportIncome ?? 'Income',
                       money(income),
                       context.appAccent,
                       Icons.arrow_downward_rounded,
@@ -162,7 +170,7 @@ class ReportDialog extends StatelessWidget {
                   Expanded(
                     child: _metricBox(
                       context,
-                      'Expenses',
+                      l10n?.reportExpenses ?? 'Expenses',
                       money(totalExpense),
                       context.palette.error,
                       Icons.arrow_upward_rounded,
@@ -172,7 +180,7 @@ class ReportDialog extends StatelessWidget {
                   Expanded(
                     child: _metricBox(
                       context,
-                      'Net Savings',
+                      l10n?.reportNetSavings ?? 'Net Savings',
                       money(netSavings),
                       context.appAccent,
                       Icons.savings_rounded,
@@ -190,9 +198,9 @@ class ReportDialog extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Savings Rate',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    Text(
+                      l10n?.reportSavingsRate ?? 'Savings Rate',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     Text(
                       '$savingsRate%',
@@ -207,14 +215,14 @@ class ReportDialog extends StatelessWidget {
               const SizedBox(height: 20),
 
               // Category Breakdown Table
-              const Text(
-                'Spending by Category',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              Text(
+                l10n?.reportSpendingByCategory ?? 'Spending by Category',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               const SizedBox(height: 8),
-              ...categories.where((c) => expenseProvider.categoryTotal(c) > 0).map((
-                cat,
-              ) {
+              ...categories
+                  .where((c) => expenseProvider.categoryTotal(c) > 0)
+                  .map((cat) {
                 final spent = expenseProvider.categoryTotal(cat);
                 final pct = totalExpense > 0 ? (spent / totalExpense) : 0.0;
                 return Padding(
@@ -224,7 +232,10 @@ class ReportDialog extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(cat, style: const TextStyle(fontSize: 13)),
+                          Text(
+                            localizedCategory(context, cat),
+                            style: const TextStyle(fontSize: 13),
+                          ),
                           Text(
                             '${money(spent)} (${(pct * 100).toStringAsFixed(1)}%)',
                             style: const TextStyle(
@@ -253,17 +264,17 @@ class ReportDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+          child: Text(l10n?.close ?? 'Close'),
         ),
         FilledButton.tonalIcon(
           onPressed: () => _exportCsv(context),
           icon: const Icon(Icons.table_chart_outlined, size: 18),
-          label: const Text('Export CSV'),
+          label: Text(l10n?.exportCsv ?? 'Export CSV'),
         ),
         FilledButton.icon(
           onPressed: () => _shareText(context),
           icon: const Icon(Icons.share_outlined, size: 18),
-          label: const Text('Share Summary'),
+          label: Text(l10n?.shareSummary ?? 'Share Summary'),
         ),
       ],
     );
