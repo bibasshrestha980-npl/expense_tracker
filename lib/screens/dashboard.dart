@@ -288,8 +288,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            l10n?.sidebarCardDesc ??
-                                'Log the small things. Understand the bigger picture.',
+                            l10n?.sidebarCardDesc ?? 'Log the small things. Understand the bigger picture.',
                             style: TextStyle(
                               color: context.appMuted,
                               fontSize: 12,
@@ -371,10 +370,9 @@ class _DashboardState extends State<Dashboard> {
                         if (wide) ...[
                           IconButton(
                             tooltip: isNepali
-                                ? (l10n?.switchToEnglish ??
-                                    'Switch to English')
+                                ? (l10n?.switchToEnglish ?? 'Switch to English')
                                 : (l10n?.switchToNepali ??
-                                    'नेपालीमा बदल्नुहोस्'),
+                                      'नेपालीमा बदल्नुहोस्'),
                             icon: const Icon(Icons.translate_rounded),
                             onPressed: () {
                               final lp = context.read<LocaleProvider?>();
@@ -403,9 +401,9 @@ class _DashboardState extends State<Dashboard> {
                                 auth.user?.email ??
                                     (auth.user?.isAnonymous == true
                                         ? (l10n?.guestSession ??
-                                            'Guest Session')
+                                              'Guest Session')
                                         : (l10n?.yourAccount ??
-                                            'Your account')),
+                                              'Your account')),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -421,7 +419,7 @@ class _DashboardState extends State<Dashboard> {
                                       isNepali
                                           ? (l10n?.languageEnglish ?? 'English')
                                           : (l10n?.languageNepali ??
-                                              'नेपाली (Nepali)'),
+                                                'नेपाली (Nepali)'),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -639,8 +637,7 @@ class _DashboardState extends State<Dashboard> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      l10n?.onboardingTip ??
-                                          'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
+                                      l10n?.onboardingTip ?? 'Starting today? Add money with the Opening balance category for the funds you already have. This is a personal ledger, not a connected bank account.',
                                       style: TextStyle(
                                         color: context.appMuted,
                                         fontSize: 12,
@@ -697,22 +694,24 @@ class _DashboardState extends State<Dashboard> {
                                           Text(
                                             p.previousTotal == 0
                                                 ? (l10n?.noSpendingLastMonth ??
-                                                    'No spending recorded last month to compare yet.')
+                                                      'No spending recorded last month to compare yet.')
                                                 : (p.total > p.previousTotal
-                                                    ? (l10n?.moreThanLastMonth(
-                                                            money(
-                                                              (p.total -
-                                                                      p.previousTotal)
-                                                                  .abs(),
-                                                            )) ??
-                                                        '${money((p.total - p.previousTotal).abs())} more than last month.')
-                                                    : (l10n?.lessThanLastMonth(
-                                                            money(
-                                                              (p.total -
-                                                                      p.previousTotal)
-                                                                  .abs(),
-                                                            )) ??
-                                                        '${money((p.total - p.previousTotal).abs())} less than last month.')),
+                                                      ? (l10n?.moreThanLastMonth(
+                                                              money(
+                                                                (p.total -
+                                                                        p.previousTotal)
+                                                                    .abs(),
+                                                              ),
+                                                            ) ??
+                                                            '${money((p.total - p.previousTotal).abs())} more than last month.')
+                                                      : (l10n?.lessThanLastMonth(
+                                                              money(
+                                                                (p.total -
+                                                                        p.previousTotal)
+                                                                    .abs(),
+                                                              ),
+                                                            ) ??
+                                                            '${money((p.total - p.previousTotal).abs())} less than last month.')),
                                             style: const TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.w600,
@@ -720,8 +719,7 @@ class _DashboardState extends State<Dashboard> {
                                           ),
                                           const SizedBox(height: 10),
                                           Text(
-                                            l10n?.monthlyComparisonNotice ??
-                                                'Comparisons use whole calendar months. A month still in progress may have a lower total.',
+                                            l10n?.monthlyComparisonNotice ?? 'Comparisons use whole calendar months. A month still in progress may have a lower total.',
                                             style: TextStyle(
                                               color: context.appMuted,
                                             ),
@@ -797,9 +795,11 @@ class _DashboardState extends State<Dashboard> {
                     size: 20,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    l10n?.recordedBalance ?? 'Recorded balance',
-                    style: const TextStyle(color: Colors.white70),
+                  Expanded(
+                    child: Text(
+                      l10n?.recordedBalance ?? 'Recorded balance',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
                   ),
                 ],
               ),
@@ -907,9 +907,9 @@ class _DashboardState extends State<Dashboard> {
         Text(
           maxValue == 0
               ? (l10n?.addExpenseToStartTimeline ??
-                  'Add an expense to start your spending timeline.')
+                    'Add an expense to start your spending timeline.')
               : (l10n?.highestDay(money(maxValue)) ??
-                  'Highest day: ${money(maxValue)}'),
+                    'Highest day: ${money(maxValue)}'),
           style: TextStyle(color: context.appMuted, fontSize: 12),
         ),
         const SizedBox(height: 24),
@@ -1044,10 +1044,10 @@ class _DashboardState extends State<Dashboard> {
                       label: Text(
                         type == 'All'
                             ? (l10n?.filterAllTransactions ??
-                                'All transactions')
+                                  'All transactions')
                             : (type == 'Income'
-                                ? (l10n?.filterIncome ?? 'Income')
-                                : (l10n?.filterExpenses ?? 'Expenses')),
+                                  ? (l10n?.filterIncome ?? 'Income')
+                                  : (l10n?.filterExpenses ?? 'Expenses')),
                       ),
                       selected: p.transactionType == type,
                       onSelected: (_) => p.setType(type),
@@ -1103,7 +1103,8 @@ class _DashboardState extends State<Dashboard> {
               children: [
                 Expanded(
                   child: Text(
-                    l10n?.resultsCount(items.length) ?? '${items.length} results',
+                    l10n?.resultsCount(items.length) ??
+                        '${items.length} results',
                     style: TextStyle(color: context.appMuted),
                   ),
                 ),
@@ -1147,9 +1148,9 @@ class _DashboardState extends State<Dashboard> {
                   Text(
                     page == 1 && (p.search.isNotEmpty || p.category != 'All')
                         ? (l10n?.noMatchingTransactions ??
-                            'No matching transactions')
+                              'No matching transactions')
                         : (l10n?.freshStartThisMonth ??
-                            'A fresh start for this month'),
+                              'A fresh start for this month'),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -1157,8 +1158,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    l10n?.emptyTransactionsPrompt ??
-                        'Add money or an expense, or try another month or filter.',
+                    l10n?.emptyTransactionsPrompt ?? 'Add money or an expense, or try another month or filter.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: context.appMuted),
                   ),
@@ -1236,7 +1236,8 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           PopupMenuButton<String>(
-                            tooltip: l10n?.editTransaction ?? 'Transaction actions',
+                            tooltip:
+                                l10n?.editTransaction ?? 'Transaction actions',
                             onSelected: (v) =>
                                 v == 'edit' ? edit(p, e) : remove(p, e),
                             itemBuilder: (_) => [

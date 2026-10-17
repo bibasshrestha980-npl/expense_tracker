@@ -22,7 +22,8 @@ class _VaultGateState extends State<VaultGate> with WidgetsBindingObserver {
   String? generatedKey, error;
   VaultRepository? repository;
   int lockEpoch = 0;
-  FirebaseFirestore get database => widget.firestore ?? FirebaseFirestore.instance;
+  FirebaseFirestore get database =>
+      widget.firestore ?? FirebaseFirestore.instance;
   DocumentReference<Map<String, dynamic>> get config =>
       database.doc('users/${widget.uid}/vault/config');
   @override
