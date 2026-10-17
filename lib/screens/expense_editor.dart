@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart' show PointerDeviceKind, PointerScrollEvent;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import 'nepali_picker.dart';
@@ -8,6 +9,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../models/calendar_period.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
+import '../services/sms_wallet_parser.dart';
 import '../theme.dart';
 import 'dashboard.dart' show localizedCategory;
 
@@ -210,6 +212,29 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     }
   }
 
+  Future<void> _openSmsParserDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => _SmsParserDialog(
+        isNepali: _isNepaliLocale,
+        onApply: (parsed) {
+          setState(() {
+            _amount.text = parsed.amount.toStringAsFixed(2);
+            _title.text = parsed.title;
+            _titleEdited = true;
+            if (categories.contains(parsed.category) ||
+                incomeCategories.contains(parsed.category)) {
+              _category = parsed.category;
+            }
+            if (parsed.referenceId != null && _note.text.isEmpty) {
+              _note.text = 'Ref: ${parsed.referenceId}';
+            }
+          });
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -240,7 +265,23 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                           'Keep the details clear. Your totals and insights update automatically.',
                       style: TextStyle(color: context.appMuted),
                     ),
-                    const SizedBox(height: 24),
+                    if (widget.expense == null) ...[
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: OutlinedButton.icon(
+                          onPressed: _openSmsParserDialog,
+                          icon: const Icon(Icons.auto_awesome, size: 17),
+                          label: Text(
+                            _isNepaliLocale
+                                ? 'SMS / वालेटबाट स्वतः भर्नुहोस्'
+                                : 'Auto-fill from SMS / Wallet',
+                            style: const TextStyle(fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
                     TextFormField(
                       controller: _title,
                       onChanged: (_) => setState(() => _titleEdited = true),
@@ -620,3 +661,182 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     );
   }
 }
+
+class _SmsParserDialog extends StatefulWidget {
+  final bool isNepali;
+  final ValueChanged<ParsedTransaction> onApply;
+
+  const _SmsParserDialog({
+    required this.isNepali,
+    required this.onApply,
+  });
+
+  @override
+  State<_SmsParserDialog> createState() => _SmsParserDialogState();
+}
+
+class _SmsParserDialogState extends State<_SmsParserDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+    _controller.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final parsed = SmsWalletParser.parse(_controller.text);
+    final theme = Theme.of(context);
+
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(
+            Icons.auto_awesome,
+            color: theme.colorScheme.primary,
+            size: 22,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              widget.isNepali
+                  ? 'SMS / वालेट विवरण स्वतः भर्नुहोस्'
+                  : 'Auto-fill from SMS / Wallet',
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: 440,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.isNepali
+                    ? 'eSewa, Khalti, Fonepay वा बैंक SMS यहाँ पेस्ट गर्नुहोस्। विवरण स्वतः फाराममा भरिनेछ।'
+                    : 'Paste transaction alerts from eSewa, Khalti, Fonepay, or your bank. Details will be extracted automatically.',
+                style: TextStyle(
+                  color: theme.colorScheme.outline,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                key: const Key('sms_input_field'),
+                controller: _controller,
+                maxLines: 3,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: widget.isNepali
+                      ? 'उदा: Paid Rs. 450 to Himalayan Java via eSewa...'
+                      : 'e.g., Paid Rs. 450 to Himalayan Java via eSewa...',
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    tooltip: 'Paste',
+                    icon: const Icon(Icons.content_paste),
+                    onPressed: () async {
+                      final clip = await Clipboard.getData(Clipboard.kTextPlain);
+                      if (clip?.text != null && mounted) {
+                        _controller.text = clip!.text!.trim();
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              if (parsed != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            parsed.isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                            size: 16,
+                            color: parsed.isIncome ? Colors.green : Colors.red,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${parsed.isIncome ? (widget.isNepali ? "आम्दानी" : "Income") : (widget.isNepali ? "खर्च" : "Expense")}: Rs. ${parsed.amount.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${widget.isNepali ? "शीर्षक" : "Title"}: ${parsed.title}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      Text(
+                        '${widget.isNepali ? "श्रेणी" : "Category"}: ${parsed.category}',
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      if (parsed.referenceId != null)
+                        Text(
+                          'Ref ID: ${parsed.referenceId}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ] else if (_controller.text.isNotEmpty) ...[
+                Text(
+                  widget.isNepali
+                      ? 'कुनै मान्य रकम फेला परेन। कृपया SMS वा सन्देश जाँच गर्नुहोस्।'
+                      : 'No valid amount found. Please check the SMS or text.',
+                  style: TextStyle(
+                    color: theme.colorScheme.error,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(widget.isNepali ? 'रद्द' : 'Cancel'),
+        ),
+        FilledButton.icon(
+          icon: const Icon(Icons.check, size: 18),
+          onPressed: parsed == null
+              ? null
+              : () {
+                  widget.onApply(parsed);
+                  Navigator.pop(context);
+                },
+          label: Text(
+            widget.isNepali ? 'लागू गर्नुहोस्' : 'Apply Details',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
