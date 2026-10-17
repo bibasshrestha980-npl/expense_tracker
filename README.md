@@ -38,7 +38,13 @@ Managing personal money in Nepal comes with unique daily dynamics: navigating bo
 |:---:|:---:|
 | <img src="docs/light-mode.png" alt="Pocket Dashboard in Light Mode" width="460" /> | <img src="docs/dark-mode.png" alt="Pocket Dashboard in Dark Mode" width="460" /> |
 
-*High-fidelity Material 3 presentation featuring responsive navigation, instant balance computation, daily spending distribution, and category breakdowns.*
+<br/>
+
+| Smart SMS & Digital Wallet Auto-Fill (eSewa / Khalti / Bank SMS) |
+|:---:|
+| <img src="docs/smart-auto-fill.png" alt="Pocket Smart SMS and Wallet Auto-Fill" width="540" /> |
+
+*High-fidelity Material 3 presentation featuring responsive navigation, instant balance computation, daily spending distribution, category breakdowns, and zero-friction SMS & digital wallet parsing.*
 
 </div>
 
