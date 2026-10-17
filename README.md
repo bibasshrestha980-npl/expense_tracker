@@ -1,103 +1,56 @@
-<p align="center"><img src="docs/banner.svg" alt="Pocket: Personal finance, made clear" width="100%"></p>
+# Pocket
 
-[![Flutter CI](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml)
-![Flutter](https://img.shields.io/badge/Flutter-Material%203-02569B?logo=flutter)
-![Provider](https://img.shields.io/badge/State-Provider-155f53)
-![Firebase](https://img.shields.io/badge/Storage-Firestore-FFCA28?logo=firebase)
-[![MIT](https://img.shields.io/badge/License-MIT-155f53)](LICENSE)
+An expense tracker built with Flutter, Provider, and Firebase. It supports Nepali rupees, BS and AD dates, and English and Nepali interfaces.
 
-# Pocket — Expense Tracker
+This is a final-project app for recording daily spending and income, reviewing monthly totals, and keeping transactions under a signed-in account.
 
-Track everyday income and expenses in Nepali rupees, browse transactions with Bikram Sambat or Gregorian dates, and understand your spending through monthly summaries.
+[![Tests](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml)
 
-Pocket is a Flutter personal finance project built with **Firebase Authentication**, **Cloud Firestore**, and **Provider**, with English and Nepali localization.
+## Screenshots
 
-[Features](#features) · [Getting started](#getting-started) · [Architecture](#architecture) · [Contributing](CONTRIBUTING.md)
+| Light mode | Dark mode |
+| --- | --- |
+| ![Dashboard in light mode](docs/light-mode.png) | ![Dashboard in dark mode](docs/dark-mode.png) |
+
+Screenshots use sample data.
 
 ## Features
 
-**Start here:** [App walkthrough](docs/DEMO.md) · [Troubleshooting](docs/TROUBLESHOOTING.md) · [Contribution guide](CONTRIBUTING.md)
+- Income and expense entries with categories, notes, search, and editing.
+- Monthly totals, category breakdowns, and spending comparisons.
+- Nepali and Gregorian calendars, with event details where source data is available.
+- English and Nepali language options.
+- Light, dark, and system themes.
+- Financial summaries and CSV copied to the clipboard.
+- Email/password, Google, and guest sign-in, depending on Firebase configuration.
+- Email verification and account deletion.
 
-| Area | What you can do |
-| --- | --- |
-| Transactions | Record, edit, search, and delete income and expenses with categories and notes. |
-| Overview | Review income, spending, balance, and recent transactions. |
-| Insights | Explore monthly spending, category totals, and comparisons. |
-| Nepali calendar | Switch between BS and AD dates and browse daily activity. |
-| Calendar details | View available event and tithi data from external sources. |
-| Reports | Copy financial summaries and monthly transactions as CSV to the clipboard. |
-| Languages | English and Nepali localization resources. |
-| Appearance | Light, dark, or system theme, with your preference saved on this device. |
-| Authentication | Email/password, Google, and guest sign-in when enabled in Firebase. |
-| Email verification | Firebase emails a verification link; unverified accounts confirm their email before entering the dashboard. |
-| Storage | Firestore synchronization with user-scoped access rules. |
+Amounts are stored as integer paisa. Provider manages app state, and Firestore stores transactions under each user's account.
 
-Amounts are stored as integer paisa to avoid floating-point rounding errors in transaction totals.
+## Run locally
 
-### Light and dark mode
-
-Open **Settings → Preferences → Appearance** and choose **Light**, **Dark**, or **Follow system**. Pocket remembers the choice on your device; **Follow system** adapts to your device's appearance setting.
-
-| Light | Dark |
-| --- | --- |
-| ![Pocket dashboard in light mode](docs/light-mode.png) | ![Pocket dashboard in dark mode](docs/dark-mode.png) |
-
-Previews use sample transaction data.
-
-## Getting started
-
-### Requirements
-
-- Flutter with **Dart 3.13 or later**, matching [pubspec.yaml](pubspec.yaml).
-- Firebase CLI and FlutterFire CLI.
-- Your own Firebase project.
-- Chrome or a configured Android/iOS development environment.
-
-### 1. Clone and install
+You need Flutter with Dart 3.13 or later, the Firebase CLI, and the FlutterFire CLI. Use your own Firebase project.
 
 ```sh
 git clone https://github.com/bibasshrestha980-npl/expense_tracker.git
 cd expense_tracker
 flutter pub get
-```
-
-### 2. Configure Firebase
-
-```sh
 firebase login
 flutterfire configure --project=YOUR_PROJECT_ID
 ```
 
-In Firebase Console:
+In Firebase Console, create a Firestore database and enable Email/Password authentication. Enable Google and Anonymous sign-in if you want those options. Configure the authorized domains and platform settings for Google sign-in.
 
-1. Create a Cloud Firestore database.
-2. Enable Email/Password authentication.
-3. Enable Google and Anonymous authentication if you want those options.
-4. Configure authorized web domains and the platform settings needed for Google sign-in.
-5. Review the verification email template under **Authentication → Templates**. Email/password users receive a link at their registered address (including Gmail). They open the link, return to Pocket, and choose **I've verified my email**. The app offers resend with a 60-second cooldown and displays delivery-request errors.
-
-The checked-in Firebase configuration identifies the original project. Generate your own configuration for a separate deployment.
+The checked-in Firebase files identify the original project. Replace them through FlutterFire when setting up your own deployment.
 
 ```sh
 firebase deploy --only firestore:rules --project=YOUR_PROJECT_ID
-```
-
-### 3. Run
-
-```sh
 flutter run -d chrome
 ```
 
-For a device or emulator, use its actual ID:
+For Android or iOS, find your device with `flutter devices`, then run `flutter run -d DEVICE_ID`. iOS builds require macOS and Xcode. Platform-specific Firebase setup is required.
 
-```sh
-flutter devices
-flutter run -d DEVICE_ID
-```
-
-The repository includes web, Android, and iOS targets. Each needs Firebase configuration; building iOS requires macOS and Xcode.
-
-### 4. Validate and build
+## Checks
 
 ```sh
 flutter analyze
@@ -105,51 +58,32 @@ flutter test
 flutter build web
 ```
 
-Web output is written to `build/web`. Building does not automatically publish a hosted site.
+The web build is written to `build/web`; it is not deployed automatically. Firestore rule tests and App Check setup are covered in the [security guide](docs/SECURITY.md).
 
-## Architecture
+## Project structure
 
-```mermaid
-flowchart LR
-    UI[Flutter screens] --> State[Provider / ChangeNotifier]
-    State --> Auth[Firebase Authentication]
-    State --> Repository[Expense repository]
-    Repository --> DB[Cloud Firestore]
-    State --> Calendar[Nepali calendar service]
-```
-
-| Path | Responsibility |
+| Folder | Contents |
 | --- | --- |
-| `lib/main.dart` | Startup and authentication routing |
-| `lib/models/` | Transactions, calendar periods, and summaries |
-| `lib/providers/` | Authentication, data streams, and state |
-| `lib/screens/` | Dashboard, forms, reports, calendar, and settings |
-| `lib/services/` | Calendar integration, account deletion, and expense repository |
-| `lib/l10n/` | English and Nepali localization resources |
-| `lib/theme.dart` | Shared visual styling |
-| `firestore.rules` | Ownership and document validation |
-| `test/` | Unit and widget tests |
+| `lib/models` | Transactions and calendar models |
+| `lib/providers` | Authentication, preferences, and application state |
+| `lib/screens` | Screens and forms |
+| `lib/services` | Firestore access, calendar integration, and account deletion |
+| `lib/l10n` | English and Nepali translations |
+| `test` | Flutter tests |
+| `security` | Firestore rule tests |
 
-Transactions live at `users/{userId}/expenses/{expenseId}`. Firestore rules require the authenticated user to own the path and validate document fields.
+## Things to know
 
-## Current limitations
+Calendar event data may be missing for some dates. Your transactions do not depend on that data.
 
-No recovery key is required for new accounts. Previously encrypted records need their original key once for safe conversion to standard account storage. Authentication and owner-only database access remain enabled. See the [security guide](docs/SECURITY.md); App Check still requires production registration and enforcement.
+New accounts do not need a recovery key. An older version encrypted transactions with a separate key; those records still need the original key once to convert them safely. See the [security guide](docs/SECURITY.md) for details and the remaining App Check setup.
 
-- Calendar event coverage depends on the external source. Missing event data does not mean a date or transaction is missing.
-- Email verification confirms ownership of the registered address; it is not multi-factor authentication. Delivery depends on Firebase email quotas and the recipient's spam filters.
-- Guest access should not be treated as a durable account across devices.
-- Account deletion removes transaction records and the user profile before the authentication account. Network requests time out after 20 seconds each and show an error; deletion is not atomic, so some records may already be removed if a later step fails. Pocket has no file uploads and does not contact Firebase Storage during normal account deletion.
-- Platform folders alone do not establish that every authentication flow has been tested on every platform.
+Guest accounts are not a substitute for a permanent sign-in. Account deletion happens in several steps, so a network failure may leave it partially complete. Android and iOS targets are included, but not every authentication flow has been verified on every platform.
 
-## Contributing
+For setup problems, see [Troubleshooting](docs/TROUBLESHOOTING.md). For fixes or suggestions, read [Contributing](CONTRIBUTING.md).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for checks and pull request guidance. Use the issue templates for reproducible bugs or feature suggestions. Do not include real financial records, passwords, or tokens in reports.
+## Credits and license
 
-## Acknowledgments
+Calendar data integration uses [bibhuticoder/nepali-calendar-api](https://github.com/bibhuticoder/nepali-calendar-api), with BS date utilities from `nepali_utils`.
 
-Built with Flutter, Firebase, Provider, and `nepali_utils`. Calendar integration uses [bibhuticoder/nepali-calendar-api](https://github.com/bibhuticoder/nepali-calendar-api).
-
-## License
-
-[MIT](LICENSE).
+[MIT license](LICENSE).

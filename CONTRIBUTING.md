@@ -1,43 +1,23 @@
-# Contributing to Pocket Expense Tracker
+# Contributing
 
-Contributions to Pocket are welcome, including bug fixes, documentation improvements, translations, and tests. Follow the [README setup guide](README.md#getting-started) to run the project with your own Firebase configuration.
+Bug fixes, translations, tests, and documentation improvements are welcome. Follow the [README](README.md#run-locally) to run the app with your own Firebase project.
 
-## Code of Conduct
+## Before opening an issue
 
-Please be respectful, collaborative, and constructive when opening issues or submitting pull requests.
+Check existing issues first. For bugs, include the steps to reproduce, expected result, device/browser, and app version or commit. Use fictional transactions in examples and remove private information from logs and screenshots.
 
-## How Can I Contribute?
+For a feature request, describe the problem it would solve and one example of how it should work.
 
-### Reporting Bugs
+## Sending a change
 
-- Check the [Issues tab](https://github.com/bibasshrestha980-npl/expense_tracker/issues) to ensure the bug hasn't already been reported.
-- Open a new issue with a clear summary, steps to reproduce, expected vs actual behavior, and platform information.
-- Remove personal financial records, credentials, and tokens from screenshots and logs.
+Create a branch from `main` and keep the change focused. Explain what changed and how you checked it in the pull request.
 
-### Suggesting Enhancements
+```sh
+dart format lib test
+flutter analyze
+flutter test
+```
 
-- Open a feature request issue describing the rationale, proposed solution, and potential alternatives.
+If you change Firestore rules, run the emulator checks in the [security guide](docs/SECURITY.md). For documentation-only edits, check the links and preview the Markdown.
 
-### Pull Requests
-
-1. Fork the repository and create your branch from `main`:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-2. Keep changes focused on one problem and follow the existing project structure.
-3. Ensure formatting, analyzer checks, and tests all pass:
-   ```bash
-   dart format .
-   flutter analyze
-   flutter test
-   ```
-4. Update documentation and add or adjust tests when behavior changes. For documentation-only changes, check wording, links, and Markdown rendering.
-5. Commit with a descriptive message, push your branch, and open a pull request explaining the problem, the change, and how you validated it.
-
-## Coding Standards
-
-- Follow the lint rules in `analysis_options.yaml` and use `dart format`.
-- Store monetary amounts as integer paisa, consistent with the existing transaction model.
-- Keep data access in repositories and state management in providers.
-- Update the English and Nepali localization resources when adding localized text.
-- Cover changed behavior with appropriate unit or widget tests.
+Keep monetary values in integer paisa, data access in repositories, and state in providers. UI changes should account for English/Nepali text and light/dark themes. Add tests where they help verify changed behavior.
