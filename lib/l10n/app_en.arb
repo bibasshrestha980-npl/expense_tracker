@@ -57,5 +57,10 @@
   "themeSystem": "Follow system",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "themeSaveFailed": "Could not save appearance. Please try again."
+  "themeSaveFailed": "Could not save appearance. Please try again.",
+  "language": "Language",
+  "languageSystem": "Follow system",
+  "languageEnglish": "English",
+  "languageNepali": "नेपाली (Nepali)",
+  "languageSaveFailed": "Could not save language preference. Please try again."
 }

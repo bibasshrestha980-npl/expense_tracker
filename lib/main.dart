@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
+import 'providers/locale_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/expense_provider.dart';
 import 'screens/auth_screen.dart';
@@ -33,9 +34,14 @@ Future<void> main() async {
   }
   final themeProvider = ThemeProvider();
   await themeProvider.load();
+  final localeProvider = LocaleProvider();
+  await localeProvider.load();
   runApp(
-    ChangeNotifierProvider.value(
-      value: themeProvider,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: themeProvider),
+        ChangeNotifierProvider.value(value: localeProvider),
+      ],
       child: ExpenseApp(setupError: setupError),
     ),
   );
@@ -66,6 +72,7 @@ class ExpenseApp extends StatelessWidget {
           theme: pocketTheme(),
           darkTheme: pocketTheme(brightness: Brightness.dark),
           themeMode: context.watch<ThemeProvider?>()?.mode ?? ThemeMode.system,
+          locale: context.watch<LocaleProvider?>()?.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
@@ -102,6 +109,7 @@ class ExpenseApp extends StatelessWidget {
             darkTheme: pocketTheme(brightness: Brightness.dark),
             themeMode:
                 context.watch<ThemeProvider?>()?.mode ?? ThemeMode.system,
+            locale: context.watch<LocaleProvider?>()?.locale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
             routes: {'/login': (_) => const AuthGate()},

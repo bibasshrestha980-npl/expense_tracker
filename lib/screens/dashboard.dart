@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../models/expense.dart';
 import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/locale_provider.dart';
 import '../theme.dart';
 import 'expense_editor.dart';
 import 'report_dialog.dart';
@@ -283,6 +284,22 @@ class _DashboardState extends State<Dashboard> {
                           ),
                           const SizedBox(width: 10),
                         ],
+                        if (wide) ...[
+                          IconButton(
+                            tooltip:
+                                context.watch<LocaleProvider?>()?.isNepali == true
+                                    ? 'Switch to English'
+                                    : 'नेपालीमा बदल्नुहोस्',
+                            icon: const Icon(Icons.translate_rounded),
+                            onPressed: () {
+                              final lp = context.read<LocaleProvider?>();
+                              if (lp != null) {
+                                lp.toggleLocale();
+                              }
+                            },
+                          ),
+                          const SizedBox(width: 4),
+                        ],
                         PopupMenuButton<String>(
                           tooltip: 'Account',
                           icon: CircleAvatar(
@@ -299,6 +316,21 @@ class _DashboardState extends State<Dashboard> {
                               enabled: false,
                               child: Text(auth.user?.email ?? 'Your account'),
                             ),
+                            PopupMenuItem(
+                              value: 'language',
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.translate_rounded, size: 18),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    context.watch<LocaleProvider?>()?.isNepali ==
+                                            true
+                                        ? 'English'
+                                        : 'नेपाली (Nepali)',
+                                  ),
+                                ],
+                              ),
+                            ),
                             const PopupMenuItem(
                               value: 'settings',
                               child: Text('Settings'),
@@ -309,6 +341,13 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ],
                           onSelected: (val) async {
+                            if (val == 'language') {
+                              final lp = context.read<LocaleProvider?>();
+                              if (lp != null) {
+                                await lp.toggleLocale();
+                              }
+                              return;
+                            }
                             if (val == 'settings') {
                               setState(() => page = 3);
                               return;

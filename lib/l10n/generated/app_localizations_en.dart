@@ -164,4 +164,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get themeSaveFailed => 'Could not save appearance. Please try again.';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get languageSystem => 'Follow system';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageNepali => 'नेपाली (Nepali)';
+
+  @override
+  String get languageSaveFailed =>
+      'Could not save language preference. Please try again.';
 }

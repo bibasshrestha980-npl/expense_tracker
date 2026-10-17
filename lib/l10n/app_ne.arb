@@ -46,5 +46,10 @@
   "themeSystem": "प्रणाली अनुसार",
   "themeLight": "उज्यालो",
   "themeDark": "अँध्यारो",
-  "themeSaveFailed": "देखावट सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"
+  "themeSaveFailed": "देखावट सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।",
+  "language": "भाषा",
+  "languageSystem": "प्रणाली अनुसार",
+  "languageEnglish": "English (अंग्रेजी)",
+  "languageNepali": "नेपाली",
+  "languageSaveFailed": "भाषा प्राथमिकता सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।"
 }

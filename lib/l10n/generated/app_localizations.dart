@@ -379,6 +379,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not save appearance. Please try again.'**
   String get themeSaveFailed;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @languageSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get languageSystem;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageNepali.
+  ///
+  /// In en, this message translates to:
+  /// **'नेपाली (Nepali)'**
+  String get languageNepali;
+
+  /// No description provided for @languageSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save language preference. Please try again.'**
+  String get languageSaveFailed;
 }
 
 class _AppLocalizationsDelegate

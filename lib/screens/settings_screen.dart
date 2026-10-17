@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
+import '../providers/locale_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme.dart';
 
@@ -35,6 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isDeleting = false;
   bool _isDeletingAccount = false;
   int _appearanceRevision = 0;
+  int _localeRevision = 0;
 
   AppLocalizations? get _l10n => AppLocalizations.of(context);
 
@@ -396,6 +398,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final p = widget.expenseProvider;
     final l10n = _l10n;
     final appearance = context.watch<ThemeProvider?>();
+    final localeProvider = context.watch<LocaleProvider?>();
     final userEmail =
         auth.user?.email ??
         (auth.user?.isAnonymous == true
@@ -497,6 +500,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               SnackBar(
                                 content: Text(
                                   l10n?.themeSaveFailed ?? 'Could not save appearance. Please try again.',
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    const Divider(height: 24),
+                  ],
+                  if (localeProvider != null) ...[
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.language_rounded),
+                      title: Text(l10n?.language ?? 'Language'),
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: DropdownButtonFormField<String>(
+                        key: ValueKey((localeProvider.languageCode, _localeRevision)),
+                        initialValue: localeProvider.languageCode,
+                        decoration: InputDecoration(
+                          labelText: l10n?.language ?? 'Language',
+                        ),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'system',
+                            child: Text(l10n?.languageSystem ?? 'Follow system'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'en',
+                            child: Text(l10n?.languageEnglish ?? 'English'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'ne',
+                            child: Text(l10n?.languageNepali ?? 'नेपाली (Nepali)'),
+                          ),
+                        ],
+                        onChanged: (code) async {
+                          if (code == null) return;
+                          try {
+                            await localeProvider.setLanguageCode(code);
+                          } catch (_) {
+                            if (!context.mounted) return;
+                            setState(() => _localeRevision++);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  l10n?.languageSaveFailed ??
+                                      'Could not save language preference. Please try again.',
                                 ),
                               ),
                             );

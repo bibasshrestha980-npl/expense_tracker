@@ -164,4 +164,20 @@ class AppLocalizationsNe extends AppLocalizations {
   @override
   String get themeSaveFailed =>
       'देखावट सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get language => 'भाषा';
+
+  @override
+  String get languageSystem => 'प्रणाली अनुसार';
+
+  @override
+  String get languageEnglish => 'English (अंग्रेजी)';
+
+  @override
+  String get languageNepali => 'नेपाली';
+
+  @override
+  String get languageSaveFailed =>
+      'भाषा प्राथमिकता सुरक्षित गर्न सकिएन। फेरि प्रयास गर्नुहोस्।';
 }
