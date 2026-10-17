@@ -77,6 +77,23 @@ class VaultRepository extends FirestoreExpenseRepository {
     }
   }
 
+  /// One-time retirement of the vault. Validate every ciphertext before writing.
+  /// Per-document transactions preserve concurrent edits; retries skip converted data.
+  Future<void> restorePlaintext() async {
+    final docs = await getCollection(owner)!
+        .get(const GetOptions(source: Source.server));
+    for (final d in docs.docs) {
+      if (d.data()['v'] == 1) await _decode(d);
+    }
+    for (final d in docs.docs) {
+      await firestore.runTransaction((tx) async {
+        final current = await tx.get(d.reference);
+        if (!current.exists || current.data()!['v'] != 1) return;
+        tx.set(current.reference, (await _decode(current)).toMap());
+      });
+    }
+  }
+
   @override
   Future<int> migrateExpenses({
     required String fromUid,

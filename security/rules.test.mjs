@@ -64,23 +64,23 @@ test('authenticated guests are limited to their own data',async () => {
   await assertFails(getDoc(doc(db,path)));
 });
 const envelope=()=>({v:1,nonce:'A'.repeat(16),mac:'A'.repeat(24),ciphertext:'encrypted'});
-test('vault config is owner-only and cannot be overwritten',async()=>{
+test('retired vault cannot be created or modified; existing metadata remains owner-only',async()=>{
+  await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),'users/alice/vault/config'),envelope()));
   const db=env.authenticatedContext('alice').firestore();
-  const config=doc(db,'users/alice/vault/config');
-  await assertSucceeds(setDoc(config,envelope()));
-  await assertSucceeds(getDoc(config));
-  await assertFails(setDoc(config,envelope()));
+  await assertSucceeds(getDoc(doc(db,'users/alice/vault/config')));
+  await assertFails(setDoc(doc(db,'users/alice/vault/config'),envelope()));
+  await assertFails(setDoc(doc(db,'users/alice/vault/new'),envelope()));
   await assertFails(getDoc(doc(env.authenticatedContext('bob').firestore(),'users/alice/vault/config')));
-  await assertFails(setDoc(doc(env.authenticatedContext('bob').firestore(),'users/alice/vault/config'),envelope()));
+  await assertSucceeds(deleteDoc(doc(db,'users/alice/vault/config')));
 });
-test('vault blocks plaintext writes and accepts only bounded ciphertext envelopes',async()=>{
+test('owner can convert existing ciphertext to validated transactions; new ciphertext is denied',async()=>{
+  await env.withSecurityRulesDisabled(async c=>{
+    await setDoc(doc(c.firestore(),'users/alice/vault/config'),envelope());
+    await setDoc(doc(c.firestore(),path),envelope());
+  });
   const db=env.authenticatedContext('alice').firestore();
-  await assertSucceeds(setDoc(doc(db,'users/alice/vault/config'),envelope()));
-  await assertFails(setDoc(doc(db,path),record()));
-  await assertSucceeds(setDoc(doc(db,path),envelope()));
-  await assertFails(updateDoc(doc(db,path),{title:'leaked'}));
-  await assertFails(setDoc(doc(db,path),{...envelope(),nonce:'short'}));
-  await assertFails(setDoc(doc(db,path),{...envelope(),ciphertext:'x'.repeat(16385)}));
-  await assertFails(getDoc(doc(env.unauthenticatedContext().firestore(),path)));
-  await assertFails(getDoc(doc(env.authenticatedContext('bob').firestore(),path)));
+  await assertFails(setDoc(doc(env.authenticatedContext('bob').firestore(),path),record()));
+  await assertSucceeds(setDoc(doc(db,path),record()));
+  await assertFails(setDoc(doc(db,path),envelope()));
+  await assertFails(updateDoc(doc(db,path),{admin:true}));
 });

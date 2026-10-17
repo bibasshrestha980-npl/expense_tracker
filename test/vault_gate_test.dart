@@ -15,18 +15,48 @@ class VaultTestAuth extends ChangeNotifier implements AuthProvider {
 }
 
 void main() {
+  testWidgets('new account opens dashboard without a recovery key', (
+    tester,
+  ) async {
+    final db = FakeFirebaseFirestore();
+    final auth = VaultTestAuth();
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AuthProvider>.value(
+        value: auth,
+        child: MaterialApp(
+          theme: pocketTheme(),
+          home: VaultGate(uid: 'alice', firestore: db),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Original recovery key'), findsNothing);
+    expect(find.text('Overview'), findsWidgets);
+    expect((await db.doc('users/alice/vault/config').get()).exists, isFalse);
+    await tester.pumpWidget(const SizedBox());
+    auth.dispose();
+  });
   testWidgets(
-    'wrong key stays locked; correct key unlocks; background locks vault',
+    'existing ciphertext requires one-time conversion and is preserved on wrong key',
     (tester) async {
       final db = FakeFirebaseFirestore();
+      final auth = VaultTestAuth();
       final key = await VaultCipher.generateKey();
       final cipher = VaultCipher.fromRecoveryKey(key);
+      final encrypted = await cipher.seal({
+        'title': 'Private',
+        'category': 'Food',
+        'amountCents': 100,
+        'date': '2026-10-17T00:00:00.000',
+        'note': '',
+        'type': 'expense',
+      }, 'alice/expenses/one');
+      await db.doc('users/alice/expenses/one').set(encrypted);
       await db
           .doc('users/alice/vault/config')
           .set(
             await cipher.seal({'check': 'pocket-vault'}, 'alice/vault/config'),
           );
-      final auth = VaultTestAuth();
       await tester.pumpWidget(
         ChangeNotifierProvider<AuthProvider>.value(
           value: auth,
@@ -37,38 +67,30 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'wrong-key');
-      await tester.tap(find.text('Unlock vault'));
+      await tester.enterText(find.byType(TextField), 'wrong');
+      await tester.ensureVisible(
+        find.text('Convert and remove key requirement'),
+      );
+      await tester.tap(find.text('Convert and remove key requirement'));
       await tester.pumpAndSettle();
-      expect(find.text('Encrypted vault unlocked'), findsNothing);
+      expect(
+        (await db.doc('users/alice/expenses/one').get()).data(),
+        encrypted,
+      );
       await tester.enterText(find.byType(TextField), key);
-      await tester.tap(find.text('Unlock vault'));
+      await tester.ensureVisible(
+        find.text('Convert and remove key requirement'),
+      );
+      await tester.tap(find.text('Convert and remove key requirement'));
       await tester.pumpAndSettle();
-      expect(find.text('Encrypted vault unlocked'), findsOneWidget);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-      expect(find.text('Encrypted vault unlocked'), findsNothing);
-      expect(find.text('Unlock vault'), findsOneWidget);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      expect(
+        (await db.doc('users/alice/expenses/one').get()).data()!['title'],
+        'Private',
+      );
+      expect((await db.doc('users/alice/vault/config').get()).exists, isFalse);
+      expect(find.text('Original recovery key'), findsNothing);
       await tester.pumpWidget(const SizedBox());
       auth.dispose();
     },
   );
-  testWidgets('new vault requires recovery key confirmation', (tester) async {
-    final db = FakeFirebaseFirestore();
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: pocketTheme(),
-        home: VaultGate(uid: 'alice', firestore: db),
-      ),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Save your recovery key'), findsOneWidget);
-    await tester.ensureVisible(find.text('Create vault and encrypt records'));
-    await tester.tap(find.text('Create vault and encrypt records'));
-    await tester.pumpAndSettle();
-    expect((await db.doc('users/alice/vault/config').get()).exists, isFalse);
-    expect(find.text('Encrypted vault unlocked'), findsNothing);
-  });
 }

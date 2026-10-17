@@ -1,4 +1,6 @@
-# Security review — 17 October 2026
+# Historical security review - 17 October 2026
+
+> The recovery-key feature was subsequently removed at the user's request. Current behavior uses standard account storage, with one-time conversion for previously encrypted records. See [current security documentation](SECURITY.md).
 
 Scope: local Flutter source, Firestore rules, encrypted transaction storage, and targeted automated tests. No destructive tests were run against live user data. This is not an independent penetration test or a guarantee against compromise.
 

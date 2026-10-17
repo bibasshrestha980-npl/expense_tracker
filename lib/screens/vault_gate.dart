@@ -6,8 +6,11 @@ import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
 import '../services/vault_cipher.dart';
 import '../services/repositories/vault_repository.dart';
+import '../services/repositories/expense_repository.dart';
 import 'dashboard.dart';
 
+/// Compatibility gate for records encrypted by the retired vault feature.
+/// New and unencrypted accounts never need a recovery key.
 class VaultGate extends StatefulWidget {
   final String uid;
   final FirebaseFirestore? firestore;
@@ -16,12 +19,10 @@ class VaultGate extends StatefulWidget {
   State<VaultGate> createState() => _VaultGateState();
 }
 
-class _VaultGateState extends State<VaultGate> with WidgetsBindingObserver {
+class _VaultGateState extends State<VaultGate> {
   final keyInput = TextEditingController();
-  bool loading = true, busy = false, exists = false;
-  String? generatedKey, error;
-  VaultRepository? repository;
-  int lockEpoch = 0;
+  bool loading = true, busy = false, needsConversion = false;
+  String? error;
   FirebaseFirestore get database =>
       widget.firestore ?? FirebaseFirestore.instance;
   DocumentReference<Map<String, dynamic>> get config =>
@@ -29,97 +30,64 @@ class _VaultGateState extends State<VaultGate> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     load();
   }
 
   Future<void> load() async {
+    if (mounted) {
+      setState(() {
+        loading = true;
+        error = null;
+      });
+    }
     try {
-      final d = await config.get(const GetOptions(source: Source.server));
-      final generated = d.exists ? null : await VaultCipher.generateKey();
+      final encrypted = await database
+          .collection('users')
+          .doc(widget.uid)
+          .collection('expenses')
+          .where('v', isEqualTo: 1)
+          .limit(1)
+          .get(const GetOptions(source: Source.server));
+      if (encrypted.docs.isEmpty) await config.delete();
       if (mounted) {
         setState(() {
-          exists = d.exists;
-          generatedKey = generated;
+          needsConversion = encrypted.docs.isNotEmpty;
           loading = false;
-          error = null;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
           loading = false;
-          error =
-              'Could not check your vault. Connect to the internet and retry.';
+          error = 'Could not check existing records. Connect to the internet and retry.';
         });
       }
     }
   }
 
-  void lock() {
-    lockEpoch++;
-    if (mounted) {
-      Navigator.of(context).popUntil((route) => route.isFirst);
-      setState(() {
-        repository = null;
-        keyInput.clear();
-      });
-    }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.hidden) {
-      if (repository != null || busy) lock();
-    }
-  }
-
-  Future<void> unlock() async {
-    final epoch = lockEpoch;
+  Future<void> convert() async {
     setState(() {
       busy = true;
       error = null;
     });
     try {
-      final entered = keyInput.text.trim();
-      if (!exists && (generatedKey == null || entered != generatedKey)) {
-        throw const FormatException('Confirm the saved recovery key');
-      }
-      final cipher = VaultCipher.fromRecoveryKey(entered);
-      final contextId = '${widget.uid}/vault/config';
-      if (!exists) {
-        final encrypted = await cipher.seal({
-          'check': 'pocket-vault',
-        }, contextId);
-        await database.runTransaction((tx) async {
-          if ((await tx.get(config)).exists) {
-            throw StateError('Vault already created. Reload and unlock it.');
-          }
-          tx.set(config, encrypted);
-        });
-        if (mounted) {
-          setState(() {
-            exists = true;
-            generatedKey = null;
-          });
-        }
-      }
-      final d = await config.get(const GetOptions(source: Source.server));
-      final check = await cipher.open(d.data()!, contextId);
-      if (check['check'] != 'pocket-vault') throw StateError('Invalid vault');
-      final repo = VaultRepository(widget.uid, cipher, firestore: database);
-      await repo.migrateLegacy();
-      if (mounted && epoch == lockEpoch) {
+      final cipher = VaultCipher.fromRecoveryKey(keyInput.text);
+      await VaultRepository(
+        widget.uid,
+        cipher,
+        firestore: database,
+      ).restorePlaintext();
+      await config.delete();
+      keyInput.clear();
+      if (mounted) {
         setState(() {
-          repository = repo;
-          keyInput.clear();
+          needsConversion = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          error = 'Could not unlock or finish encryption. Check your recovery key and connection, then retry. Your key cannot be reset.';
+          error = 'Conversion could not finish. Check the original recovery key and connection, then retry. Encrypted records cannot be restored without their key.';
         });
       }
     } finally {
@@ -129,41 +97,24 @@ class _VaultGateState extends State<VaultGate> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     keyInput.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (repository != null) {
+    if (!loading && !needsConversion && error == null) {
       return ChangeNotifierProvider(
-        create: (_) => ExpenseProvider(widget.uid, repository: repository),
-        child: Column(
-          children: [
-            Material(
-              child: SafeArea(
-                bottom: false,
-                child: ListTile(
-                  dense: true,
-                  leading: const Icon(Icons.lock_outline),
-                  title: const Text('Encrypted vault unlocked'),
-                  trailing: TextButton.icon(
-                    onPressed: lock,
-                    icon: const Icon(Icons.lock),
-                    label: const Text('Lock'),
-                  ),
-                ),
-              ),
-            ),
-            const Expanded(child: Dashboard()),
-          ],
+        create: (_) => ExpenseProvider(
+          widget.uid,
+          repository: FirestoreExpenseRepository(firestore: database),
         ),
+        child: const Dashboard(),
       );
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Private transaction vault'),
+        title: const Text('Update account storage'),
         actions: [
           TextButton(
             onPressed: busy
@@ -181,46 +132,42 @@ class _VaultGateState extends State<VaultGate> with WidgetsBindingObserver {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.enhanced_encryption_outlined, size: 56),
-                const SizedBox(height: 20),
-                Text(
-                  exists ? 'Unlock your vault' : 'Save your recovery key',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Only this key can decrypt your transactions. Keep it in a password manager or another safe place. Losing it means losing access, even after a password reset. It is never uploaded or saved by Pocket.',
-                ),
-                const SizedBox(height: 16),
                 if (loading) const LinearProgressIndicator(),
-                if (generatedKey != null) ...[
-                  SelectableText(
-                    generatedKey!,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 18,
+                if (needsConversion) ...[
+                  const Text(
+                    'Remove the old recovery-key lock',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Some existing transactions were encrypted. Enter the original key once to convert them to standard account storage. Afterwards, sign-in is enough. Transactions will remain private to your account, but will no longer use end-to-end encryption.',
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: keyInput,
+                    enabled: !busy,
+                    obscureText: true,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    decoration: const InputDecoration(
+                      labelText: 'Original recovery key',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: busy ? null : convert,
+                    child: Text(
+                      busy
+                          ? 'Converting records...'
+                          : 'Convert and remove key requirement',
                     ),
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Save the key, then enter it below to confirm. Existing transactions will be encrypted before the dashboard opens. Keep the app open until this finishes.',
+                    'If the key is lost, these encrypted records cannot be recovered. No records will be deleted automatically.',
                   ),
-                  const SizedBox(height: 12),
                 ],
-                TextField(
-                  controller: keyInput,
-                  enabled: !busy && !loading,
-                  obscureText: true,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  decoration: InputDecoration(
-                    labelText: exists
-                        ? 'Recovery key'
-                        : 'Re-enter saved recovery key',
-                    border: const OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
                 if (error != null) ...[
                   Text(
                     error!,
@@ -230,26 +177,9 @@ class _VaultGateState extends State<VaultGate> with WidgetsBindingObserver {
                   ),
                   TextButton(
                     onPressed: busy ? null : load,
-                    child: const Text('Reload vault status'),
+                    child: const Text('Retry'),
                   ),
                 ],
-                FilledButton(
-                  onPressed:
-                      busy || loading || (!exists && generatedKey == null)
-                      ? null
-                      : unlock,
-                  child: Text(
-                    busy
-                        ? 'Encrypting / unlocking…'
-                        : exists
-                        ? 'Unlock vault'
-                        : 'Create vault and encrypt records',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'The vault locks when the app goes into the background. Reports copied to the clipboard are readable outside the vault.',
-                ),
               ],
             ),
           ),

@@ -134,7 +134,7 @@ Transactions live at `users/{userId}/expenses/{expenseId}`. Firestore rules requ
 
 ## Current limitations
 
-Transaction data now uses a recovery-key encrypted vault. Read the [security guide](docs/SECURITY.md) before creating a vault: a lost key cannot be recovered, older clients cannot write after migration, and App Check still requires production registration and enforcement.
+No recovery key is required for new accounts. Previously encrypted records need their original key once for safe conversion to standard account storage. Authentication and owner-only database access remain enabled. See the [security guide](docs/SECURITY.md); App Check still requires production registration and enforcement.
 
 - Calendar event coverage depends on the external source. Missing event data does not mean a date or transaction is missing.
 - Email verification confirms ownership of the registered address; it is not multi-factor authentication. Delivery depends on Firebase email quotas and the recipient's spam filters.
