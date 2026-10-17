@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountDesc.
   ///
   /// In en, this message translates to:
-  /// **'Permanently delete your account credentials from Firebase Authentication, all documents in Cloud Firestore, and any uploaded media in Firebase Storage. This action cannot be undone.'**
+  /// **'Permanently delete your account credentials from Firebase Authentication, your expense and income records in Cloud Firestore. This action cannot be undone.'**
   String get deleteAccountDesc;
 
   /// No description provided for @deleteAccountPermanentlyTitle.
@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountPermanentlyContent.
   ///
   /// In en, this message translates to:
-  /// **'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore, and any associated files from Firebase Storage.\n\nThis action cannot be undone. Are you sure you want to proceed?'**
+  /// **'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?'**
   String get deleteAccountPermanentlyContent;
 
   /// No description provided for @cancel.

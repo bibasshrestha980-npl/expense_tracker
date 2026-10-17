@@ -135,6 +135,7 @@ Transactions live at `users/{userId}/expenses/{expenseId}`. Firestore rules requ
 - Calendar event coverage depends on the external source. Missing event data does not mean a date or transaction is missing.
 - Email verification confirms ownership of the registered address; it is not multi-factor authentication. Delivery depends on Firebase email quotas and the recipient's spam filters.
 - Guest access should not be treated as a durable account across devices.
+- Account deletion removes transaction records and the user profile before the authentication account. Network requests time out after 20 seconds each and show an error; deletion is not atomic, so some records may already be removed if a later step fails. Pocket has no file uploads and does not contact Firebase Storage during normal account deletion.
 - Platform folders alone do not establish that every authentication flow has been tested on every platform.
 
 ## Contributing

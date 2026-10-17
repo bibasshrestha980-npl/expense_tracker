@@ -111,14 +111,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountDesc =>
-      'Permanently delete your account credentials from Firebase Authentication, all documents in Cloud Firestore, and any uploaded media in Firebase Storage. This action cannot be undone.';
+      'Permanently delete your account credentials from Firebase Authentication, your expense and income records in Cloud Firestore. This action cannot be undone.';
 
   @override
   String get deleteAccountPermanentlyTitle => 'Delete Account Permanently?';
 
   @override
   String get deleteAccountPermanentlyContent =>
-      'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore, and any associated files from Firebase Storage.\n\nThis action cannot be undone. Are you sure you want to proceed?';
+      'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?';
 
   @override
   String get cancel => 'Cancel';

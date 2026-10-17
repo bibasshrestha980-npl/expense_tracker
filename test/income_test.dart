@@ -109,6 +109,51 @@ void main() {
       );
     },
   );
+
+  testWidgets(
+    'Selecting Food category auto-generates title by AI and suggestion chips',
+    (tester) async {
+      final provider = ExpenseProvider('', initialExpenses: []);
+      addTearDown(provider.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: pocketTheme(),
+          home: Scaffold(
+            body: ExpenseEditor(provider: provider, income: false),
+          ),
+        ),
+      );
+      final titleField = find.byType(TextFormField).first;
+      String titleText() =>
+          tester.widget<TextFormField>(titleField).controller!.text;
+
+      // Select Food category from Dropdown
+      await tester.ensureVisible(find.byType(DropdownButtonFormField<String>));
+      await tester.tap(find.byType(DropdownButtonFormField<String>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Food').last);
+      await tester.pumpAndSettle();
+
+      // Verify AI title was auto-generated in "What was it for?"
+      expect(titleText().isNotEmpty, isTrue);
+
+      // Verify AI suggestion chips for Food appear
+      final momoChip = find.text('Momo & Chowmein');
+      expect(momoChip, findsOneWidget);
+      await tester.ensureVisible(momoChip);
+      await tester.tap(momoChip);
+      await tester.pumpAndSettle();
+      expect(titleText(), 'Momo & Chowmein');
+
+      // Tap Auto-generate button to cycle AI suggestion
+      final autoGenBtn = find.byTooltip('Auto-generate with AI');
+      await tester.ensureVisible(autoGenBtn);
+      await tester.tap(autoGenBtn);
+      await tester.pumpAndSettle();
+      expect(titleText().isNotEmpty, isTrue);
+    },
+  );
+
   test('Income, legacy expenses, edits and deletes update the ledger independently of spending', () async {
     final db = FakeFirebaseFirestore();
     final collection = db

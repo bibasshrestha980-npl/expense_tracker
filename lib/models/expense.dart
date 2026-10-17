@@ -19,6 +19,65 @@ const incomeCategories = [
   'Other income',
 ];
 
+const Map<String, List<String>> aiCategorySuggestions = {
+  'Food': [
+    'Momo & Chowmein',
+    'Lunch / Khaja',
+    'Groceries & Vegetables',
+    'Coffee & Bakery',
+    'Dinner & Drinks',
+    'Tea & Snacks (Chiya Khaja)',
+  ],
+  'Transport': [
+    'Bus / Micro fare',
+    'Pathao / InDrive ride',
+    'Petrol / Fuel refill',
+    'Taxi fare',
+    'Vehicle servicing',
+  ],
+  'Shopping': [
+    'Clothes & Apparel',
+    'Daily essentials',
+    'Electronics & Gadgets',
+    'Shoes & Footwear',
+    'Home & Kitchen items',
+  ],
+  'Bills': [
+    'Electricity bill (NEA)',
+    'Internet / Wi-Fi',
+    'Mobile recharge & Data',
+    'Water bill (Khanepani)',
+    'House / Room rent',
+  ],
+  'Health': [
+    'Pharmacy & Medicines',
+    'Doctor consultation',
+    'Lab tests & Checkup',
+    'Dental care',
+    'Gym / Fitness',
+  ],
+  'Education': [
+    'Books & Stationery',
+    'College / Tuition fees',
+    'Exam registration',
+    'Online course / Certification',
+  ],
+  'Other': [
+    'Personal care & Grooming',
+    'Donation / Puja',
+    'Pet supplies',
+    'Miscellaneous expense',
+  ],
+  'Salary': ['Monthly salary', 'Advance salary', 'Bonus payment'],
+  'Freelance': ['Client project', 'Design gig', 'Consulting fee'],
+  'Allowance': ['Monthly allowance', 'Family support', 'Stipend'],
+  'Gift': ['Birthday gift', 'Festive cash (Dashain/Tihar)', 'Prize money'],
+  'Refund': ['Security deposit return', 'Online return refund', 'Overpayment refund'],
+  'Opening balance': ['Cash in hand', 'Bank balance starting point'],
+  'Other income': ['Interest earned', 'Asset sale', 'Side income'],
+};
+
+
 class Expense {
   final String id, title, category, note;
   final int amountCents;
