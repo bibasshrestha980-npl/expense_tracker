@@ -248,7 +248,7 @@ void main() {
     test(
       'sorts visible items by newest, oldest, highest and lowest amount',
       () {
-        final base = DateTime(2026, 10, 15, 12, 0);
+        final base = DateTime.now();
         final provider = ExpenseProvider(
           'user-1',
           repository: mockRepo,
@@ -277,6 +277,7 @@ void main() {
           ],
         );
         addTearDown(provider.dispose);
+        provider.setCalendar(false);
 
         // Newest first (default)
         expect(provider.visible.first.title, 'Low item');

@@ -11,6 +11,7 @@ import '../models/expense.dart';
 import '../providers/expense_provider.dart';
 import '../services/sms_wallet_parser.dart';
 import '../theme.dart';
+import '../services/ai_service.dart';
 import 'dashboard.dart' show localizedCategory;
 
 class ExpenseEditor extends StatefulWidget {
@@ -36,7 +37,12 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   bool _busy = false;
   bool _nepali = false;
   bool _titleEdited = false;
+  final AiService _aiService = const AiService();
+  List<String> _aiSuggestions = [];
+  bool _aiLoading = false;
+  bool _aiPowered = false;
   bool get _income => widget.expense?.isIncome ?? widget.income;
+
   String? _error;
   @override
   void initState() {
@@ -52,6 +58,12 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     _category =
         e?.category ?? (_income ? incomeCategories.first : categories.first);
     if (e == null && _income) _title.text = _category;
+    // Load AI suggestions after the frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadAiSuggestions(_category);
+      }
+    });
   }
 
   bool get _isNepaliLocale =>
@@ -59,7 +71,43 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
 
   int _aiSuggestionIndex = 0;
 
-  List<String> _getAiSuggestions(String category) {
+  /// Fetch suggestions from the AI service; fall back to static maps on failure.
+  Future<void> _loadAiSuggestions(String category) async {
+    if (!mounted) return;
+    final staticList = _getStaticSuggestions(category);
+    setState(() {
+      _aiSuggestions = staticList;
+      _aiPowered = false;
+      _aiLoading = AiService.isConfigured;
+    });
+
+    if (!AiService.isConfigured) return;
+
+    try {
+      final suggestions = await _aiService.fetchSuggestions(
+        category: category,
+        nepali: _isNepaliLocale,
+        isIncome: _income,
+      );
+      if (mounted && suggestions.isNotEmpty) {
+        setState(() {
+          _aiSuggestions = suggestions;
+          _aiPowered = true;
+          _aiLoading = false;
+          if (widget.expense == null && !_titleEdited) {
+            _title.text = suggestions.first;
+          }
+        });
+        return;
+      }
+    } catch (e) {
+      debugPrint('AI suggestion error: $e');
+    }
+    if (mounted) setState(() => _aiLoading = false);
+  }
+
+  /// Return static suggestion list for a category (used as fallback).
+  List<String> _getStaticSuggestions(String category) {
     if (_isNepaliLocale) {
       return aiCategorySuggestionsNe[category] ??
           aiCategorySuggestions[category] ??
@@ -69,6 +117,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   }
 
   String _getAiPrimarySuggestion(String category) {
+    if (_aiSuggestions.isNotEmpty) return _aiSuggestions.first;
     if (category == 'Food') {
       final hour = DateTime.now().hour;
       if (_isNepaliLocale) {
@@ -82,7 +131,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
       if (hour >= 15 && hour < 19) return 'Momo & Chowmein';
       return 'Dinner & Groceries';
     }
-    final list = _getAiSuggestions(category);
+    final list = _getStaticSuggestions(category);
     return list.isNotEmpty
         ? list.first
         : (_isNepaliLocale ? localizedCategory(context, category) : category);
@@ -103,10 +152,9 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   }
 
   void _cycleAiSuggestion() {
-    final list = _getAiSuggestions(_category);
-    if (list.isEmpty) return;
-    _aiSuggestionIndex = (_aiSuggestionIndex + 1) % list.length;
-    final next = list[_aiSuggestionIndex];
+    if (_aiSuggestions.isEmpty) return;
+    _aiSuggestionIndex = (_aiSuggestionIndex + 1) % _aiSuggestions.length;
+    final next = _aiSuggestions[_aiSuggestionIndex];
     setState(() {
       _title.text = next;
       _titleEdited = true;
@@ -152,7 +200,6 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
           _titleEdited = false;
         }
       } else {
-        // Auto-generate title by AI when a category (e.g. Food) is selected
         if (_title.text.trim().isEmpty ||
             (widget.expense == null && !_titleEdited)) {
           _title.text = _getAiPrimarySuggestion(category);
@@ -160,6 +207,8 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
         }
       }
     });
+    // Reload AI suggestions for the new category
+    _loadAiSuggestions(category);
     if (_chipsScrollController.hasClients) {
       _chipsScrollController.animateTo(
         0,
@@ -334,7 +383,17 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.auto_awesome, size: 13, color: accent),
+                        if (_aiLoading)
+                          const SizedBox(
+                            width: 13,
+                            height: 13,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: accent,
+                            ),
+                          )
+                        else
+                          const Icon(Icons.auto_awesome, size: 13, color: accent),
                         const SizedBox(width: 5),
                         Expanded(
                           child: Tooltip(
@@ -342,11 +401,22 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                                 l10n?.aiSuggestionsForCategory(_category) ??
                                 'Suggestions for $_category',
                             child: Text(
-                              l10n?.aiSuggestionsLabel ?? 'AI suggestions:',
+                              _aiPowered
+                                  ? (_isNepaliLocale
+                                      ? '✨ Gemini AI सुझावहरू:'
+                                      : '✨ Powered by Gemini AI')
+                                  : _aiLoading
+                                      ? (_isNepaliLocale
+                                          ? 'AI सुझावहरू लोड हुँदैछ...'
+                                          : 'Loading AI suggestions...')
+                                      : (l10n?.aiSuggestionsLabel ??
+                                          'AI suggestions:'),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: context.appMuted,
+                                color: _aiPowered
+                                    ? accent
+                                    : context.appMuted,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -388,40 +458,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                             ),
                           ),
                         ),
-                        Tooltip(
-                          message:
-                              l10n?.autoGenerateAiTooltip ??
-                              'Auto-generate with AI',
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(4),
-                            onTap: _cycleAiSuggestion,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.refresh_rounded,
-                                    size: 13,
-                                    color: accent,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    l10n?.autoGenerate ?? 'Auto',
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      color: accent,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+
                       ],
                     ),
                     const SizedBox(height: 6),
@@ -460,7 +497,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                             parent: AlwaysScrollableScrollPhysics(),
                           ),
                           child: Row(
-                            children: _getAiSuggestions(_category).map((s) {
+                            children: _aiSuggestions.map((s) {
                               final isSelected =
                                   _title.text.trim().toLowerCase() ==
                                   s.toLowerCase();
