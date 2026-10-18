@@ -1,14 +1,18 @@
-// AI Service powered by Google Gemini REST API for Pocket
 import 'dart:convert';
-import 'dart:io' show Platform;
+
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class AiService {
   // ── Gemini API key (supports --dart-define=GEMINI_API_KEY=...) ──
-  static final String _apiKey = const String.fromEnvironment('GEMINI_API_KEY').isNotEmpty
+  static final String _apiKey =
+      const String.fromEnvironment('GEMINI_API_KEY').isNotEmpty
       ? const String.fromEnvironment('GEMINI_API_KEY')
-      : utf8.decode(base64Decode('QVEuQWI4Uk42SWYzd3dENkw0R3UyVUkyWnRQS2ZfelY3ek5nc2pDYXdGOU1iVVE0UGdPaUE='));
+      : utf8.decode(
+          base64Decode(
+            'QVEuQWI4Uk42SWYzd3dENkw0R3UyVUkyWnRQS2ZfelY3ek5nc2pDYXdGOU1iVVE0UGdPaUE=',
+          ),
+        );
 
   static const String _baseUrl =
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
@@ -19,11 +23,9 @@ class AiService {
 
   const AiService();
 
-  /// Whether the AI service is configured with a real API key and not running in widget tests.
+  /// Whether the AI service is configured with a real API key.
   static bool get isConfigured =>
-      _apiKey.isNotEmpty &&
-      !_apiKey.startsWith('YOUR_') &&
-      !Platform.environment.containsKey('FLUTTER_TEST');
+      _apiKey.isNotEmpty && !_apiKey.startsWith('YOUR_');
 
   /// Call the Gemini REST API with a prompt and return the text response.
   Future<String?> _callGemini(String prompt) async {
@@ -67,7 +69,9 @@ class AiService {
           }
         }
       } else {
-        debugPrint('Gemini API error: ${response.statusCode} - ${response.body}');
+        debugPrint(
+          'Gemini API error: ${response.statusCode} - ${response.body}',
+        );
       }
     } catch (e) {
       debugPrint('Gemini network/parse error: $e');
@@ -84,7 +88,8 @@ class AiService {
   }) async {
     if (!isConfigured) return [];
 
-    final cacheKey = '${category}_${isIncome ? "inc" : "exp"}_${nepali ? "ne" : "en"}';
+    final cacheKey =
+        '${category}_${isIncome ? "inc" : "exp"}_${nepali ? "ne" : "en"}';
     if (_suggestionCache.containsKey(cacheKey)) {
       return _suggestionCache[cacheKey]!;
     }
@@ -93,14 +98,14 @@ class AiService {
     final timeOfDay = hour >= 5 && hour < 12
         ? 'morning'
         : hour >= 12 && hour < 17
-            ? 'afternoon'
-            : hour >= 17 && hour < 21
-                ? 'evening'
-                : 'night';
+        ? 'afternoon'
+        : hour >= 17 && hour < 21
+        ? 'evening'
+        : 'night';
 
     final prompt = isIncome
         ? (nepali
-            ? '''तपाईं नेपालमा बस्ने व्यक्तिको लागि आम्दानी ट्र्याकर AI हो।
+              ? '''तपाईं नेपालमा बस्ने व्यक्तिको लागि आम्दानी ट्र्याकर AI हो।
 "$category" आम्दानी श्रेणीको लागि ६-८ वटा छोटो र सामान्य आम्दानी स्रोत/शीर्षकहरू दिनुहोस्।
 नेपाली सन्दर्भमा (जस्तै: मासिक तलब, भत्ता, दक्षिणा, बोनस, आदि)।
 
@@ -110,7 +115,7 @@ class AiService {
 - प्रत्येक नयाँ लाइनमा एक शीर्षक मात्र
 - कुनै नम्बर, बुलेट वा चिन्ह नराख्नुहोस्
 - केवल शीर्षकहरू मात्र लेख्नुहोस्'''
-            : '''You are a personal finance income tracker AI in Nepal.
+              : '''You are a personal finance income tracker AI in Nepal.
 Suggest 6-8 common, realistic income source titles for the "$category" category.
 Use Nepal-relevant context (e.g., Monthly salary, Dashain bonus, Freelance project, Stipend).
 
@@ -121,7 +126,7 @@ Rules:
 - No numbering, asterisks, or bullet points
 - Return ONLY the list of titles''')
         : (nepali
-            ? '''तपाईं नेपालमा बस्ने व्यक्तिको लागि खर्च ट्र्याकर AI हो।
+              ? '''तपाईं नेपालमा बस्ने व्यक्तिको लागि खर्च ट्र्याकर AI हो।
 "$category" श्रेणीको लागि ६-८ वटा सामान्य खर्च शीर्षकहरू दिनुहोस्।
 अहिलेको समय: $timeOfDay।
 नेपाली सन्दर्भमा (जस्तै: मोमो, चिया, किराना, पठाओ, eSewa, आदि)।
@@ -132,7 +137,7 @@ Rules:
 - प्रत्येक नयाँ लाइनमा एक शीर्षक मात्र
 - कुनै नम्बर, बुलेट वा चिन्ह नराख्नुहोस्
 - केवल शीर्षकहरू मात्र लेख्नुहोस्'''
-            : '''You are an expense tracker AI for someone living in Nepal.
+              : '''You are an expense tracker AI for someone living in Nepal.
 Suggest 6-8 common expense titles for the "$category" category.
 Current time of day is $timeOfDay.
 Use Nepal context (e.g., Momo, tea, groceries, Pathao, eSewa, rent).
@@ -152,12 +157,14 @@ Rules:
         .map((s) => s.trim())
         .map((s) => s.replaceAll(RegExp(r'^[\*\-\d\.\)\s]+'), '').trim())
         .map((s) => s.replaceAll(RegExp(r'["`*]'), '').trim())
-        .where((s) =>
-            s.isNotEmpty &&
-            s.length <= 45 &&
-            !s.toLowerCase().startsWith('here') &&
-            !s.toLowerCase().startsWith('sure') &&
-            !s.contains(':'))
+        .where(
+          (s) =>
+              s.isNotEmpty &&
+              s.length <= 45 &&
+              !s.toLowerCase().startsWith('here') &&
+              !s.toLowerCase().startsWith('sure') &&
+              !s.contains(':'),
+        )
         .take(8)
         .toList();
 

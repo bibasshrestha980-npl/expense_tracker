@@ -16,7 +16,6 @@ import 'report_dialog.dart';
 import 'settings_screen.dart';
 import 'spending_stories.dart';
 import '../models/calendar_period.dart';
-import '../widgets/ai_coach_card.dart';
 
 String money(int cents) =>
     NumberFormat.currency(symbol: 'NPR ', decimalDigits: 2).format(cents / 100);
@@ -645,11 +644,6 @@ class _DashboardState extends State<Dashboard> {
                                       ),
                                     ),
                                     const SizedBox(height: 16),
-                                    AiCoachCard(
-                                      provider: p,
-                                      isNepali: isNepali,
-                                    ),
-                                    const SizedBox(height: 8),
                                     LayoutBuilder(
                                       builder: (context, box) {
                                         final chart = panel(
