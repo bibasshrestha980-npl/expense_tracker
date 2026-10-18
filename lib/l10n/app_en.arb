@@ -158,6 +158,7 @@
   "noMatchingTransactions": "No matching transactions",
   "freshStartThisMonth": "A fresh start for this month",
   "emptyTransactionsPrompt": "Add money or an expense, or try another month or filter.",
+  "showAllTransactions": "Show all transactions",
   "editTransaction": "Edit transaction",
   "deleteTransaction": "Delete transaction",
   "viewAll": "View all",

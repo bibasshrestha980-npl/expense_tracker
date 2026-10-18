@@ -394,6 +394,9 @@ class AppLocalizationsNe extends AppLocalizations {
       'रकम वा खर्च थप्नुहोस्, वा अर्को महिना वा फिल्टर छान्नुहोस्।';
 
   @override
+  String get showAllTransactions => 'सबै कारोबार देखाउनुहोस्';
+
+  @override
   String get editTransaction => 'कारोबार सम्पादन गर्नुहोस्';
 
   @override

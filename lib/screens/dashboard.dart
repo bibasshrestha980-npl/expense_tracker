@@ -1020,6 +1020,10 @@ class _DashboardState extends State<Dashboard> {
     final items = page == 0
         ? p.monthlyTransactions.take(5).toList()
         : p.visible;
+    final hasTransactionFilters =
+        p.search.isNotEmpty ||
+        p.category != 'All' ||
+        p.transactionType != 'All';
 
     String sortLabel(String v) => switch (v) {
       'Newest first' => l10n?.sortNewestFirst ?? 'Newest first',
@@ -1146,7 +1150,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    page == 1 && (p.search.isNotEmpty || p.category != 'All')
+                    page == 1 && hasTransactionFilters
                         ? (l10n?.noMatchingTransactions ??
                               'No matching transactions')
                         : (l10n?.freshStartThisMonth ??
@@ -1162,6 +1166,21 @@ class _DashboardState extends State<Dashboard> {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: context.appMuted),
                   ),
+                  if (page == 1 && hasTransactionFilters) ...[
+                    const SizedBox(height: 16),
+                    OutlinedButton.icon(
+                      onPressed: () {
+                        search.clear();
+                        p.find('');
+                        p.filter('All');
+                        p.setType('All');
+                      },
+                      icon: const Icon(Icons.filter_alt_off_outlined),
+                      label: Text(
+                        l10n?.showAllTransactions ?? 'Show all transactions',
+                      ),
+                    ),
+                  ],
                 ],
               ),
             )

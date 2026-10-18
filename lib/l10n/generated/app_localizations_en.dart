@@ -399,6 +399,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add money or an expense, or try another month or filter.';
 
   @override
+  String get showAllTransactions => 'Show all transactions';
+
+  @override
   String get editTransaction => 'Edit transaction';
 
   @override

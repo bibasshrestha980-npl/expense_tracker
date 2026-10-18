@@ -794,6 +794,12 @@ abstract class AppLocalizations {
   /// **'Add money or an expense, or try another month or filter.'**
   String get emptyTransactionsPrompt;
 
+  /// No description provided for @showAllTransactions.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all transactions'**
+  String get showAllTransactions;
+
   /// No description provided for @editTransaction.
   ///
   /// In en, this message translates to:

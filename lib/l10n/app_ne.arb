@@ -122,6 +122,7 @@
   "noMatchingTransactions": "कुनै मिल्दो कारोबार फेला परेन",
   "freshStartThisMonth": "यो महिनाको नयाँ सुरुवात",
   "emptyTransactionsPrompt": "रकम वा खर्च थप्नुहोस्, वा अर्को महिना वा फिल्टर छान्नुहोस्।",
+  "showAllTransactions": "सबै कारोबार देखाउनुहोस्",
   "editTransaction": "कारोबार सम्पादन गर्नुहोस्",
   "deleteTransaction": "कारोबार मेटाउनुहोस्",
   "viewAll": "सबै हेर्नुहोस्",
