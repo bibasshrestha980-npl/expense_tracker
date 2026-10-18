@@ -59,3 +59,4 @@ app.*.map.json
 .metadata
 devtools_options.yaml
 tool/
+lib/services/ai_service.dart
