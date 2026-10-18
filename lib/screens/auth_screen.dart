@@ -131,7 +131,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Icon(
-                      Icons.account_balance_wallet_rounded,
+                      Icons.account_balance_wallet,
                       size: 64,
                       color: Theme.of(context).colorScheme.primary,
                     ),

@@ -215,7 +215,7 @@ class _DashboardState extends State<Dashboard> {
                     Row(
                       children: [
                         Icon(
-                          Icons.account_balance_wallet_rounded,
+                          Icons.account_balance_wallet,
                           color: context.appAccent,
                           size: 30,
                         ),
@@ -318,7 +318,7 @@ class _DashboardState extends State<Dashboard> {
                       children: [
                         if (!wide) ...[
                           Icon(
-                            Icons.account_balance_wallet_rounded,
+                            Icons.account_balance_wallet,
                             color: context.appAccent,
                           ),
                           const SizedBox(width: 10),
