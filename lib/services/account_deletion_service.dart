@@ -34,7 +34,8 @@ class AccountDeletionService {
   );
 
   /// Deletes the authenticated user's:
-  /// 1. Cloud Firestore documents (`users/{uid}/expenses/*` and `users/{uid}`)
+  /// 1. Cloud Firestore documents (`users/{uid}/expenses/*`,
+  ///    `users/{uid}/contributions/*`, and `users/{uid}`)
   /// 2. Firebase Storage media files (`users/{uid}/*`)
   /// 3. Firebase Authentication account (`user.delete()`)
   ///
@@ -83,20 +84,29 @@ class AccountDeletionService {
     }
   }
 
-  /// Deletes all documents in `users/{uid}/expenses` (in batches) and the parent `users/{uid}` document.
+  /// Deletes all expense and contribution documents (in batches), vault
+  /// metadata, and the parent `users/{uid}` document.
   Future<void> deleteFirestoreUserData(String uid) async {
     try {
       final userDocRef = _firestore.collection('users').doc(uid);
-      final expensesRef = userDocRef.collection('expenses');
-      final snapshot = await _request(
-        expensesRef.get(const GetOptions(source: Source.server)),
+      final expensesSnapshot = await _request(
+        userDocRef
+            .collection('expenses')
+            .get(const GetOptions(source: Source.server)),
         'Loading account records',
       );
+      final contributionsSnapshot = await _request(
+        userDocRef
+            .collection('contributions')
+            .get(const GetOptions(source: Source.server)),
+        'Loading contribution records',
+      );
 
-      if (snapshot.docs.isNotEmpty) {
+      final records = [...expensesSnapshot.docs, ...contributionsSnapshot.docs];
+      if (records.isNotEmpty) {
         WriteBatch batch = _firestore.batch();
         int batchCount = 0;
-        for (final doc in snapshot.docs) {
+        for (final doc in records) {
           batch.delete(doc.reference);
           batchCount++;
           if (batchCount >= 450) {

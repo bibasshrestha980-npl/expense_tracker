@@ -91,7 +91,7 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get deleteMyDataDesc =>
-      'क्लाउड फायरस्टोरबाट तपाईंका सबै खर्च र आम्दानी रेकर्डहरू स्थायी रूपमा मेटाउनुहोस्। एकपटक मेटिएपछि, तपाईंको वित्तीय इतिहास पुनः प्राप्त गर्न सकिँदैन।';
+      'क्लाउड फायरस्टोरबाट तपाईंका खर्च, आम्दानी र GitHub योगदानका सबै रेकर्ड स्थायी रूपमा मेटाउनुहोस्। एकपटक मेटिएपछि, तपाईंको डाटा पुनः प्राप्त गर्न सकिँदैन।';
 
   @override
   String get dataDeletionCancelled =>
@@ -110,14 +110,14 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get deleteAccountDesc =>
-      'फायरबेस प्रमाणीकरणबाट तपाईंको खाता र क्लाउड फायरस्टोरका खर्च तथा आम्दानी रेकर्डहरू स्थायी रूपमा मेटाउनुहोस्। यो कार्य फिर्ता गर्न सकिँदैन।';
+      'फायरबेस प्रमाणीकरणबाट तपाईंको खाता र क्लाउड फायरस्टोरका खर्च, आम्दानी तथा GitHub योगदान लग स्थायी रूपमा मेटाउनुहोस्। यो कार्य फिर्ता गर्न सकिँदैन।';
 
   @override
   String get deleteAccountPermanentlyTitle => 'खाता स्थायी रूपमा मेटाउने?';
 
   @override
   String get deleteAccountPermanentlyContent =>
-      'यसले तपाईंको पकेट खाता र क्लाउड फायरस्टोरका सबै खर्च तथा आम्दानी रेकर्डहरू स्थायी रूपमा मेटाउनेछ।\n\nयो कार्य पूर्ववत गर्न सकिँदैन। के तपाईं पक्का हुनुहुन्छ?';
+      'यसले तपाईंको पकेट खाता र क्लाउड फायरस्टोरका सबै खर्च, आम्दानी तथा GitHub योगदान लग स्थायी रूपमा मेटाउनेछ।\n\nयो कार्य पूर्ववत गर्न सकिँदैन। के तपाईं पक्का हुनुहुन्छ?';
 
   @override
   String get cancel => 'रद्द गर्नुहोस्';
@@ -191,6 +191,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get navInsights => 'अन्तरदृष्टि';
 
   @override
+  String get navContributions => 'योगदानहरू';
+
+  @override
   String get navSettings => 'सेटिङहरू';
 
   @override
@@ -245,11 +248,107 @@ class AppLocalizationsNe extends AppLocalizations {
       'आफ्ना दैनिक खर्चहरूलाई उपयोगी विश्लेषणमा बदल्नुहोस्।';
 
   @override
+  String get heroContributionsTitle => 'तपाईंका GitHub योगदानहरू।';
+
+  @override
+  String get heroContributionsSubtitle =>
+      'कुनै पनि रिपोजिटरीका योगदानहरू गन्नुहोस्।';
+
+  @override
   String get heroSettingsTitle => 'खाता र प्राथमिकताहरू।';
 
   @override
   String get heroSettingsSubtitle =>
       'पात्रो, मुद्रा, र डाटा गोपनीयता विकल्पहरू व्यवस्थापन गर्नुहोस्।';
+
+  @override
+  String contributionCount(int count) {
+    return '$count योगदान';
+  }
+
+  @override
+  String get contributionCountLabel => 'जम्मा योगदान संख्या';
+
+  @override
+  String get contributionCountSubtitle =>
+      'सबै रिपोजिटरीमा सुरक्षित गरिएको प्रत्येक गतिविधि एक पटक गनिन्छ।';
+
+  @override
+  String get addContribution => 'योगदान थप्नुहोस्';
+
+  @override
+  String get contributionActivityType => 'गतिविधिको प्रकार';
+
+  @override
+  String get contributionTitleField => 'शीर्षक';
+
+  @override
+  String get contributionRepository => 'रिपोजिटरी (वैकल्पिक)';
+
+  @override
+  String get contributionNote => 'कैफियत (वैकल्पिक)';
+
+  @override
+  String get contributionDate => 'मिति';
+
+  @override
+  String get contributionSelectDate => 'मिति छान्नुहोस्';
+
+  @override
+  String get contributionSaveButton => 'सुरक्षित गर्नुहोस्';
+
+  @override
+  String get contributionSaved => 'योगदान गणना गरियो।';
+
+  @override
+  String get contributionDeleted => 'योगदान हटाइयो।';
+
+  @override
+  String get contributionLoadError =>
+      'योगदानहरू लोड गर्न सकिएन। इन्टरनेट जाँच गरी फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get contributionSaveError =>
+      'योगदान सुरक्षित गर्न सकिएन। इन्टरनेट जाँच गरी फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get contributionDeleteError =>
+      'योगदान मेटाउन सकिएन। इन्टरनेट जाँच गरी फेरि प्रयास गर्नुहोस्।';
+
+  @override
+  String get contributionSignInRequired =>
+      'योगदान सुरक्षित गर्न साइन इन गर्नुहोस्।';
+
+  @override
+  String get contributionNone =>
+      'अहिलेसम्म कुनै योगदान छैन। गणना सुरु गर्न एउटा थप्नुहोस्।';
+
+  @override
+  String get deleteContribution => 'योगदान मेटाउने?';
+
+  @override
+  String get deleteContributionConfirm => 'यो योगदान तपाईंको गणनाबाट हटाइनेछ।';
+
+  @override
+  String get contributionCommit => 'कमिट';
+
+  @override
+  String get contributionPullRequest => 'पुल अनुरोध';
+
+  @override
+  String get contributionIssue => 'इश्यू';
+
+  @override
+  String get contributionCodeReview => 'कोड समीक्षा';
+
+  @override
+  String get contributionDiscussion => 'छलफल';
+
+  @override
+  String get contributionSponsorship => 'प्रायोजन';
+
+  @override
+  String get contributionOther => 'अन्य';
 
   @override
   String get addMoney => 'रकम थप्नुहोस्';

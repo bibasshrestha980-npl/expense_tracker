@@ -92,7 +92,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteMyDataDesc =>
-      'Permanently erase all your expense and income records from Cloud Firestore. Once deleted, your financial history cannot be recovered.';
+      'Permanently erase all your expense, income, and GitHub contribution records from Cloud Firestore. Once deleted, your data cannot be recovered.';
 
   @override
   String get dataDeletionCancelled =>
@@ -111,14 +111,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountDesc =>
-      'Permanently delete your account credentials from Firebase Authentication, your expense and income records in Cloud Firestore. This action cannot be undone.';
+      'Permanently delete your account credentials from Firebase Authentication, your expense and income records, and your GitHub contribution log from Cloud Firestore. This action cannot be undone.';
 
   @override
   String get deleteAccountPermanentlyTitle => 'Delete Account Permanently?';
 
   @override
   String get deleteAccountPermanentlyContent =>
-      'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?';
+      'This will permanently delete your Pocket account, all expense and income records, and your GitHub contribution log from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?';
 
   @override
   String get cancel => 'Cancel';
@@ -191,6 +191,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navInsights => 'Insights';
 
   @override
+  String get navContributions => 'Contributions';
+
+  @override
   String get navSettings => 'Settings';
 
   @override
@@ -245,11 +248,107 @@ class AppLocalizationsEn extends AppLocalizations {
       'Turn your everyday expenses into useful insights.';
 
   @override
+  String get heroContributionsTitle => 'Your GitHub contributions.';
+
+  @override
+  String get heroContributionsSubtitle =>
+      'Keep a count of contributions across any repository.';
+
+  @override
   String get heroSettingsTitle => 'Account & Preferences.';
 
   @override
   String get heroSettingsSubtitle =>
       'Manage calendar, currency, and data privacy options.';
+
+  @override
+  String contributionCount(int count) {
+    return '$count contributions';
+  }
+
+  @override
+  String get contributionCountLabel => 'All-time contribution count';
+
+  @override
+  String get contributionCountSubtitle =>
+      'Each saved activity counts once, across every repository.';
+
+  @override
+  String get addContribution => 'Add contribution';
+
+  @override
+  String get contributionActivityType => 'Activity type';
+
+  @override
+  String get contributionTitleField => 'Title';
+
+  @override
+  String get contributionRepository => 'Repository (optional)';
+
+  @override
+  String get contributionNote => 'Note (optional)';
+
+  @override
+  String get contributionDate => 'Date';
+
+  @override
+  String get contributionSelectDate => 'Select date';
+
+  @override
+  String get contributionSaveButton => 'Save';
+
+  @override
+  String get contributionSaved => 'Contribution counted.';
+
+  @override
+  String get contributionDeleted => 'Contribution removed.';
+
+  @override
+  String get contributionLoadError =>
+      'Could not load contributions. Check your connection and try again.';
+
+  @override
+  String get contributionSaveError =>
+      'Could not save contribution. Check your connection and try again.';
+
+  @override
+  String get contributionDeleteError =>
+      'Could not delete contribution. Check your connection and try again.';
+
+  @override
+  String get contributionSignInRequired => 'Sign in to save contributions.';
+
+  @override
+  String get contributionNone =>
+      'No contributions yet. Add one to start your count.';
+
+  @override
+  String get deleteContribution => 'Delete contribution?';
+
+  @override
+  String get deleteContributionConfirm =>
+      'This contribution will be removed from your count.';
+
+  @override
+  String get contributionCommit => 'Commit';
+
+  @override
+  String get contributionPullRequest => 'Pull request';
+
+  @override
+  String get contributionIssue => 'Issue';
+
+  @override
+  String get contributionCodeReview => 'Code review';
+
+  @override
+  String get contributionDiscussion => 'Discussion';
+
+  @override
+  String get contributionSponsorship => 'Sponsorship';
+
+  @override
+  String get contributionOther => 'Other';
 
   @override
   String get addMoney => 'Add money';

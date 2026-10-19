@@ -11,6 +11,8 @@ import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/locale_provider.dart';
 import '../theme.dart';
+import '../services/repositories/contribution_repository.dart';
+import 'contribution_screen.dart';
 import 'expense_editor.dart';
 import 'report_dialog.dart';
 import 'settings_screen.dart';
@@ -68,11 +70,17 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   int page = 0;
   final search = TextEditingController();
+  late final ContributionRepository _contributionRepository =
+      ContributionRepository(
+        uid: context.read<AuthProvider>().user?.uid ?? '',
+        firestore: context.read<ExpenseProvider>().database,
+      );
 
   List<String> getTitles(AppLocalizations? l10n) => [
     l10n?.navOverview ?? 'Overview',
     l10n?.navTransactions ?? 'Transactions',
     l10n?.navInsights ?? 'Insights',
+    l10n?.navContributions ?? 'Contributions',
     l10n?.navSettings ?? 'Settings',
   ];
 
@@ -163,6 +171,7 @@ class _DashboardState extends State<Dashboard> {
       l10n?.heroOverviewTitle ?? 'A little clarity. A lot of control.',
       l10n?.heroTransactionsTitle ?? 'Every expense, in one place.',
       l10n?.heroInsightsTitle ?? 'Understand your spending.',
+      l10n?.heroContributionsTitle ?? 'Your GitHub contributions.',
       l10n?.heroSettingsTitle ?? 'Account & Preferences.',
     ];
     final heroSubtitles = [
@@ -171,6 +180,8 @@ class _DashboardState extends State<Dashboard> {
           'Search, review and organize your daily spending.',
       l10n?.heroInsightsSubtitle ??
           'Turn your everyday expenses into useful insights.',
+      l10n?.heroContributionsSubtitle ??
+          'Keep a count of contributions across any repository.',
       l10n?.heroSettingsSubtitle ??
           'Manage calendar, currency, and data privacy options.',
     ];
@@ -195,8 +206,12 @@ class _DashboardState extends State<Dashboard> {
                   label: titles[2],
                 ),
                 NavigationDestination(
-                  icon: const Icon(Icons.settings_outlined),
+                  icon: const Icon(Icons.code_rounded),
                   label: titles[3],
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.settings_outlined),
+                  label: titles[4],
                 ),
               ],
             ),
@@ -258,6 +273,7 @@ class _DashboardState extends State<Dashboard> {
                                 Icons.space_dashboard_outlined,
                                 Icons.receipt_long_outlined,
                                 Icons.bar_chart_rounded,
+                                Icons.code_rounded,
                                 Icons.settings_outlined,
                               ][i],
                             ),
@@ -329,27 +345,31 @@ class _DashboardState extends State<Dashboard> {
                         ),
                         const Spacer(),
                         if (wide) ...[
-                          FilledButton.tonalIcon(
-                            onPressed: () => showDialog<void>(
-                              context: context,
-                              builder: (_) => ReportDialog(expenseProvider: p),
+                          if (page < 3)
+                            FilledButton.tonalIcon(
+                              onPressed: () => showDialog<void>(
+                                context: context,
+                                builder: (_) =>
+                                    ReportDialog(expenseProvider: p),
+                              ),
+                              icon: const Icon(
+                                Icons.summarize_outlined,
+                                size: 16,
+                              ),
+                              label: Text(l10n?.shareReport ?? 'Share Report'),
                             ),
-                            icon: const Icon(
-                              Icons.summarize_outlined,
-                              size: 16,
-                            ),
-                            label: Text(l10n?.shareReport ?? 'Share Report'),
-                          ),
-                          const SizedBox(width: 14),
+                          if (page < 3) const SizedBox(width: 14),
                         ] else ...[
-                          IconButton(
-                            tooltip: l10n?.shareReport ?? 'Share Report',
-                            icon: const Icon(Icons.summarize_outlined),
-                            onPressed: () => showDialog<void>(
-                              context: context,
-                              builder: (_) => ReportDialog(expenseProvider: p),
+                          if (page < 3)
+                            IconButton(
+                              tooltip: l10n?.shareReport ?? 'Share Report',
+                              icon: const Icon(Icons.summarize_outlined),
+                              onPressed: () => showDialog<void>(
+                                context: context,
+                                builder: (_) =>
+                                    ReportDialog(expenseProvider: p),
+                              ),
                             ),
-                          ),
                         ],
                         if (wide) ...[
                           Icon(
@@ -445,7 +465,7 @@ class _DashboardState extends State<Dashboard> {
                               return;
                             }
                             if (val == 'settings') {
-                              setState(() => page = 3);
+                              setState(() => page = 4);
                               return;
                             }
                             try {
@@ -496,7 +516,7 @@ class _DashboardState extends State<Dashboard> {
                                       ),
                                     ],
                                   ),
-                                  if (page != 3) ...[
+                                  if (page < 3) ...[
                                     FilledButton.icon(
                                       onPressed: () => edit(p, null, true),
                                       icon: const Icon(
@@ -517,9 +537,18 @@ class _DashboardState extends State<Dashboard> {
                                   ],
                                 ],
                               ),
-                              if (page == 3) ...[
+                              if (page == 4) ...[
                                 const SizedBox(height: 24),
-                                SettingsScreen(expenseProvider: p),
+                                SettingsScreen(
+                                  expenseProvider: p,
+                                  contributionRepository:
+                                      _contributionRepository,
+                                ),
+                              ] else if (page == 3) ...[
+                                const SizedBox(height: 24),
+                                ContributionScreen(
+                                  repository: _contributionRepository,
+                                ),
                               ] else ...[
                                 const SizedBox(height: 18),
                                 SegmentedButton<bool>(

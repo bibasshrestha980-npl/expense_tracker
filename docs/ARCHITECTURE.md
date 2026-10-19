@@ -44,3 +44,4 @@ Pocket maintains a robust automated testing suite with over 96 tests covering:
 1. **Unit Tests**: Domain entities, parsers, calendar calculations, and validators.
 2. **Provider Tests**: State transitions, filters, and computed metrics.
 3. **Widget Tests**: Localization rendering, dialog interactions, and theme adaptivity.
+

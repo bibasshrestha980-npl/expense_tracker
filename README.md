@@ -99,6 +99,9 @@ Pocket provides a complete, modern suite of personal money management tools—av
   * Instant full-text search across titles and notes.
   * Filter by category, transaction type (Income vs. Expense), or calendar month.
   * Sort by newest, oldest, or highest amount.
+* **Manual GitHub Contribution Count:**
+  * Log commits, pull requests, issues, code reviews, discussions, sponsorships, and other contributions across any repository.
+  * Each saved activity counts once in an all-time total; entries are private to your Pocket account and are not fetched automatically from GitHub.
 
 ### 5. Localization, Privacy & Security
 * **Bilingual English & Nepali Interface:**

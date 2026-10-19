@@ -6,6 +6,8 @@ import { doc, collection, getDoc, getDocs, setDoc, updateDoc, deleteDoc, Timesta
 let env;
 const path = 'users/alice/expenses/example';
 const record = () => ({title:'Lunch', category:'Food', amountCents:45000, date:Timestamp.now(), note:'', type:'expense'});
+const contributionPath = 'users/alice/contributions/example';
+const contribution = () => ({title:'Fix documentation', repository:'owner/project', type:'Pull request', date:Timestamp.now(), note:''});
 before(async () => {
   if (!process.env.FIRESTORE_EMULATOR_HOST) throw new Error('Run using the Firestore emulator. Never target production.');
   env = await initializeTestEnvironment({projectId:'demo-pocket-security', firestore:{rules:readFileSync(new URL('../firestore.rules',import.meta.url),'utf8')}});
@@ -49,6 +51,26 @@ test('missing required fields are rejected',async () => {
   const data=record(); delete data.note;
   await assertFails(setDoc(doc(db,path),data));
 });
+test('owners can count contributions across their repositories',async () => {
+  const db=env.authenticatedContext('alice').firestore();
+  await assertSucceeds(setDoc(doc(db,contributionPath),contribution()));
+  await assertSucceeds(getDocs(collection(db,'users/alice/contributions')));
+  await assertSucceeds(deleteDoc(doc(db,contributionPath)));
+});
+test('other users cannot access contributions',async () => {
+  await env.withSecurityRulesDisabled(async c=>setDoc(doc(c.firestore(),contributionPath),contribution()));
+  const db=env.authenticatedContext('bob').firestore();
+  await assertFails(getDoc(doc(db,contributionPath)));
+  await assertFails(getDocs(collection(db,'users/alice/contributions')));
+  await assertFails(setDoc(doc(db,contributionPath),contribution()));
+  await assertFails(deleteDoc(doc(db,contributionPath)));
+});
+for (const [name,patch] of Object.entries({emptyTitle:{title:''},longTitle:{title:'x'.repeat(121)},longRepository:{repository:'x'.repeat(101)},invalidType:{type:'admin'},invalidDate:{date:'today'},longNote:{note:'x'.repeat(301)},extraField:{count:4}})) {
+  test(`rejects malformed contribution: ${name}`,async () => {
+    const db=env.authenticatedContext('alice').firestore();
+    await assertFails(setDoc(doc(db,contributionPath),{...contribution(),...patch}));
+  });
+}
 test('profile privilege injection, user enumeration and unknown paths are denied',async () => {
   const db=env.authenticatedContext('alice').firestore();
   await assertFails(setDoc(doc(db,'users/alice'),{admin:true}));

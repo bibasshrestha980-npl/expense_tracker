@@ -123,6 +123,27 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.text('Daily spending'), findsOneWidget);
           expect(tester.takeException(), isNull);
+          await tester.tap(
+            find.descendant(
+              of: find.byType(width < 950 ? NavigationBar : ListTile),
+              matching: width < 950
+                  ? find.byIcon(Icons.code_rounded)
+                  : find.text('Contributions'),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(find.text('All-time contribution count'), findsOneWidget);
+          expect(find.text('0 contributions'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+          await tester.tap(
+            find.descendant(
+              of: find.byType(width < 950 ? NavigationBar : ListTile),
+              matching: width < 950
+                  ? find.byIcon(Icons.bar_chart_rounded)
+                  : find.text('Insights'),
+            ),
+          );
+          await tester.pumpAndSettle();
           await tester.tap(find.text('Add expense'));
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);

@@ -215,6 +215,12 @@ void main() {
             .collection('expenses')
             .doc('doc-2')
             .set({'title': 'Bus', 'amountCents': 2500});
+        await fakeFirestore
+            .collection('users')
+            .doc(uid)
+            .collection('contributions')
+            .doc('contribution-1')
+            .set({'title': 'Fix docs'});
 
         final service = AccountDeletionService(
           firestore: fakeFirestore,
@@ -229,6 +235,12 @@ void main() {
             .collection('expenses')
             .get();
         expect(expensesSnapshot.docs, isEmpty);
+        final contributionsSnapshot = await fakeFirestore
+            .collection('users')
+            .doc(uid)
+            .collection('contributions')
+            .get();
+        expect(contributionsSnapshot.docs, isEmpty);
 
         final userDoc = await fakeFirestore.collection('users').doc(uid).get();
         expect(userDoc.exists, isFalse);
@@ -270,6 +282,21 @@ void main() {
             .collection('expenses')
             .get();
         expect(after.docs, isEmpty);
+        await fakeFirestore
+            .collection('users')
+            .doc(uid)
+            .collection('contributions')
+            .doc('contribution-1')
+            .set({'title': 'Review PR'});
+
+        await service.deleteFirestoreUserData(uid);
+
+        final afterContributions = await fakeFirestore
+            .collection('users')
+            .doc(uid)
+            .collection('contributions')
+            .get();
+        expect(afterContributions.docs, isEmpty);
       },
     );
 

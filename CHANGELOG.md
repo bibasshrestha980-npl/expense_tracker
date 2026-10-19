@@ -35,3 +35,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial public release of Pocket expense tracker.
 - Cloud Firestore authentication and security rules.
 - Category-based income and expense logging.
+

@@ -18,12 +18,18 @@ import '../providers/auth_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/locale_provider.dart';
 import '../providers/theme_provider.dart';
+import '../services/repositories/contribution_repository.dart';
 import '../theme.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ExpenseProvider expenseProvider;
+  final ContributionRepository? contributionRepository;
 
-  const SettingsScreen({super.key, required this.expenseProvider});
+  const SettingsScreen({
+    super.key,
+    required this.expenseProvider,
+    this.contributionRepository,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -97,6 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     try {
       await widget.expenseProvider.deleteAllData();
+      await widget.contributionRepository?.deleteAllContributions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -518,7 +525,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: DropdownButtonFormField<String>(
-                        key: ValueKey((localeProvider.languageCode, _localeRevision)),
+                        key: ValueKey((
+                          localeProvider.languageCode,
+                          _localeRevision,
+                        )),
                         initialValue: localeProvider.languageCode,
                         decoration: InputDecoration(
                           labelText: l10n?.language ?? 'Language',
@@ -526,7 +536,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         items: [
                           DropdownMenuItem(
                             value: 'system',
-                            child: Text(l10n?.languageSystem ?? 'Follow system'),
+                            child: Text(
+                              l10n?.languageSystem ?? 'Follow system',
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'en',
@@ -534,7 +546,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           DropdownMenuItem(
                             value: 'ne',
-                            child: Text(l10n?.languageNepali ?? 'नेपाली (Nepali)'),
+                            child: Text(
+                              l10n?.languageNepali ?? 'नेपाली (Nepali)',
+                            ),
                           ),
                         ],
                         onChanged: (code) async {
@@ -547,8 +561,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  l10n?.languageSaveFailed ??
-                                      'Could not save language preference. Please try again.',
+                                  l10n?.languageSaveFailed ?? 'Could not save language preference. Please try again.',
                                 ),
                               ),
                             );

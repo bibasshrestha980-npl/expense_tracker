@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteMyDataDesc.
   ///
   /// In en, this message translates to:
-  /// **'Permanently erase all your expense and income records from Cloud Firestore. Once deleted, your financial history cannot be recovered.'**
+  /// **'Permanently erase all your expense, income, and GitHub contribution records from Cloud Firestore. Once deleted, your data cannot be recovered.'**
   String get deleteMyDataDesc;
 
   /// No description provided for @dataDeletionCancelled.
@@ -281,7 +281,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountDesc.
   ///
   /// In en, this message translates to:
-  /// **'Permanently delete your account credentials from Firebase Authentication, your expense and income records in Cloud Firestore. This action cannot be undone.'**
+  /// **'Permanently delete your account credentials from Firebase Authentication, your expense and income records, and your GitHub contribution log from Cloud Firestore. This action cannot be undone.'**
   String get deleteAccountDesc;
 
   /// No description provided for @deleteAccountPermanentlyTitle.
@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @deleteAccountPermanentlyContent.
   ///
   /// In en, this message translates to:
-  /// **'This will permanently delete your Pocket account, all expense and income records from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?'**
+  /// **'This will permanently delete your Pocket account, all expense and income records, and your GitHub contribution log from Cloud Firestore.\n\nThis action cannot be undone. Are you sure you want to proceed?'**
   String get deleteAccountPermanentlyContent;
 
   /// No description provided for @cancel.
@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'Insights'**
   String get navInsights;
 
+  /// No description provided for @navContributions.
+  ///
+  /// In en, this message translates to:
+  /// **'Contributions'**
+  String get navContributions;
+
   /// No description provided for @navSettings.
   ///
   /// In en, this message translates to:
@@ -530,6 +536,18 @@ abstract class AppLocalizations {
   /// **'Turn your everyday expenses into useful insights.'**
   String get heroInsightsSubtitle;
 
+  /// No description provided for @heroContributionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your GitHub contributions.'**
+  String get heroContributionsTitle;
+
+  /// No description provided for @heroContributionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep a count of contributions across any repository.'**
+  String get heroContributionsSubtitle;
+
   /// No description provided for @heroSettingsTitle.
   ///
   /// In en, this message translates to:
@@ -541,6 +559,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Manage calendar, currency, and data privacy options.'**
   String get heroSettingsSubtitle;
+
+  /// No description provided for @contributionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} contributions'**
+  String contributionCount(int count);
+
+  /// No description provided for @contributionCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'All-time contribution count'**
+  String get contributionCountLabel;
+
+  /// No description provided for @contributionCountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Each saved activity counts once, across every repository.'**
+  String get contributionCountSubtitle;
+
+  /// No description provided for @addContribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Add contribution'**
+  String get addContribution;
+
+  /// No description provided for @contributionActivityType.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity type'**
+  String get contributionActivityType;
+
+  /// No description provided for @contributionTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get contributionTitleField;
+
+  /// No description provided for @contributionRepository.
+  ///
+  /// In en, this message translates to:
+  /// **'Repository (optional)'**
+  String get contributionRepository;
+
+  /// No description provided for @contributionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get contributionNote;
+
+  /// No description provided for @contributionDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get contributionDate;
+
+  /// No description provided for @contributionSelectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get contributionSelectDate;
+
+  /// No description provided for @contributionSaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get contributionSaveButton;
+
+  /// No description provided for @contributionSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution counted.'**
+  String get contributionSaved;
+
+  /// No description provided for @contributionDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Contribution removed.'**
+  String get contributionDeleted;
+
+  /// No description provided for @contributionLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load contributions. Check your connection and try again.'**
+  String get contributionLoadError;
+
+  /// No description provided for @contributionSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save contribution. Check your connection and try again.'**
+  String get contributionSaveError;
+
+  /// No description provided for @contributionDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete contribution. Check your connection and try again.'**
+  String get contributionDeleteError;
+
+  /// No description provided for @contributionSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to save contributions.'**
+  String get contributionSignInRequired;
+
+  /// No description provided for @contributionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No contributions yet. Add one to start your count.'**
+  String get contributionNone;
+
+  /// No description provided for @deleteContribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete contribution?'**
+  String get deleteContribution;
+
+  /// No description provided for @deleteContributionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'This contribution will be removed from your count.'**
+  String get deleteContributionConfirm;
+
+  /// No description provided for @contributionCommit.
+  ///
+  /// In en, this message translates to:
+  /// **'Commit'**
+  String get contributionCommit;
+
+  /// No description provided for @contributionPullRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull request'**
+  String get contributionPullRequest;
+
+  /// No description provided for @contributionIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue'**
+  String get contributionIssue;
+
+  /// No description provided for @contributionCodeReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Code review'**
+  String get contributionCodeReview;
+
+  /// No description provided for @contributionDiscussion.
+  ///
+  /// In en, this message translates to:
+  /// **'Discussion'**
+  String get contributionDiscussion;
+
+  /// No description provided for @contributionSponsorship.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsorship'**
+  String get contributionSponsorship;
+
+  /// No description provided for @contributionOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get contributionOther;
 
   /// No description provided for @addMoney.
   ///
