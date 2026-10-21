@@ -2,9 +2,9 @@
 
 # 🌿 Pocket
 
-### Personal Finance, Budgeting & Expense Tracking for Nepal & Beyond
+### Personal Finance & Expense Tracking for Nepal & Beyond
 
-An intuitive, beautifully crafted personal finance application engineered for real everyday life in Nepal. Track expenses and income, manage monthly budgets, parse digital wallet and bank SMS alerts, analyze spending habits, and seamlessly switch between Bikram Sambat (BS) and Gregorian (AD) calendars in English or Nepali.
+An intuitive personal finance application for everyday life in Nepal. Track expenses and income, parse digital wallet and bank SMS alerts, review spending, and switch between Bikram Sambat (BS) and Gregorian (AD) calendars in English or Nepali.
 
 [![Flutter CI](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/ci.yml)
 [![Security rules](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/security.yml/badge.svg)](https://github.com/bibasshrestha980-npl/expense_tracker/actions/workflows/security.yml)
@@ -16,7 +16,7 @@ An intuitive, beautifully crafted personal finance application engineered for re
 
 <br/>
 
-[Overview](#-overview) &nbsp;•&nbsp; [Screenshots](#-screenshots) &nbsp;•&nbsp; [Features](#-core-features) &nbsp;•&nbsp; [Smart AI & Automation](#1-ai--smart-automation) &nbsp;•&nbsp; [Architecture](#-architecture) &nbsp;•&nbsp; [Run Locally](#-quick-start--setup) &nbsp;•&nbsp; [Security](#-security--data-integrity)
+[Overview](#-overview) &nbsp;•&nbsp; [Screenshots](#-screenshots) &nbsp;•&nbsp; [Features](#-core-features) &nbsp;•&nbsp; [Architecture](#-architecture) &nbsp;•&nbsp; [Run Locally](#-quick-start--setup) &nbsp;•&nbsp; [Security](#-security--data-integrity)
 
 </div>
 
@@ -44,77 +44,30 @@ Managing personal money in Nepal comes with unique daily dynamics: navigating bo
 |:---:|
 | <img src="docs/smart-auto-fill.png" alt="Pocket Smart SMS and Wallet Auto-Fill" width="540" /> |
 
-*High-fidelity Material 3 presentation featuring responsive navigation, instant balance computation, daily spending distribution, category breakdowns, and zero-friction SMS & digital wallet parsing.*
+*Material 3 screens showing the dashboard, spending breakdowns, and SMS import flow.*
 
 </div>
 
 ---
 
-## 🚀 Core Features
+## Core Features
 
-Pocket provides a complete, modern suite of personal money management tools—available **100% free and open-source**:
+Pocket provides an open-source set of personal money management tools:
 
-### 1. AI & Smart Automation
-* **Smart SMS & Digital Wallet Parser (eSewa / Khalti / Bank SMS):**
-  * Paste transaction SMS alerts from commercial banks (e.g., Nabil, NIC Asia, Global IME, Sanima) or digital wallets (eSewa, Khalti, Fonepay).
-  * Automatically detects transaction amount, type (Income vs. Expense), merchant/store title, date, and pre-selects the appropriate category with one click.
-* **Context-Aware Category Suggestions:**
-  * Context-sensitive suggestions for all 14 categories in both English and Nepali.
-  * Instant auto-generation based on the selected category and current time of day (e.g., morning tea, lunch/khaja, dinner, microbus fare, internet recharge).
-  * Smooth horizontal scrollable suggestion chips supporting touch, trackpad drag, mouse wheel, and navigation arrows.
-* **AI Financial Coach & Spending Insights:**
-  * Summarizes spending velocity and flags sudden spikes in recurring discretionary categories.
-  * Provides conversational feedback on month-to-date budget pacing.
-* **Receipt & Bill Scanner (Vision OCR):**
-  * Architecture-ready image intake for parsing photo receipts and printed supermarket invoices.
+### 1. Transaction Tracking & SMS Import
+* **Expenses and income:** Record, edit, search, filter, and sort transactions.
+* **SMS and wallet parser:** Paste bank or wallet alerts. The parser reads amounts only when it finds a currency marker or clear transaction keyword, and suggests a supported category. Review imported fields before saving.
+* **Title suggestions:** Pick context-sensitive suggestions from the selected category.
 
-### 2. Advanced Budgeting & Goal Management
-* **Category Budgets with Dynamic Alerts:**
-  * Establish monthly spending limits per category (e.g., *Food & Dining: Rs. 15,000*, *Shopping: Rs. 8,000*).
-  * Real-time color-coded progress bars (🟢 Normal $\rightarrow$ 🟡 Caution at 80% $\rightarrow$ 🔴 Overspent at 100%).
-* **Savings Goals & Sinking Funds:**
-  * Track custom financial milestones (e.g., *Dashain Celebration Fund*, *Emergency Reserves*, *Gadget Upgrades*, *Vacation Savings*).
-  * Dedicated progress rings tracking target dates and accumulated amounts.
-* **Recurring Transactions & Subscriptions:**
-  * Schedule fixed monthly commitments (house rent, fiber internet, gym dues, streaming services, and monthly salary).
+### 2. Spending Overview & Reports
+* **Dashboard:** Review period income and expenses, all-time balance, daily spending, and category breakdowns.
+* **PDF and CSV reports:** Export period summaries and transaction logs.
 
-### 3. Multi-Account & Wallet Architecture
-* **Multiple Wallets & Ledger Separation:**
-  * Track isolated balances for **Cash in Hand**, **Bank Accounts**, and **Digital Wallets (eSewa, Khalti)**.
-  * Inter-wallet fund transfers with automated double-entry ledger balance updates.
-* **Debts & Loans Tracker (उधारो / Udharo Ledger):**
-  * Keep track of money lent to friends and borrowed obligations.
-  * Record partial repayments, due dates, and settlement status.
-* **Multi-Currency Converter:**
-  * Log foreign purchases in USD, EUR, INR (भारतीय रुपैयाँ), AUD, or GBP with automated conversion to NPR.
-
-### 4. Professional Analytics & Reporting
-* **Interactive Visualization:**
-  * Daily spending activity bar charts showing monthly pace.
-  * Proportionate category distribution bars with percentage contribution metrics.
-* **Executive PDF & CSV Reports:**
-  * Generate formatted monthly financial statements ready for business reimbursements, tax documentation, or personal records.
-  * One-click clipboard copy of tabular CSV transaction logs.
-* **Search, Filtering & Sorting:**
-  * Instant full-text search across titles and notes.
-  * Filter by category, transaction type (Income vs. Expense), or calendar month.
-  * Sort by newest, oldest, or highest amount.
-* **Manual GitHub Contribution Count:**
-  * Log commits, pull requests, issues, code reviews, discussions, sponsorships, and other contributions across any repository.
-  * Each saved activity counts once in an all-time total; entries are private to your Pocket account and are not fetched automatically from GitHub.
-
-### 5. Localization, Privacy & Security
-* **Bilingual English & Nepali Interface:**
-  * Complete native Nepali translation (`नेपाली`) across every screen, dialog, navigation destination, and alert.
-  * Instant language toggle with persistent storage via `SharedPreferences`.
-* **Dual Calendar Engine (Bikram Sambat BS & Gregorian AD):**
-  * Switch between BS (`वि.सं.`) and AD (`ई.सं.`) at any time without altering underlying date timestamps.
-  * Full Nepali month names (बैशाख, जेठ, असार, ..., चैत) and festival/tithi metadata integration.
-* **Strict Privacy & Owner Isolation:**
-  * Cloud Firestore Security Rules enforce strict ownership: authenticated users can only query, modify, or delete their own data under `users/{uid}/...`.
-  * Secure multi-stage account deletion service for permanent data eradication.
-* **Integer Paisa Precision:**
-  * Financial amounts are stored internally as integer paisa (1 Rupee = 100 Paisa), guaranteeing zero floating-point accumulation errors during financial calculations.
+### 3. Localization, Privacy & Security
+* **English and Nepali interface:** Switch languages with the setting saved on the device.
+* **BS and AD calendars:** Browse transactions using Bikram Sambat or Gregorian calendar periods.
+* **Owner-isolated data:** Firestore rules restrict each account to its own records. Account deletion includes a multi-stage data purge.
+* **Integer paisa storage:** Transaction amounts are stored as integer paisa for precise totals.
 
 ---
 
@@ -169,7 +122,7 @@ flowchart TD
 
 ### Transaction Storage Schema
 
-Every transaction is stored as a isolated document in Cloud Firestore:
+Every transaction is stored as an individual document in Cloud Firestore:
 
 ```text
 users/{uid}/expenses/{expenseId}
@@ -178,7 +131,7 @@ users/{uid}/expenses/{expenseId}
   ├── amountCents: Integer   (Paisa representation, e.g., 25000 = Rs 250.00)
   ├── date: Timestamp        (UTC transaction timestamp)
   ├── note: String           (Optional detailed note)
-  └── isIncome: Boolean      (true = Income, false = Expense)
+  └── type: String      ("income" or "expense")
 ```
 
 ---

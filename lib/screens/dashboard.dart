@@ -12,7 +12,6 @@ import '../providers/expense_provider.dart';
 import '../providers/locale_provider.dart';
 import '../theme.dart';
 import '../services/repositories/contribution_repository.dart';
-import 'contribution_screen.dart';
 import 'expense_editor.dart';
 import 'report_dialog.dart';
 import 'settings_screen.dart';
@@ -75,12 +74,10 @@ class _DashboardState extends State<Dashboard> {
         uid: context.read<AuthProvider>().user?.uid ?? '',
         firestore: context.read<ExpenseProvider>().database,
       );
-
   List<String> getTitles(AppLocalizations? l10n) => [
     l10n?.navOverview ?? 'Overview',
     l10n?.navTransactions ?? 'Transactions',
     l10n?.navInsights ?? 'Insights',
-    l10n?.navContributions ?? 'Contributions',
     l10n?.navSettings ?? 'Settings',
   ];
 
@@ -171,7 +168,6 @@ class _DashboardState extends State<Dashboard> {
       l10n?.heroOverviewTitle ?? 'A little clarity. A lot of control.',
       l10n?.heroTransactionsTitle ?? 'Every expense, in one place.',
       l10n?.heroInsightsTitle ?? 'Understand your spending.',
-      l10n?.heroContributionsTitle ?? 'Your GitHub contributions.',
       l10n?.heroSettingsTitle ?? 'Account & Preferences.',
     ];
     final heroSubtitles = [
@@ -180,8 +176,6 @@ class _DashboardState extends State<Dashboard> {
           'Search, review and organize your daily spending.',
       l10n?.heroInsightsSubtitle ??
           'Turn your everyday expenses into useful insights.',
-      l10n?.heroContributionsSubtitle ??
-          'Keep a count of contributions across any repository.',
       l10n?.heroSettingsSubtitle ??
           'Manage calendar, currency, and data privacy options.',
     ];
@@ -537,17 +531,12 @@ class _DashboardState extends State<Dashboard> {
                                   ],
                                 ],
                               ),
-                              if (page == 4) ...[
+                              if (page == 3) ...[
                                 const SizedBox(height: 24),
                                 SettingsScreen(
                                   expenseProvider: p,
                                   contributionRepository:
                                       _contributionRepository,
-                                ),
-                              ] else if (page == 3) ...[
-                                const SizedBox(height: 24),
-                                ContributionScreen(
-                                  repository: _contributionRepository,
                                 ),
                               ] else ...[
                                 const SizedBox(height: 18),

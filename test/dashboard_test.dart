@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,9 @@ class TestAuth extends ChangeNotifier implements AuthProvider {
 }
 
 class TestExpenses extends ChangeNotifier implements ExpenseProvider {
+  @override
+  FirebaseFirestore? get database => null;
+
   @override
   bool nepali = false;
   @override
@@ -122,18 +126,6 @@ void main() {
           );
           await tester.pumpAndSettle();
           expect(find.text('Daily spending'), findsOneWidget);
-          expect(tester.takeException(), isNull);
-          await tester.tap(
-            find.descendant(
-              of: find.byType(width < 950 ? NavigationBar : ListTile),
-              matching: width < 950
-                  ? find.byIcon(Icons.code_rounded)
-                  : find.text('Contributions'),
-            ),
-          );
-          await tester.pumpAndSettle();
-          expect(find.text('All-time contribution count'), findsOneWidget);
-          expect(find.text('0 contributions'), findsOneWidget);
           expect(tester.takeException(), isNull);
           await tester.tap(
             find.descendant(
