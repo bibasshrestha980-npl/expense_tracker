@@ -7,15 +7,21 @@ Future<void> activateAppIntegrity() async {
   const enabled = bool.fromEnvironment('APP_CHECK_ENABLED');
   const siteKey = String.fromEnvironment('APP_CHECK_WEB_SITE_KEY');
   if (!enabled) return;
-  if (kIsWeb && siteKey.isEmpty) {
+  if (kIsWeb && !kDebugMode && siteKey.isEmpty) {
     throw StateError(
       'APP_CHECK_WEB_SITE_KEY is required for App Check on web.',
     );
   }
   await FirebaseAppCheck.instance.activate(
-    providerWeb: kIsWeb ? ReCaptchaV3Provider(siteKey) : null,
-    providerAndroid: const AndroidPlayIntegrityProvider(),
-    providerApple: const AppleDeviceCheckProvider(),
+    providerWeb: kIsWeb
+        ? (kDebugMode ? WebDebugProvider() : ReCaptchaV3Provider(siteKey))
+        : null,
+    providerAndroid: kDebugMode
+        ? const AndroidDebugProvider()
+        : const AndroidPlayIntegrityProvider(),
+    providerApple: kDebugMode
+        ? const AppleDebugProvider()
+        : const AppleDeviceCheckProvider(),
   );
   await FirebaseAppCheck.instance.setTokenAutoRefreshEnabled(true);
 }

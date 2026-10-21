@@ -1,4 +1,5 @@
-import 'package:flutter/gestures.dart' show PointerDeviceKind, PointerScrollEvent;
+import 'package:flutter/gestures.dart'
+    show PointerDeviceKind, PointerScrollEvent;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -10,6 +11,7 @@ import '../models/calendar_period.dart';
 import '../models/expense.dart';
 import '../providers/expense_provider.dart';
 import '../services/sms_wallet_parser.dart';
+import '../services/ai_transaction_generator.dart';
 import '../theme.dart';
 import 'dashboard.dart' show localizedCategory;
 
@@ -62,10 +64,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
 
   int _suggestionIndex = 0;
 
-  List<String> _getStaticSuggestions(
-    String category, {
-    bool? isNepaliLocale,
-  }) {
+  List<String> _getStaticSuggestions(String category, {bool? isNepaliLocale}) {
     final useNepali = isNepaliLocale ?? _isNepaliLocale;
     if (useNepali) {
       return aiCategorySuggestionsNe[category] ??
@@ -76,7 +75,10 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   }
 
   String _getPrimarySuggestion(String category) {
-    final list = _getStaticSuggestions(category, isNepaliLocale: _isNepaliLocale);
+    final list = _getStaticSuggestions(
+      category,
+      isNepaliLocale: _isNepaliLocale,
+    );
     if (list.isNotEmpty) return list.first;
     if (category == 'Food') {
       final hour = DateTime.now().hour;
@@ -99,7 +101,9 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
     setState(() {
       _suggestions = list;
       _suggestionIndex = 0;
-      if (widget.expense == null && !_titleEdited && _title.text.trim().isEmpty) {
+      if (widget.expense == null &&
+          !_titleEdited &&
+          _title.text.trim().isEmpty) {
         _title.text = _getPrimarySuggestion(category);
       }
     });
@@ -108,7 +112,10 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _suggestions = _getStaticSuggestions(_category, isNepaliLocale: _isNepaliLocale);
+    _suggestions = _getStaticSuggestions(
+      _category,
+      isNepaliLocale: _isNepaliLocale,
+    );
     if (widget.expense == null && !_titleEdited) {
       if (_income) {
         _title.text = _isNepaliLocale
@@ -218,10 +225,9 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         setState(
-          () =>
-              _error =
-                  l10n?.couldNotSaveError ??
-                  'Could not save. Check your connection and try again.',
+          () => _error =
+              l10n?.couldNotSaveError ??
+              'Could not save. Check your connection and try again.',
         );
       }
     } finally {
@@ -262,11 +268,11 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
         title: Text(
           _income
               ? (widget.expense == null
-                  ? (l10n?.addMoneyTitle ?? 'Add money')
-                  : (l10n?.editIncomeTitle ?? 'Edit income'))
+                    ? (l10n?.addMoneyTitle ?? 'Add money')
+                    : (l10n?.editIncomeTitle ?? 'Edit income'))
               : (widget.expense == null
-                  ? (l10n?.addExpenseTitle ?? 'Add expense')
-                  : (l10n?.editExpenseTitle ?? 'Edit expense')),
+                    ? (l10n?.addExpenseTitle ?? 'Add expense')
+                    : (l10n?.editExpenseTitle ?? 'Edit expense')),
         ),
         content: SizedBox(
           width: 440,
@@ -279,8 +285,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      l10n?.expenseEditorSubtitle ??
-                          'Keep the details clear. Your totals and insights update automatically.',
+                      l10n?.expenseEditorSubtitle ?? 'Keep the details clear. Your totals and insights update automatically.',
                       style: TextStyle(color: context.appMuted),
                     ),
                     if (widget.expense == null) ...[
@@ -307,7 +312,7 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                       decoration: InputDecoration(
                         labelText: _income
                             ? (l10n?.whereFromLabel ??
-                                'Where did the money come from?')
+                                  'Where did the money come from?')
                             : (l10n?.whatForLabel ?? 'What was it for?'),
                         hintText: _income
                             ? (l10n?.octoberSalaryHint ?? 'e.g. October salary')
@@ -351,7 +356,11 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.lightbulb_outline_rounded, size: 13, color: accent),
+                        const Icon(
+                          Icons.lightbulb_outline_rounded,
+                          size: 13,
+                          color: accent,
+                        ),
                         const SizedBox(width: 5),
                         Expanded(
                           child: Text(
@@ -420,12 +429,12 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                                 ? pointerSignal.scrollDelta.dy
                                 : pointerSignal.scrollDelta.dx;
                             if (delta != 0) {
-                              final target = (_chipsScrollController.offset +
-                                      delta)
-                                  .clamp(
+                              final target =
+                                  (_chipsScrollController.offset + delta).clamp(
                                     0.0,
                                     _chipsScrollController
-                                        .position.maxScrollExtent,
+                                        .position
+                                        .maxScrollExtent,
                                   );
                               _chipsScrollController.jumpTo(target);
                             }
@@ -508,13 +517,13 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
                         hintText: '0.00',
                         helperText: _income
                             ? (l10n?.amountReceivedHelper ??
-                                'Enter the amount you received')
+                                  'Enter the amount you received')
                             : (l10n?.amountPaidHelper ??
-                                'Enter the amount you paid'),
+                                  'Enter the amount you paid'),
                       ),
                       validator: (v) => parseAmount(v ?? '') == null
                           ? (l10n?.invalidAmountError ??
-                              'Enter a positive amount with up to 2 decimals')
+                                'Enter a positive amount with up to 2 decimals')
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -631,8 +640,8 @@ class _ExpenseEditorState extends State<ExpenseEditor> {
               _busy
                   ? (l10n?.savingButton ?? 'Saving…')
                   : (_income
-                      ? (l10n?.saveIncomeButton ?? 'Save income')
-                      : (l10n?.saveExpenseButton ?? 'Save expense')),
+                        ? (l10n?.saveIncomeButton ?? 'Save income')
+                        : (l10n?.saveExpenseButton ?? 'Save expense')),
             ),
           ),
         ],
@@ -658,14 +667,52 @@ class _SmsParserDialog extends StatefulWidget {
 
 class _SmsParserDialogState extends State<_SmsParserDialog> {
   late final TextEditingController _controller;
+  ParsedTransaction? _aiParsed;
+  String? _aiError;
+  bool _aiBusy = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
-    _controller.addListener(() {
-      if (mounted) setState(() {});
+    _controller.addListener(_onInputChanged);
+  }
+
+  void _onInputChanged() {
+    if (!mounted) return;
+    setState(() {
+      _aiParsed = null;
+      _aiError = null;
     });
+  }
+
+  Future<void> _generateWithAi() async {
+    final input = _controller.text.trim();
+    if (input.isEmpty || _aiBusy) return;
+    setState(() {
+      _aiBusy = true;
+      _aiError = null;
+      _aiParsed = null;
+    });
+    try {
+      final suggestion = await AiTransactionGenerator().generate(
+        input,
+        defaultIsIncome: widget.isIncome,
+      );
+      if (mounted) setState(() => _aiParsed = suggestion);
+    } on FormatException catch (error) {
+      if (mounted) setState(() => _aiError = error.message.toString());
+    } on AiTransactionGenerationException catch (error) {
+      if (mounted) setState(() => _aiError = error.message);
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _aiError = 'AI error: ${error.toString()}';
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _aiBusy = false);
+    }
   }
 
   @override
@@ -680,16 +727,13 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
       _controller.text,
       defaultIsIncome: widget.isIncome,
     );
+    final displayParsed = _aiParsed ?? parsed;
     final theme = Theme.of(context);
 
     return AlertDialog(
       title: Row(
         children: [
-          Icon(
-            Icons.auto_awesome,
-            color: theme.colorScheme.primary,
-            size: 22,
-          ),
+          Icon(Icons.auto_awesome, color: theme.colorScheme.primary, size: 22),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -720,6 +764,7 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
               TextField(
                 key: const Key('sms_input_field'),
                 controller: _controller,
+                enabled: !_aiBusy,
                 maxLines: 3,
                 autofocus: true,
                 decoration: InputDecoration(
@@ -731,7 +776,9 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
                     tooltip: 'Paste',
                     icon: const Icon(Icons.content_paste),
                     onPressed: () async {
-                      final clip = await Clipboard.getData(Clipboard.kTextPlain);
+                      final clip = await Clipboard.getData(
+                        Clipboard.kTextPlain,
+                      );
                       if (clip?.text != null && mounted) {
                         _controller.text = clip!.text!.trim();
                       }
@@ -739,12 +786,54 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
                   ),
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                widget.isNepali
+                    ? 'AI तयार गर्न यो SMS को पाठ Firebase मार्फत Gemini मा पठाइन्छ। लागू गर्नु अघि विवरण जाँच्नुहोस्।'
+                    : 'Generate with AI sends this alert text to Gemini through Firebase. Review the suggested details before applying.',
+                style: TextStyle(
+                  color: theme.colorScheme.outline,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: _controller.text.trim().isEmpty || _aiBusy
+                    ? null
+                    : _generateWithAi,
+                icon: _aiBusy
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome, size: 18),
+                label: Text(
+                  _aiBusy
+                      ? (widget.isNepali ? 'AI तयार गर्दै...' : 'Generating...')
+                      : (widget.isNepali
+                            ? 'AI बाट तयार गर्नुहोस्'
+                            : 'Generate with AI'),
+                ),
+              ),
+              if (_aiError != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  _aiError!,
+                  style: TextStyle(
+                    color: theme.colorScheme.error,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
               const SizedBox(height: 14),
-              if (parsed != null) ...[
+              if (displayParsed != null) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                    color: theme.colorScheme.primaryContainer.withValues(
+                      alpha: 0.3,
+                    ),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: theme.colorScheme.primary.withValues(alpha: 0.4),
@@ -756,29 +845,33 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
                       Row(
                         children: [
                           Icon(
-                            parsed.isIncome ? Icons.arrow_downward : Icons.arrow_upward,
+                            displayParsed.isIncome
+                                ? Icons.arrow_downward
+                                : Icons.arrow_upward,
                             size: 16,
-                            color: parsed.isIncome ? Colors.green : Colors.red,
+                            color: displayParsed.isIncome
+                                ? Colors.green
+                                : Colors.red,
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            '${parsed.isIncome ? (widget.isNepali ? "आम्दानी" : "Income") : (widget.isNepali ? "खर्च" : "Expense")}: Rs. ${parsed.amount.toStringAsFixed(2)}',
+                            '${displayParsed.isIncome ? (widget.isNepali ? "आम्दानी" : "Income") : (widget.isNepali ? "खर्च" : "Expense")}: Rs. ${displayParsed.amount.toStringAsFixed(2)}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${widget.isNepali ? "शीर्षक" : "Title"}: ${parsed.title}',
+                        '${widget.isNepali ? "शीर्षक" : "Title"}: ${displayParsed.title}',
                         style: const TextStyle(fontSize: 13),
                       ),
                       Text(
-                        '${widget.isNepali ? "श्रेणी" : "Category"}: ${parsed.category}',
+                        '${widget.isNepali ? "श्रेणी" : "Category"}: ${displayParsed.category}',
                         style: const TextStyle(fontSize: 13),
                       ),
-                      if (parsed.referenceId != null)
+                      if (displayParsed.referenceId != null)
                         Text(
-                          'Ref ID: ${parsed.referenceId}',
+                          'Ref ID: ${displayParsed.referenceId}',
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.outline,
@@ -787,7 +880,7 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
                     ],
                   ),
                 ),
-              ] else if (_controller.text.isNotEmpty) ...[
+              ] else if (_controller.text.isNotEmpty && _aiError == null) ...[
                 Text(
                   widget.isNepali
                       ? 'कुनै मान्य रकम फेला परेन। कृपया SMS वा सन्देश जाँच गर्नुहोस्।'
@@ -809,18 +902,15 @@ class _SmsParserDialogState extends State<_SmsParserDialog> {
         ),
         FilledButton.icon(
           icon: const Icon(Icons.check, size: 18),
-          onPressed: parsed == null
+          onPressed: displayParsed == null
               ? null
               : () {
-                  widget.onApply(parsed);
+                  widget.onApply(displayParsed);
                   Navigator.pop(context);
                 },
-          label: Text(
-            widget.isNepali ? 'लागू गर्नुहोस्' : 'Apply Details',
-          ),
+          label: Text(widget.isNepali ? 'लागू गर्नुहोस्' : 'Apply Details'),
         ),
       ],
     );
   }
 }
-

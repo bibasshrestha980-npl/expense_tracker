@@ -31,11 +31,9 @@ void main() {
       expect(parsed.title, 'Freelance Payment');
     });
 
-    test('Parses plain number with defaultIsIncome = true', () {
+    test('Rejects an unlabelled number as an ambiguous SMS amount', () {
       final parsed = SmsWalletParser.parse('60000', defaultIsIncome: true);
-      expect(parsed, isNotNull);
-      expect(parsed!.amount, 60000.0);
-      expect(parsed.isIncome, isTrue);
+      expect(parsed, isNull);
     });
 
     test('Parses plain expense: food 500', () {
@@ -67,7 +65,7 @@ void main() {
       expect(parsed!.amount, 2500.0);
       expect(parsed.amountCents, 250000);
       expect(parsed.isIncome, isFalse);
-      expect(parsed.category, 'Groceries');
+      expect(parsed.category, 'Shopping');
       expect(parsed.merchant, 'Bhatbhateni Supermarket');
       expect(parsed.referenceId, 'FNP987654');
     });
@@ -91,7 +89,7 @@ void main() {
       expect(parsed, isNotNull);
       expect(parsed!.amount, 1400.0);
       expect(parsed.isIncome, isFalse);
-      expect(parsed.category, 'Utilities');
+      expect(parsed.category, 'Bills');
       expect(parsed.merchant, 'Worldlink Communications');
       expect(parsed.referenceId, 'KHL776655');
     });

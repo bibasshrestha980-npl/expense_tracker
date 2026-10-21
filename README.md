@@ -56,7 +56,7 @@ Pocket provides an open-source set of personal money management tools:
 
 ### 1. Transaction Tracking & SMS Import
 * **Expenses and income:** Record, edit, search, filter, and sort transactions.
-* **SMS and wallet parser:** Paste bank or wallet alerts. The parser reads amounts only when it finds a currency marker or clear transaction keyword, and suggests a supported category. Review imported fields before saving.
+* **SMS and wallet parser:** Paste bank or wallet alerts for deterministic auto-fill, or use **Generate with AI** to suggest a title and category. AI requests redact account and reference identifiers; review every suggestion before applying it.
 * **Title suggestions:** Pick context-sensitive suggestions from the selected category.
 
 ### 2. Spending Overview & Reports
@@ -161,12 +161,13 @@ flutter pub get
 
 1. Create a project in the [Firebase Console](https://console.firebase.google.com/).
 2. Enable **Cloud Firestore** and **Authentication** (Email/Password, Google, and Anonymous).
-3. Connect your project locally via FlutterFire CLI:
+3. Enable **Firebase AI Logic** and its Gemini Developer API provider in the Firebase console to use the optional AI generation button.
+4. Connect your project locally via FlutterFire CLI:
    ```bash
    firebase login
    flutterfire configure --project=YOUR_FIREBASE_PROJECT_ID
    ```
-4. Deploy the production security rules:
+5. Deploy the production security rules:
    ```bash
    firebase deploy --only firestore:rules --project=YOUR_FIREBASE_PROJECT_ID
    ```
